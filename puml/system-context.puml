@@ -1,0 +1,15 @@
+@startuml system-context
+!include https://raw.githubusercontent.com/plantuml/plantuml-stdlib/refs/heads/master/stdlib/C4/C4_Context.puml
+
+title System Context Diagram
+
+Person(user, "User", "The user of xav")
+
+System(scan_engine, "Scan Engine", "Scans objects")
+System(protection_engine, "Protection Engine", "Protects system")
+System_Ext(database, "Database", "Virus signatures")
+
+Rel(user, scan_engine, "send object to")
+Rel(user, protection_engine, "send object to when access object")
+Rel(protection_engine, scan_engine, "send object to")
+Rel(scan_engine, database, "query when scan object")
