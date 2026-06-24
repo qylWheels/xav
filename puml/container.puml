@@ -1,0 +1,42 @@
+@startuml container
+
+!include https://raw.githubusercontent.com/plantuml/plantuml-stdlib/refs/heads/master/stdlib/C4/C4_Container.puml
+
+title Container Diagram
+
+Person(user, "User", "The user of xav")
+
+System_Boundary(protection_engine, "Protection Engine") {
+    Container(execution_monitor, "Execution Monitor", "fanotify")
+    Container(behavior_monitor, "Behavior Monitor", "ebpf+fanotify")
+}
+
+System_Boundary(scan_engine, "Scan Engine") {
+    System_Boundary(static_engine, "Static Engine") {
+        Container(exact_hash_engine, "Exact Hash Engine", "SHA256")
+        Container(fuzzy_hash_engine, "Fuzzy Hash Engine", "CTPH")
+        Container(heur_engine, "Heuristic Engine", "NULL")
+    }
+}
+
+System_Boundary(database, "Database") {
+    ContainerDb(exact_hash_db, "Exact Hash Database", "KV Database")
+    ContainerDb(fuzzy_hash_db, "Fuzzy Hash Database", "NULL")
+    ContainerDb(heur_db, "Heuristic Database", "NULL")
+    ContainerDb(behavior_db, "Behavior Database", "NULL")
+}
+
+Rel(user, execution_monitor, "send object to when access object")
+Rel(user, exact_hash_engine, "send object to")
+Rel(user, fuzzy_hash_engine, "send object to")
+Rel(execution_monitor, exact_hash_engine, "send object to")
+Rel(execution_monitor, fuzzy_hash_engine, "send object to")
+Rel(exact_hash_engine, heur_engine, "send object to if not detected")
+Rel(fuzzy_hash_engine, heur_engine, "send object to if not detected")
+Rel(heur_engine, behavior_monitor, "run object")
+Rel(exact_hash_engine, exact_hash_db, "query when scan object")
+Rel(fuzzy_hash_engine, fuzzy_hash_db, "query when scan object")
+Rel(heur_engine, heur_db, "query when scan object")
+Rel(behavior_monitor, behavior_db, "query when run object")
+
+@enduml
