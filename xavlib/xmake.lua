@@ -1,5 +1,5 @@
 target("xavlib")
     set_kind("shared")
     add_files("*.cpp")
-    add_packages("leveldb", "cryptopp")
+    add_packages("leveldb", "cryptopp", "protobuf-cpp")
     add_includedirs("./", {public = true}) 
