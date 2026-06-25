@@ -4,6 +4,7 @@
 #include <optional>
 #include <string>
 
+#include "exact_hash.h"
 #include "malware_info.h"
 
 namespace xav {
@@ -19,5 +20,10 @@ public:
 public:
     void start_monitoring();
     void stop_monitoring();
+
+private:
+    int fanfd_;
+    char* buf_;
+    ExactHashEngine exact_hash_engine_;
 };
 }  // namespace xav
