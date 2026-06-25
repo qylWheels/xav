@@ -8,7 +8,7 @@
 #include <optional>
 #include <string>
 
-#include "malware_info.h"
+#include "malware_info.pb.h"
 
 namespace xav {
 class ExactHashEngine {
@@ -21,8 +21,9 @@ public:
     ExactHashEngine& operator=(ExactHashEngine&&) = delete;
 
 public:
-    std::optional<MalwareInfo> scan(const std::string& path);
-    std::optional<MalwareInfo> scan(const std::filesystem::path& path);
+    std::optional<malware_info::MalwareInfo> scan(const std::string& path);
+    std::optional<malware_info::MalwareInfo> scan(
+        const std::filesystem::path& path);
 
 private:
     std::string calc_sha256_of_file(const char* path) const;
