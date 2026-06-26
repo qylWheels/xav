@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <string>
 
+namespace xav {
 class Scanner {
 public:
     Scanner();
@@ -17,3 +18,4 @@ public:
     void scan(const std::string& path, int nthreads);
     void scan(const std::filesystem::path& path, int nthreads);
 };
+}  // namespace xav
