@@ -1,4 +1,4 @@
-target("xavcli")
+target("xavgui")
     set_kind("binary")
     add_files("*.cpp")
     add_deps("xavlib")
