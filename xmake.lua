@@ -1,6 +1,8 @@
 add_rules("mode.debug", "mode.release")
 
-add_requires("leveldb", "cryptopp")
+set_languages("c++20")
+
+add_requires("leveldb", "cryptopp", "protobuf-cpp")
 
 includes("xavcli")
 includes("xavlib")

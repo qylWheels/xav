@@ -3,7 +3,11 @@
 #include <cryptopp/filters.h>
 #include <cryptopp/hex.h>
 
-#define XAV_EXACT_HASH_DB "xav_exact_hash.db"
+#include "malware_info.pb.h"
+
+// FIXME: Only for tests.
+#define XAV_EXACT_HASH_DB \
+    "/home/comma/projs/xav-db/malware_database/malware-bazaar-sha256.db"
 
 namespace xav {
 ExactHashEngine::ExactHashEngine() {
@@ -20,11 +24,12 @@ ExactHashEngine::~ExactHashEngine() {
     this->db_ = nullptr;
 }
 
-std::optional<MalwareInfo> ExactHashEngine::scan(const std::string& path) {
+std::optional<malware_info::MalwareInfo> ExactHashEngine::scan(
+    const std::string& path) {
     return this->scan(std::filesystem::path{path});
 }
 
-std::optional<MalwareInfo> ExactHashEngine::scan(
+std::optional<malware_info::MalwareInfo> ExactHashEngine::scan(
     const std::filesystem::path& path) {
     std::string sha256 = this->calc_sha256_of_file(path.c_str());
     std::string raw_malware_info;
@@ -33,8 +38,8 @@ std::optional<MalwareInfo> ExactHashEngine::scan(
     if (!status.ok()) {
         return std::nullopt;
     } else {
-        MalwareInfo malware_info =
-            *reinterpret_cast<MalwareInfo*>(raw_malware_info.data());
+        malware_info::MalwareInfo malware_info;
+        malware_info.ParseFromString(raw_malware_info);
         return malware_info;
     }
 }
