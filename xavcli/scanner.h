@@ -5,7 +5,7 @@
 #include <queue>
 #include <string>
 
-#include "exact_hash.h"
+#include "xavlib/exact_hash.h"
 
 namespace xav {
 class Scanner {
