@@ -50,12 +50,17 @@ void Scanner::scan(const std::filesystem::path& path, int nthreads) {
         threads.push_back(std::thread{scanner});
     }
 
-    for (const auto& entry :
-         std::filesystem::recursive_directory_iterator{path}) {
-        if (entry.is_regular_file()) {
-            std::unique_lock<std::mutex> lock(this->mutex_);
-            files_to_scan_.push(entry.path());
+    try {
+        for (const auto& entry :
+             std::filesystem::recursive_directory_iterator{path}) {
+            if (entry.is_regular_file()) {
+                std::unique_lock<std::mutex> lock(this->mutex_);
+                files_to_scan_.push(entry.path());
+            }
         }
+    } catch (std::filesystem::filesystem_error& e) {
+        std::cerr << std::format("Error: {} ({})", e.code().value(), e.what())
+                  << std::endl;
     }
     this->traverse_finished_ = true;
 
