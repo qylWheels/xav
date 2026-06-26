@@ -70,9 +70,15 @@ void ExecutionMonitor::start_monitoring() {
                         this->exact_hash_engine_.scan(std::string{path});
                     if (result.has_value()) {
                         printf("[BLOCK] %s\n", path);
+                        const auto result_value = result.value();
+                        std::cout
+                            << std::format(
+                                   "<MalwareBazaar><ExactHash> Generic.{}",
+                                   result_value.variant())
+                            << std::endl;
                         resp.response = FAN_DENY;
                     } else {
-                        printf("[ALLOW] %s\n", path);
+                        // printf("[ALLOW] %s\n", path);
                         resp.response = FAN_ALLOW;
                     }
 
