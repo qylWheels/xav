@@ -1,7 +1,11 @@
 #pragma once
 
 #include <filesystem>
+#include <mutex>
+#include <queue>
 #include <string>
+
+#include "exact_hash.h"
 
 namespace xav {
 class Scanner {
@@ -17,5 +21,11 @@ public:
     void scan(const char* path, int nthreads);
     void scan(const std::string& path, int nthreads);
     void scan(const std::filesystem::path& path, int nthreads);
+
+private:
+    std::mutex mutex_;
+    std::queue<std::filesystem::path> files_to_scan_;
+    ExactHashEngine exact_hash_engine_;
+    bool traverse_finished_;
 };
 }  // namespace xav
