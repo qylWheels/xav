@@ -23,6 +23,10 @@
 #include <wx/sizer.h>
 #include <wx/button.h>
 #include <wx/frame.h>
+#include <wx/choice.h>
+#include <wx/bmpbuttn.h>
+#include <wx/gauge.h>
+#include <wx/listctrl.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -52,6 +56,33 @@ class MainWindow : public wxFrame
 		MainWindow( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Xav"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 658,417 ), long style = wxCAPTION|wxCLOSE_BOX|wxMINIMIZE_BOX|wxSTAY_ON_TOP|wxTAB_TRAVERSAL );
 
 		~MainWindow();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class ScanWindow
+///////////////////////////////////////////////////////////////////////////////
+class ScanWindow : public wxFrame
+{
+	private:
+
+	protected:
+		wxStaticBitmap* scan_icon;
+		wxStaticText* choose_label;
+		wxChoice* choices;
+		wxButton* start_scan_btn;
+		wxBitmapButton* pause_btn;
+		wxBitmapButton* cancel_btn;
+		wxGauge* scan_progress;
+		wxStaticText* curr_file_label;
+		wxStaticText* curr_file;
+		wxListCtrl* scan_result_list;
+
+	public:
+
+		ScanWindow( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Xav - Scan"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxCAPTION|wxCLOSE_BOX|wxMINIMIZE_BOX|wxTAB_TRAVERSAL );
+
+		~ScanWindow();
 
 };
 

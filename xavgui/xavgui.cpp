@@ -128,3 +128,107 @@ MainWindow::MainWindow( wxWindow* parent, wxWindowID id, const wxString& title, 
 MainWindow::~MainWindow()
 {
 }
+
+ScanWindow::ScanWindow( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+
+	wxBoxSizer* vbox;
+	vbox = new wxBoxSizer( wxVERTICAL );
+
+	wxBoxSizer* icon_and_user_options_box;
+	icon_and_user_options_box = new wxBoxSizer( wxHORIZONTAL );
+
+	scan_icon = new wxStaticBitmap( this, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, 0 );
+	icon_and_user_options_box->Add( scan_icon, 1, wxALIGN_CENTER|wxALL, 30 );
+
+	wxBoxSizer* user_options_box;
+	user_options_box = new wxBoxSizer( wxVERTICAL );
+
+	choose_label = new wxStaticText( this, wxID_ANY, _("Choose Scan Type:"), wxDefaultPosition, wxDefaultSize, 0 );
+	choose_label->Wrap( -1 );
+	user_options_box->Add( choose_label, 0, wxTOP, 20 );
+
+	wxBoxSizer* choice_box;
+	choice_box = new wxBoxSizer( wxHORIZONTAL );
+
+	wxString choicesChoices[] = { _("Quick Scan - Only scan critical area"), _("Full Scan - Scan the whole system"), _("Custom Scan") };
+	int choicesNChoices = sizeof( choicesChoices ) / sizeof( wxString );
+	choices = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, choicesNChoices, choicesChoices, 0 );
+	choices->SetSelection( 0 );
+	choice_box->Add( choices, 2, 0, 10 );
+
+
+	choice_box->Add( 0, 0, 1, wxEXPAND, 5 );
+
+
+	user_options_box->Add( choice_box, 0, wxEXPAND|wxTOP, 10 );
+
+	wxBoxSizer* btn_box;
+	btn_box = new wxBoxSizer( wxHORIZONTAL );
+
+	start_scan_btn = new wxButton( this, wxID_ANY, _("Start Scan"), wxDefaultPosition, wxDefaultSize, 0 );
+	btn_box->Add( start_scan_btn, 0, 0, 10 );
+
+	pause_btn = new wxBitmapButton( this, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|0 );
+	pause_btn->Enable( false );
+
+	btn_box->Add( pause_btn, 0, wxLEFT, 10 );
+
+	cancel_btn = new wxBitmapButton( this, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|0 );
+	cancel_btn->Enable( false );
+
+	btn_box->Add( cancel_btn, 0, wxLEFT, 10 );
+
+
+	user_options_box->Add( btn_box, 1, wxEXPAND|wxTOP, 10 );
+
+
+	icon_and_user_options_box->Add( user_options_box, 4, wxEXPAND, 5 );
+
+
+	vbox->Add( icon_and_user_options_box, 1, wxEXPAND, 5 );
+
+	wxBoxSizer* scan_result_box;
+	scan_result_box = new wxBoxSizer( wxVERTICAL );
+
+	scan_progress = new wxGauge( this, wxID_ANY, 100, wxDefaultPosition, wxDefaultSize, wxGA_HORIZONTAL );
+	scan_progress->SetValue( 27 );
+	scan_result_box->Add( scan_progress, 0, wxALL|wxEXPAND, 15 );
+
+	wxBoxSizer* curr_file_box;
+	curr_file_box = new wxBoxSizer( wxHORIZONTAL );
+
+	curr_file_label = new wxStaticText( this, wxID_ANY, _("Current scanning file:"), wxDefaultPosition, wxDefaultSize, 0 );
+	curr_file_label->Wrap( -1 );
+	curr_file_box->Add( curr_file_label, 0, wxLEFT, 15 );
+
+	curr_file = new wxStaticText( this, wxID_ANY, _("/bin/cat"), wxDefaultPosition, wxDefaultSize, 0 );
+	curr_file->Wrap( -1 );
+	curr_file_box->Add( curr_file, 1, wxLEFT|wxRIGHT, 10 );
+
+
+	scan_result_box->Add( curr_file_box, 0, wxEXPAND, 5 );
+
+	wxBoxSizer* scan_result_list_box;
+	scan_result_list_box = new wxBoxSizer( wxVERTICAL );
+
+	scan_result_list = new wxListCtrl( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT );
+	scan_result_list_box->Add( scan_result_list, 0, wxEXPAND|wxLEFT|wxRIGHT, 10 );
+
+
+	scan_result_box->Add( scan_result_list_box, 1, wxBOTTOM|wxEXPAND|wxTOP, 10 );
+
+
+	vbox->Add( scan_result_box, 1, wxEXPAND, 5 );
+
+
+	this->SetSizer( vbox );
+	this->Layout();
+
+	this->Centre( wxBOTH );
+}
+
+ScanWindow::~ScanWindow()
+{
+}
