@@ -8,6 +8,7 @@
 class XavApp : public wxApp {
 public:
     bool OnInit() override;
+    void open_scan_window(wxCommandEvent& event);
 
 private:
 };
@@ -72,7 +73,19 @@ bool XavApp::OnInit() {
         settings_btn->SetBitmap(settings_icon_bitmap);
     }
 
+    // Set scan button click handler
+    auto win = wxFindWindowByName("scan_btn");
+    auto scan_btn = wxDynamicCast(win, wxButton);
+    scan_btn->Connect(wxEVT_BUTTON,
+                      wxCommandEventHandler(XavApp::open_scan_window), nullptr,
+                      mainwindow);
+
     mainwindow->Show();
 
     return true;
+}
+
+void XavApp::open_scan_window(wxCommandEvent& event) {
+    auto scan_window = new ScanWindow(nullptr);
+    scan_window->Show();
 }
