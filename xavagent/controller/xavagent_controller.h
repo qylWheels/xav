@@ -25,9 +25,14 @@ public:
         return createDtoResponse(Status::CODE_200, dto);
     }
 
+    ENDPOINT("GET", "/scan", scan) {
+        OATPP_LOGi("Xav Agent", "Scan /home/comma/projs");
+        this->scanner_.scan("/home/comma/projs/xav", 4);
+        return this->createResponse(Status::CODE_200);
+    }
+
 private:
-    xavagent::ExecutionMonitor execution_monitor_;
-    xavagent::Scanner scanner_;
+    Scanner scanner_;
 };
 }  // namespace xavagent
 

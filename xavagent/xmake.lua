@@ -1,6 +1,6 @@
 target("xavagent")
     set_kind("binary")
-    add_files("*.cpp")
+    add_files("**.cpp")
     add_deps("xavlib")
     add_packages("leveldb", "cryptopp", "wxwidgets", "oatpp")
 

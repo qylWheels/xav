@@ -67,6 +67,11 @@ void Scanner::scan(const std::filesystem::path& path, int nthreads) {
     for (auto& thread : threads) {
         thread.join();
     }
+
+    // Reset states
+    std::lock_guard<std::mutex> lock(mutex_);
+    this->traverse_finished_ = false;
+    this->files_to_scan_ = {};
 }
 
 }  // namespace xavagent
