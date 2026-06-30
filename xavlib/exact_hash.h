@@ -10,7 +10,7 @@
 
 #include "malware_info.pb.h"
 
-namespace xav {
+namespace xavlib {
 class ExactHashEngine {
 public:
     ExactHashEngine();
@@ -31,4 +31,4 @@ private:
 private:
     leveldb::DB* db_;
 };
-}  // namespace xav
+}  // namespace xavlib

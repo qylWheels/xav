@@ -9,7 +9,7 @@
 #define XAV_EXACT_HASH_DB \
     "/home/comma/projs/xav-db/malware_database/malware-bazaar-sha256.db"
 
-namespace xav {
+namespace xavlib {
 ExactHashEngine::ExactHashEngine() {
     leveldb::Status status =
         leveldb::DB::Open(leveldb::Options{}, XAV_EXACT_HASH_DB, &this->db_);
@@ -54,4 +54,4 @@ std::string ExactHashEngine::calc_sha256_of_file(const char* path) const {
             new CryptoPP::HexEncoder(new CryptoPP::StringSink(digest), false))};
     return digest;
 }
-}  // namespace xav
+}  // namespace xavlib
