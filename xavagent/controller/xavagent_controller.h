@@ -5,6 +5,8 @@
 #include <oatpp/web/server/api/ApiController.hpp>
 
 #include "../dto/DTOs.h"
+#include "../edr/execution_monitor.h"
+#include "../edr/scanner.h"
 
 #include OATPP_CODEGEN_BEGIN(ApiController)
 
@@ -22,6 +24,10 @@ public:
         dto->message = "Hello World!";
         return createDtoResponse(Status::CODE_200, dto);
     }
+
+private:
+    xavagent::ExecutionMonitor execution_monitor_;
+    xavagent::Scanner scanner_;
 };
 }  // namespace xavagent
 
