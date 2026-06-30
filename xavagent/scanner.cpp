@@ -6,7 +6,7 @@
 
 #define MAX_FILES_IN_QUEUE 8192
 
-namespace xav {
+namespace xavagent {
 Scanner::Scanner() : traverse_finished_(false) {}
 
 Scanner::~Scanner() {}
@@ -69,4 +69,4 @@ void Scanner::scan(const std::filesystem::path& path, int nthreads) {
     }
 }
 
-}  // namespace xav
+}  // namespace xavagent

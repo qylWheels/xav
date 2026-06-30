@@ -7,7 +7,7 @@
 
 #include "xavlib/exact_hash.h"
 
-namespace xav {
+namespace xavagent {
 class Scanner {
 public:
     Scanner();
@@ -25,7 +25,7 @@ public:
 private:
     std::mutex mutex_;
     std::queue<std::filesystem::path> files_to_scan_;
-    ExactHashEngine exact_hash_engine_;
+    xavlib::ExactHashEngine exact_hash_engine_;
     bool traverse_finished_;
 };
-}  // namespace xav
+}  // namespace xavagent

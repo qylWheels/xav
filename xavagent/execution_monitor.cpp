@@ -9,7 +9,7 @@
 
 #define BUFSIZE (1 * 1024 * 1024)  // 1MB
 
-namespace xav {
+namespace xavagent {
 ExecutionMonitor::ExecutionMonitor() {
     // Initialize the fanotify descriptor.
     this->fanfd_ = fanotify_init(FAN_CLASS_CONTENT | FAN_CLOEXEC |
@@ -96,4 +96,4 @@ void ExecutionMonitor::start_monitoring() {
 void ExecutionMonitor::stop_monitoring() {
     // TODO
 }
-}  // namespace xav
+}  // namespace xavagent
