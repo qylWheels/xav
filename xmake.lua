@@ -4,5 +4,5 @@ set_languages("c++20")
 
 add_requires("leveldb", "cryptopp", "protobuf-cpp", "wxwidgets")
 
-includes("xavgui")
+includes("xavagent")
 includes("xavlib")
