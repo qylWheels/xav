@@ -2,7 +2,7 @@ target("xavagent")
     set_kind("binary")
     add_files("*.cpp")
     add_deps("xavlib")
-    add_packages("leveldb", "cryptopp", "wxwidgets")
+    add_packages("leveldb", "cryptopp", "wxwidgets", "oatpp")
 
     on_run(function (target)
         import("core.base.option")
