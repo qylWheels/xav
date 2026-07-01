@@ -25,9 +25,14 @@ public:
         return createDtoResponse(Status::CODE_200, dto);
     }
 
-    ENDPOINT("GET", "/scan", scan) {
-        OATPP_LOGi("Xav Agent", "Scan /home/comma/projs");
-        this->scanner_.scan("/home/comma/projs/xav", 4);
+    ENDPOINT("GET", "/scan/quick", quick_scan) {
+        OATPP_LOGi("Xav Agent", "Execute quick scan");
+        std::vector<std::string> critical_paths{"/home",    "/tmp",  "/var/tmp",
+                                                "/bin",     "/sbin", "/usr/bin",
+                                                "/usr/sbin"};
+        for (const auto& path : critical_paths) {
+            this->scanner_.scan(path, 4);
+        }
         return this->createResponse(Status::CODE_200);
     }
 

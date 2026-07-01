@@ -83,7 +83,8 @@
                             </template>
                             <template #default>
                                 <el-row>
-                                    <el-button type="primary" plain>Quick Scan</el-button>
+                                    <el-button type="primary" plain @click="handleQuickScanBtnClick">Quick
+                                        Scan</el-button>
                                     <el-button type="primary" plain>Full Scan</el-button>
                                     <el-button type="primary" plain>Custom Scan</el-button>
                                 </el-row>
@@ -166,7 +167,7 @@
 </style>
 
 <script setup lang="ts">
-import { el } from 'element-plus/es/locales.mjs'
+import axios from 'axios'
 import { ref } from 'vue'
 
 const machineName = ref("Comma")
@@ -198,4 +199,13 @@ const scanResult = ref([
         threatType: "Suspicious Behavior"
     }
 ])
+
+function handleQuickScanBtnClick() {
+    axios.get('/api/scan/quick')
+        .then(() => {
+
+        }).finally(() => {
+
+        })
+}
 </script>
