@@ -81,6 +81,48 @@
                                 </el-icon>
                                 <span>&nbsp;&nbsp;Scan</span>
                             </template>
+                            <template #default>
+                                <el-row>
+                                    <el-button type="primary" plain>Quick Scan</el-button>
+                                    <el-button type="primary" plain>Full Scan</el-button>
+                                    <el-button type="primary" plain>Custom Scan</el-button>
+                                </el-row>
+                                <div class="scan-margin"></div>
+                                <el-row>
+                                    <el-col :span="24">
+                                        <el-progress :percentage="scanProgress"></el-progress>
+                                    </el-col>
+                                </el-row>
+                                <el-row>
+                                    <el-col :span="24">
+                                        <el-text>Scanning file: </el-text>
+                                    </el-col>
+                                </el-row>
+                                <el-row>
+                                    <el-col :span="24">
+                                        <el-text truncated>{{ currentScanningFile }}</el-text>
+                                    </el-col>
+                                </el-row>
+                                <el-row>
+                                    <el-col :span="24">
+                                        <el-table :data="scanResult" :max-height="300">
+                                            <el-table-column prop="path" label="Path" />
+                                            <el-table-column prop="threatType" label="Threat Type">
+                                                <template #default="scope">
+                                                    <el-text type="danger">{{ scope.row.threatType }}</el-text>
+                                                </template>
+                                            </el-table-column>
+                                        </el-table>
+                                    </el-col>
+                                </el-row>
+                                <el-row :style="{ marginTop: '15px' }">
+                                    <el-col :span="12"></el-col>
+                                    <el-col :span="12">
+                                        <el-button type="primary" plain>Quarantine</el-button>
+                                        <el-button type="danger" plain>Ignore</el-button>
+                                    </el-col>
+                                </el-row>
+                            </template>
                         </el-card>
                     </el-col>
                 </el-row>
@@ -102,6 +144,10 @@
     height: 15px;
 }
 
+.scan-margin {
+    height: 15px;
+}
+
 .card-margin {
     height: 15px;
 }
@@ -120,7 +166,7 @@
 </style>
 
 <script setup lang="ts">
-import { el } from 'element-plus/es/locales.mjs';
+import { el } from 'element-plus/es/locales.mjs'
 import { ref } from 'vue'
 
 const machineName = ref("Comma")
@@ -132,4 +178,24 @@ const analyzedBehaviorsCount = ref(1743)
 const suspiciousBehaviorCount = ref(15)
 const cpuUsage = ref(80)
 const memoryUsage = ref(60)
+const scanProgress = ref(72)
+const currentScanningFile = ref("/home/comma/projs/xav/xavadmin/src/components/SingleMachineDashboard.vue")
+const scanResult = ref([
+    {
+        path: "/home/comma/projs/xav/xavadmin/src/components/SingleMachineDashboard.vue",
+        threatType: "Ransom.wannacry.a"
+    },
+    {
+        path: "/home/comma/projs/xav/xavadmin/a.txt",
+        threatType: "Exploit.CVE-020-0688.g"
+    },
+    {
+        path: "/home/comma/projs/xav/xavadmin/src/components/SingleMachineDashboard.vue",
+        threatType: "Suspicious Behavior"
+    },
+    {
+        path: "/home/comma/projs/xav/xavadmin/src/components/SingleMachineDashboard.vue",
+        threatType: "Suspicious Behavior"
+    }
+])
 </script>
