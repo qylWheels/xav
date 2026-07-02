@@ -23,6 +23,12 @@ void Scanner::scan(const std::string& path, int nthreads) {
 }
 
 void Scanner::scan(const std::filesystem::path& path, int nthreads) {
+    // Reset states at start.
+    this->malware_infos_ = {};
+    this->total_file_count_ = 0;
+    this->scanned_file_count_ = 0;
+    this->traverse_finished_ = false;
+
     auto scanner = [this]() {
         while (true) {
             std::unique_lock<std::mutex> lock(this->mutex_);
@@ -82,12 +88,8 @@ void Scanner::scan(const std::filesystem::path& path, int nthreads) {
     lock.lock();
     this->scan_status_ = ScanStatus::Stopped;
 
-    // Reset states
-    this->traverse_finished_ = false;
+    // Reset states at end.
     this->files_to_scan_ = {};
-    this->total_file_count_ = 0;
-    this->scanned_file_count_ = 0;
-    this->malware_infos_ = {};
     this->curr_scanning_file_.clear();
     lock.unlock();
 }
