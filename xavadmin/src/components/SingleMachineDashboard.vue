@@ -73,7 +73,7 @@
                     <div class="card-margin"></div>
                 </el-row>
                 <el-row>
-                    <el-col :span="11">
+                    <el-col :span="24">
                         <el-card>
                             <template #header>
                                 <el-icon>
@@ -108,7 +108,7 @@
                                 </el-row>
                                 <el-row>
                                     <el-col :span="24">
-                                        <el-table :data="malwareInfos" :max-height="300">
+                                        <el-table :data="malwareInfos" :max-height="400">
                                             <el-table-column prop="file_path" label="Path" />
                                             <el-table-column prop="malware_name" label="Malware Name">
                                                 <template #default="scope">
@@ -119,8 +119,8 @@
                                     </el-col>
                                 </el-row>
                                 <el-row :style="{ marginTop: '15px' }">
-                                    <el-col :span="16"></el-col>
-                                    <el-col :span="8">
+                                    <el-col :span="20"></el-col>
+                                    <el-col :span="4">
                                         <el-button type="primary" plain disabled>Quarantine</el-button>
                                         <el-button type="danger" plain disabled>Ignore</el-button>
                                     </el-col>
