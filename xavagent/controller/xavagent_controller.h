@@ -1,6 +1,5 @@
 #pragma once
 
-#include <atomic>
 #include <format>
 #include <oatpp/base/Log.hpp>
 #include <oatpp/macro/codegen.hpp>
@@ -19,8 +18,7 @@ class XavAgentController : public oatpp::web::server::api::ApiController {
 public:
     XavAgentController(OATPP_COMPONENT(
         std::shared_ptr<oatpp::web::mime::ContentMappers>, api_content_mappers))
-        : oatpp::web::server::api::ApiController(api_content_mappers),
-          is_scanning_(false) {}
+        : oatpp::web::server::api::ApiController(api_content_mappers) {}
 
 public:
     ENDPOINT("GET", "/", root) {
@@ -31,22 +29,22 @@ public:
     }
 
     ENDPOINT("GET", "/scan/quick/start", quick_scan) {
-        if (this->is_scanning_) {
+        if (this->scanner_.scan_status() != ScanStatus::Stopped) {
             OATPP_LOGi("Xav Agent", "Quick scan is already running");
             return this->createResponse(Status::CODE_403);
         }
 
-        this->is_scanning_ = true;
         OATPP_LOGi("Xav Agent", "Execute quick scan");
 
         std::thread t([this]() {
-            std::vector<std::string> critical_paths{
-                "/home", "/tmp",     "/var/tmp", "/bin",
-                "/sbin", "/usr/bin", "/usr/sbin"};
+            // std::vector<std::string> critical_paths{
+            //     "/home", "/tmp",     "/var/tmp", "/bin",
+            //     "/sbin", "/usr/bin", "/usr/sbin"};
+            // FIXME: Only for test.
+            std::vector<const char*> critical_paths{"/home/comma/projs/xav/"};
             for (const auto& path : critical_paths) {
                 this->scanner_.scan(path, 4);
             }
-            this->is_scanning_ = false;
             OATPP_LOGi("Xav Agent", "Quick scan completed");
         });
         t.detach();
@@ -56,6 +54,7 @@ public:
 
     ENDPOINT("GET", "/scan/quick/status", quick_scan_status) {
         auto status = ScanStatusDto::createShared();
+        status->scan_status = ScanStatusEnumDto(this->scanner_.scan_status());
         status->total_file_count = this->scanner_.total_file_count();
         status->scanned_file_count = this->scanner_.scanned_file_count();
         auto malware_infos = this->scanner_.malware_infos();
@@ -75,7 +74,6 @@ public:
 
 private:
     Scanner scanner_;
-    std::atomic_bool is_scanning_;
 };
 }  // namespace xavagent
 
