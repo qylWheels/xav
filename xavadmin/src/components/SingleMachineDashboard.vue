@@ -35,7 +35,7 @@
                                             <el-text>Security Status: </el-text>
                                             <el-tag type="success" class="basic-info-tag">Safe</el-tag>
                                         </el-row>
-                                        <el-button type="danger" plain>Disconnect</el-button>
+                                        <el-button type="danger" plain disabled>Disconnect</el-button>
                                     </el-col>
                                     <el-col :span="4">
                                         <el-statistic title="Real-time Protection Scanned Files"
@@ -85,8 +85,8 @@
                                 <el-row>
                                     <el-button type="primary" plain @click="handleQuickScanBtnClick">Quick
                                         Scan</el-button>
-                                    <el-button type="primary" plain>Full Scan</el-button>
-                                    <el-button type="primary" plain>Custom Scan</el-button>
+                                    <el-button type="primary" plain disabled>Full Scan</el-button>
+                                    <el-button type="primary" plain disabled>Custom Scan</el-button>
                                 </el-row>
                                 <div class="scan-margin"></div>
                                 <el-row>
@@ -120,8 +120,8 @@
                                 <el-row :style="{ marginTop: '15px' }">
                                     <el-col :span="16"></el-col>
                                     <el-col :span="8">
-                                        <el-button type="primary" plain>Quarantine</el-button>
-                                        <el-button type="danger" plain>Ignore</el-button>
+                                        <el-button type="primary" plain disabled>Quarantine</el-button>
+                                        <el-button type="danger" plain disabled>Ignore</el-button>
                                     </el-col>
                                 </el-row>
                             </template>
