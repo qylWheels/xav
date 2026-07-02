@@ -4,10 +4,9 @@
 #include <optional>
 #include <string>
 
-#include "exact_hash.h"
-#include "malware_info.h"
+#include "xavlib/exact_hash.h"
 
-namespace xav {
+namespace xavagent {
 class ExecutionMonitor {
 public:
     ExecutionMonitor();
@@ -24,6 +23,6 @@ public:
 private:
     int fanfd_;
     char* buf_;
-    ExactHashEngine exact_hash_engine_;
+    xavlib::ExactHashEngine exact_hash_engine_;
 };
-}  // namespace xav
+}  // namespace xavagent
