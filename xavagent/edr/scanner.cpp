@@ -6,7 +6,11 @@
 #define MAX_FILES_IN_QUEUE 8192
 
 namespace xavagent {
-Scanner::Scanner() : traverse_finished_(false) {}
+Scanner::Scanner()
+    : traverse_finished_(false),
+      scan_status_(ScanStatus::Stopped),
+      total_file_count_{0},
+      scanned_file_count_{0} {}
 
 Scanner::~Scanner() {}
 
@@ -41,6 +45,7 @@ void Scanner::scan(const std::filesystem::path& path, int nthreads) {
         }
     };
 
+    this->scan_status_ = ScanStatus::Scanning;
     std::vector<std::thread> threads;
     for (int i = 0; i < nthreads; ++i) {
         threads.push_back(std::thread{scanner});
@@ -65,6 +70,7 @@ void Scanner::scan(const std::filesystem::path& path, int nthreads) {
     for (auto& thread : threads) {
         thread.join();
     }
+    this->scan_status_ = ScanStatus::Stopped;
 
     // Reset states
     std::lock_guard<std::mutex> lock(mutex_);
