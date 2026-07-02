@@ -10,7 +10,8 @@
 #define BUFSIZE (1 * 1024 * 1024)  // 1MB
 
 namespace xavagent {
-ExecutionMonitor::ExecutionMonitor() {
+ExecutionMonitor::ExecutionMonitor()
+    : scanned_file_count_(0), blocked_file_count_(0) {
     // Initialize the fanotify descriptor.
     this->fanfd_ = fanotify_init(FAN_CLASS_CONTENT | FAN_CLOEXEC |
                                      FAN_UNLIMITED_QUEUE | FAN_REPORT_PIDFD,
@@ -68,15 +69,11 @@ void ExecutionMonitor::start_monitoring() {
                     struct fanotify_response resp = {.fd = metadata->fd};
                     const auto result =
                         this->exact_hash_engine_.scan(std::string{path});
+                    this->scanned_file_count_++;
                     if (result.has_value()) {
-                        printf("[BLOCK] %s\n", path);
                         const auto result_value = result.value();
-                        std::cout
-                            << std::format(
-                                   "<MalwareBazaar><ExactHash> Generic.{}",
-                                   result_value.variant())
-                            << std::endl;
                         resp.response = FAN_DENY;
+                        this->blocked_file_count_++;
                     } else {
                         // printf("[ALLOW] %s\n", path);
                         resp.response = FAN_ALLOW;
