@@ -25,6 +25,13 @@ class ScanStatusDto : public oatpp::DTO {
     DTO_FIELD(List<Object<MalwareInfoDto>>, malware_infos);
     DTO_FIELD(String, curr_scanning_file);
 };
+
+class ExecutionMonitorStatusDto : public oatpp::DTO {
+    DTO_INIT(ExecutionMonitorStatusDto, DTO)
+
+    DTO_FIELD(UInt64, scanned_file_count);
+    DTO_FIELD(UInt64, blocked_file_count);
+};
 }  // namespace xavagent
 
 #include OATPP_CODEGEN_END(DTO)
