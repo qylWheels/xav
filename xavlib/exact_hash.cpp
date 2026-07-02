@@ -3,6 +3,8 @@
 #include <cryptopp/filters.h>
 #include <cryptopp/hex.h>
 
+#include <format>
+
 #include "malware_info.pb.h"
 
 // FIXME: Only for tests.
@@ -31,7 +33,13 @@ std::optional<malware_info::MalwareInfo> ExactHashEngine::scan(
 
 std::optional<malware_info::MalwareInfo> ExactHashEngine::scan(
     const std::filesystem::path& path) {
-    std::string sha256 = this->calc_sha256_of_file(path.c_str());
+    std::string sha256;
+    try {
+        sha256 = this->calc_sha256_of_file(path.c_str());
+    } catch (const CryptoPP::Exception&) {
+        std::cerr << std::format("Error: failed to scan {}.\n", path.string());
+        return std::nullopt;
+    }
     std::string raw_malware_info;
     leveldb::Status status =
         this->db_->Get(leveldb::ReadOptions{}, sha256, &raw_malware_info);
