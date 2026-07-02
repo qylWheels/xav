@@ -1,7 +1,6 @@
 #include "scanner.h"
 
 #include <filesystem>
-#include <format>
 #include <thread>
 
 #define MAX_FILES_IN_QUEUE 8192
@@ -23,25 +22,22 @@ void Scanner::scan(const std::filesystem::path& path, int nthreads) {
     auto scanner = [this]() {
         while (true) {
             std::unique_lock<std::mutex> lock(this->mutex_);
-            if (files_to_scan_.empty()) {
+            if (this->files_to_scan_.empty()) {
                 if (this->traverse_finished_) {
                     break;
                 } else {
                     continue;
                 }
             }
-            auto file = files_to_scan_.front();
-            std::cout << std::format("Scanning: {}", file.string())
-                      << std::endl;
-            files_to_scan_.pop();
-            lock.unlock();
+            auto file = this->files_to_scan_.front();
+            this->files_to_scan_.pop();
+            this->curr_scanning_file_ = file;
             auto result = this->exact_hash_engine_.scan(file);
+            this->scanned_file_count_++;
             if (result.has_value()) {
-                std::cout << std::format("Malware found: {} is {}",
-                                         file.string(),
-                                         result.value().variant())
-                          << std::endl;
+                this->malware_infos_.push_back({file, result.value()});
             }
+            lock.unlock();
         }
     };
 
@@ -50,17 +46,19 @@ void Scanner::scan(const std::filesystem::path& path, int nthreads) {
         threads.push_back(std::thread{scanner});
     }
 
+    // Traverse directory to find files to scan.
     try {
         for (const auto& entry :
              std::filesystem::recursive_directory_iterator{path}) {
             if (entry.is_regular_file()) {
                 std::unique_lock<std::mutex> lock(this->mutex_);
-                files_to_scan_.push(entry.path());
+                this->total_file_count_++;
+                this->files_to_scan_.push(entry.path());
             }
         }
     } catch (std::filesystem::filesystem_error& e) {
-        std::cerr << std::format("Error: {} ({})", e.code().value(), e.what())
-                  << std::endl;
+        // TODO: We just ignore the error for now, but we should log it and
+        // transfer information related to the error to the client.
     }
     this->traverse_finished_ = true;
 
