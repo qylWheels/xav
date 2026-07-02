@@ -85,6 +85,10 @@ void Scanner::scan(const std::filesystem::path& path, int nthreads) {
     // Reset states
     this->traverse_finished_ = false;
     this->files_to_scan_ = {};
+    this->total_file_count_ = 0;
+    this->scanned_file_count_ = 0;
+    this->malware_infos_ = {};
+    this->curr_scanning_file_.clear();
     lock.unlock();
 }
 
