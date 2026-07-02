@@ -97,13 +97,7 @@
                                 </el-row>
                                 <el-row>
                                     <el-col :span="24">
-                                        <el-text>Scanning file ({{ scannedFileCount }} of {{ totalFileCount }}):
-                                        </el-text>
-                                    </el-col>
-                                </el-row>
-                                <el-row>
-                                    <el-col :span="24">
-                                        <el-text truncated>{{ currentScanningFile }}</el-text>
+                                        <el-text>{{ scanStatusText }}</el-text>
                                     </el-col>
                                 </el-row>
                                 <el-row>
@@ -184,7 +178,7 @@ const cpuUsage = ref(80)
 const memoryUsage = ref(60)
 
 // Scan status.
-const scanStatus = ref("")
+const scanStatus = ref(undefined)
 const scannedFileCount = ref(0)
 const totalFileCount = ref(0)
 const scanProgress = ref(0)
@@ -195,6 +189,19 @@ const scanProgressBarStatus = computed(() => {
         return malwareInfos.value.length > 0 ? 'exception' : 'success'
     } else {
         return null
+    }
+})
+const scanStatusText = computed(() => {
+    if (scanStatus.value === 'Scanning') {
+        return `Scanning file (${scannedFileCount.value} of ${totalFileCount.value}): ${currentScanningFile.value}`
+    } else if (scanStatus.value === 'Stopped') {
+        let ret = 'Scan completed, '
+        if (malwareInfos.value.length > 0) {
+            ret += 'threat detected.'
+        } else {
+            ret += 'no threat detected.'
+        }
+        return ret
     }
 })
 
