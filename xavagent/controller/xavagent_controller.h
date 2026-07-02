@@ -58,6 +58,7 @@ public:
         status->total_file_count = this->scanner_.total_file_count();
         status->scanned_file_count = this->scanner_.scanned_file_count();
         auto malware_infos = this->scanner_.malware_infos();
+        status->malware_infos = {};
         for (const auto& info : malware_infos) {
             auto info_dto = MalwareInfoDto::createShared();
             info_dto->file_path = info.file_path.string();
