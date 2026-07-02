@@ -83,11 +83,11 @@
                             </template>
                             <template #default>
                                 <el-row>
-                                    <el-button type="primary" plain @click="handleQuickScanBtnClick"
+                                    <el-button plain @click="handleQuickScanBtnClick"
                                         :disabled="scanButtonDisabled">Quick
                                         Scan</el-button>
-                                    <el-button type="primary" plain disabled>Full Scan</el-button>
-                                    <el-button type="primary" plain disabled>Custom Scan</el-button>
+                                    <el-button plain disabled>Full Scan</el-button>
+                                    <el-button plain disabled>Custom Scan</el-button>
                                 </el-row>
                                 <div class="scan-margin"></div>
                                 <el-row>
