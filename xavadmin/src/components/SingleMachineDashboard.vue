@@ -83,7 +83,8 @@
                             </template>
                             <template #default>
                                 <el-row>
-                                    <el-button type="primary" plain @click="handleQuickScanBtnClick">Quick
+                                    <el-button type="primary" plain @click="handleQuickScanBtnClick"
+                                        :disabled="scanButtonDisabled">Quick
                                         Scan</el-button>
                                     <el-button type="primary" plain disabled>Full Scan</el-button>
                                     <el-button type="primary" plain disabled>Custom Scan</el-button>
@@ -176,6 +177,7 @@ const analyzedBehaviorsCount = ref(1743)
 const suspiciousBehaviorCount = ref(15)
 const cpuUsage = ref(80)
 const memoryUsage = ref(60)
+const scanButtonDisabled = ref(false)
 
 // Scan status.
 const scanStatus = ref(undefined)
@@ -213,6 +215,7 @@ const { pause, resume, isActive } = useIntervalFn(() => {
             const data = res.data
             scanStatus.value = data.scan_status
             if (scanStatus.value === 'Stopped') {
+                scanButtonDisabled.value = false
                 pause()
             }
             scannedFileCount.value = data.scanned_file_count
@@ -222,14 +225,14 @@ const { pause, resume, isActive } = useIntervalFn(() => {
             malwareInfos.value = data.malware_infos
         })
         .finally(() => {
-
         })
 }, 500, { immediate: false })
 
 function handleQuickScanBtnClick() {
+    scanButtonDisabled.value = true
     axios.get('/api/scan/quick/start')
         .catch(() => {
-            // TODO
+            scanButtonDisabled.value = false
         })
     resume()
 }
