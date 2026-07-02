@@ -73,7 +73,7 @@
                     <div class="card-margin"></div>
                 </el-row>
                 <el-row>
-                    <el-col :span="8">
+                    <el-col :span="11">
                         <el-card>
                             <template #header>
                                 <el-icon>
@@ -96,7 +96,8 @@
                                 </el-row>
                                 <el-row>
                                     <el-col :span="24">
-                                        <el-text>Scanning file: </el-text>
+                                        <el-text>Scanning file ({{ scannedFileCount }} of {{ totalFileCount }}):
+                                        </el-text>
                                     </el-col>
                                 </el-row>
                                 <el-row>
@@ -106,19 +107,19 @@
                                 </el-row>
                                 <el-row>
                                     <el-col :span="24">
-                                        <el-table :data="scanResult" :max-height="300">
-                                            <el-table-column prop="path" label="Path" />
-                                            <el-table-column prop="threatType" label="Threat Type">
+                                        <el-table :data="malwareInfos" :max-height="300">
+                                            <el-table-column prop="file_path" label="Path" />
+                                            <el-table-column prop="malware_name" label="Malware Name">
                                                 <template #default="scope">
-                                                    <el-text type="danger">{{ scope.row.threatType }}</el-text>
+                                                    <el-text type="danger">{{ scope.row.malware_name }}</el-text>
                                                 </template>
                                             </el-table-column>
                                         </el-table>
                                     </el-col>
                                 </el-row>
                                 <el-row :style="{ marginTop: '15px' }">
-                                    <el-col :span="12"></el-col>
-                                    <el-col :span="12">
+                                    <el-col :span="16"></el-col>
+                                    <el-col :span="8">
                                         <el-button type="primary" plain>Quarantine</el-button>
                                         <el-button type="danger" plain>Ignore</el-button>
                                     </el-col>
@@ -169,6 +170,7 @@
 <script setup lang="ts">
 import axios from 'axios'
 import { ref } from 'vue'
+import { useIntervalFn } from '@vueuse/core'
 
 const machineName = ref("Comma")
 const color = ref("green")
@@ -179,33 +181,41 @@ const analyzedBehaviorsCount = ref(1743)
 const suspiciousBehaviorCount = ref(15)
 const cpuUsage = ref(80)
 const memoryUsage = ref(60)
-const scanProgress = ref(72)
-const currentScanningFile = ref("/home/comma/projs/xav/xavadmin/src/components/SingleMachineDashboard.vue")
-const scanResult = ref([
-    {
-        path: "/home/comma/projs/xav/xavadmin/src/components/SingleMachineDashboard.vue",
-        threatType: "Ransom.wannacry.a"
-    },
-    {
-        path: "/home/comma/projs/xav/xavadmin/a.txt",
-        threatType: "Exploit.CVE-020-0688.g"
-    },
-    {
-        path: "/home/comma/projs/xav/xavadmin/src/components/SingleMachineDashboard.vue",
-        threatType: "Suspicious Behavior"
-    },
-    {
-        path: "/home/comma/projs/xav/xavadmin/src/components/SingleMachineDashboard.vue",
-        threatType: "Suspicious Behavior"
-    }
-])
 
-function handleQuickScanBtnClick() {
-    axios.get('/api/scan/quick')
-        .then(() => {
+// Scan status.
+const scanStatus = ref("")
+const scannedFileCount = ref(0)
+const totalFileCount = ref(0)
+const scanProgress = ref(0)
+const currentScanningFile = ref("")
+const malwareInfos = ref([])
 
-        }).finally(() => {
+// Get scan status periodically.
+const { pause, resume, isActive } = useIntervalFn(() => {
+    // Get scan status agent.
+    axios.get('/api/scan/quick/status')
+        .then((res) => {
+            const data = res.data
+            scanStatus.value = data.scan_status
+            if (scanStatus.value === 'Stopped') {
+                pause()
+            }
+            scannedFileCount.value = data.scanned_file_count
+            totalFileCount.value = data.total_file_count
+            scanProgress.value = Number((data.scanned_file_count / data.total_file_count * 100).toFixed(1))
+            currentScanningFile.value = data.curr_scanning_file
+            malwareInfos.value = data.malware_infos
+        })
+        .finally(() => {
 
         })
+}, 500, { immediate: false })
+
+function handleQuickScanBtnClick() {
+    axios.get('/api/scan/quick/start')
+        .catch(() => {
+            // TODO
+        })
+    resume()
 }
 </script>
