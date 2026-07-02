@@ -91,7 +91,8 @@
                                 <div class="scan-margin"></div>
                                 <el-row>
                                     <el-col :span="24">
-                                        <el-progress :percentage="scanProgress"></el-progress>
+                                        <el-progress :percentage="scanProgress"
+                                            :status="scanProgressBarStatus"></el-progress>
                                     </el-col>
                                 </el-row>
                                 <el-row>
@@ -169,7 +170,7 @@
 
 <script setup lang="ts">
 import axios from 'axios'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useIntervalFn } from '@vueuse/core'
 
 const machineName = ref("Comma")
@@ -189,6 +190,13 @@ const totalFileCount = ref(0)
 const scanProgress = ref(0)
 const currentScanningFile = ref("")
 const malwareInfos = ref([])
+const scanProgressBarStatus = computed(() => {
+    if (scanStatus.value === 'Stopped') {
+        return malwareInfos.value.length > 0 ? 'exception' : 'success'
+    } else {
+        return null
+    }
+})
 
 // Get scan status periodically.
 const { pause, resume, isActive } = useIntervalFn(() => {
