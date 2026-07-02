@@ -18,7 +18,7 @@
                                 <el-row>
                                     <el-col :span="2"></el-col>
                                     <el-col :span="2">
-                                        <el-icon class="monitor-icon" size="128" :color="color">
+                                        <el-icon class="monitor-icon" size="128" :color="successColor">
                                             <Monitor />
                                         </el-icon>
                                     </el-col>
@@ -49,7 +49,7 @@
                                         <el-statistic title="Suspicious Behaviors" :value="suspiciousBehaviorCount" />
                                     </el-col>
                                     <el-col :span="3">
-                                        <el-progress type="dashboard" :percentage="cpuUsage" :color="color">
+                                        <el-progress type="dashboard" :percentage="cpuUsage" :color="dangerColor">
                                             <template #default="{ percentage }">
                                                 <el-text class="percentage-value">{{ percentage }}%</el-text>
                                                 <el-text class="percentage-label">CPU Usage</el-text>
@@ -57,7 +57,7 @@
                                         </el-progress>
                                     </el-col>
                                     <el-col :span="3">
-                                        <el-progress type="dashboard" :percentage="memoryUsage" :color="color">
+                                        <el-progress type="dashboard" :percentage="memoryUsage" :color="warningColor">
                                             <template #default="{ percentage }">
                                                 <el-text class="percentage-value">{{ percentage }}%</el-text>
                                                 <el-text class="percentage-label">Memory Usage</el-text>
@@ -166,7 +166,14 @@
 <script setup lang="ts">
 import axios from 'axios'
 import { ref, computed } from 'vue'
-import { useIntervalFn } from '@vueuse/core'
+import { useIntervalFn, useCssVar } from '@vueuse/core'
+
+// Colors.
+const primaryColor = useCssVar('--el-color-primary')
+const successColor = useCssVar('--el-color-success')
+const warningColor = useCssVar('--el-color-warning')
+const infoColor = useCssVar('--el-color-info')
+const dangerColor = useCssVar('--el-color-danger')
 
 const machineName = ref("Comma")
 const color = ref("green")
