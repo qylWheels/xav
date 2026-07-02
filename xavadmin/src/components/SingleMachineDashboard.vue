@@ -39,7 +39,7 @@
                                     </el-col>
                                     <el-col :span="4">
                                         <el-statistic title="Real-time Protection Scanned Files"
-                                            :value="realTimeProtScanFiles" />
+                                            :value="realTimeProtectionScanFileCount" />
                                         <div class="statistic-margin" />
                                         <el-statistic title="Malware Blocked" :value="malwareBlockedCount" />
                                     </el-col>
@@ -178,13 +178,27 @@ const dangerColor = useCssVar('--el-color-danger')
 const machineName = ref("Comma")
 const color = ref("green")
 const system = ref("Linux")
-const realTimeProtScanFiles = ref(32917)
-const malwareBlockedCount = ref(21)
 const analyzedBehaviorsCount = ref(1743)
 const suspiciousBehaviorCount = ref(15)
 const cpuUsage = ref(80)
 const memoryUsage = ref(60)
 const scanButtonDisabled = ref(false)
+
+// Real-time protection status.
+const realTimeProtectionScanFileCount = ref(0)
+const malwareBlockedCount = ref(0)
+const {
+    pause: pauseQueryRealTimeProtectionStatus,
+    resume: resumeQueryRealTimeProtectionStatus,
+    isActive: isQueryRealTimeProtectionStatusActive
+} = useIntervalFn(() => {
+    axios.get('/api/execution-monitor/status')
+        .then((res) => {
+            const data = res.data
+            realTimeProtectionScanFileCount.value = data.scanned_file_count
+            malwareBlockedCount.value = data.blocked_file_count
+        })
+}, 3000, { immediate: true })
 
 // Scan status.
 const scanStatus = ref(undefined)
