@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "app_component.h"
 #include "controller/xavagent_controller.h"
 #include "oatpp/network/Server.hpp"
