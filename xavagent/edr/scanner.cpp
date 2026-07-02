@@ -45,7 +45,11 @@ void Scanner::scan(const std::filesystem::path& path, int nthreads) {
         }
     };
 
+    std::unique_lock<std::mutex> lock(this->mutex_);
+
     this->scan_status_ = ScanStatus::Scanning;
+    lock.unlock();
+
     std::vector<std::thread> threads;
     for (int i = 0; i < nthreads; ++i) {
         threads.push_back(std::thread{scanner});
@@ -56,26 +60,32 @@ void Scanner::scan(const std::filesystem::path& path, int nthreads) {
         for (const auto& entry :
              std::filesystem::recursive_directory_iterator{path}) {
             if (entry.is_regular_file()) {
-                std::unique_lock<std::mutex> lock(this->mutex_);
+                lock.lock();
                 this->total_file_count_++;
                 this->files_to_scan_.push(entry.path());
+                lock.unlock();
             }
         }
     } catch (std::filesystem::filesystem_error& e) {
         // TODO: We just ignore the error for now, but we should log it and
         // transfer information related to the error to the client.
     }
+
+    lock.lock();
     this->traverse_finished_ = true;
+    lock.unlock();
 
     for (auto& thread : threads) {
         thread.join();
     }
+
+    lock.lock();
     this->scan_status_ = ScanStatus::Stopped;
 
     // Reset states
-    std::lock_guard<std::mutex> lock(mutex_);
     this->traverse_finished_ = false;
     this->files_to_scan_ = {};
+    lock.unlock();
 }
 
 }  // namespace xavagent
