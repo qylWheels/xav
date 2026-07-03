@@ -38,10 +38,11 @@
                                         <el-button type="danger" plain disabled>Disconnect</el-button>
                                     </el-col>
                                     <el-col :span="4">
-                                        <el-statistic title="Real-time Protection Scanned Files"
-                                            :value="realTimeProtectionScanFileCount" />
+                                        <el-statistic title="On Access Scanner Scanned Objects"
+                                            :value="onAccessScannerScanObjectCount" />
                                         <div class="statistic-margin" />
-                                        <el-statistic title="Malware Blocked" :value="malwareBlockedCount"
+                                        <el-statistic title="On Access Scanner Blocked Threats"
+                                            :value="onAccessScannerBlockedThreatsCount"
                                             :value-style="{ color: dangerColor }" />
                                     </el-col>
                                     <el-col :span="3">
@@ -187,18 +188,18 @@ const memoryUsage = ref(60)
 const scanButtonDisabled = ref(false)
 
 // Real-time protection status.
-const realTimeProtectionScanFileCount = ref(0)
-const malwareBlockedCount = ref(0)
+const onAccessScannerScanObjectCount = ref(0)
+const onAccessScannerBlockedThreatsCount = ref(0)
 const {
     pause: pauseQueryRealTimeProtectionStatus,
     resume: resumeQueryRealTimeProtectionStatus,
     isActive: isQueryRealTimeProtectionStatusActive
 } = useIntervalFn(() => {
-    axios.get('/api/execution-monitor/status')
+    axios.get('/api/on-access-scanner/status')
         .then((res) => {
             const data = res.data
-            realTimeProtectionScanFileCount.value = data.scanned_file_count
-            malwareBlockedCount.value = data.blocked_file_count
+            onAccessScannerScanObjectCount.value = data.scanned_object_count
+            onAccessScannerBlockedThreatsCount.value = data.blocked_object_count
         })
 }, 3000, { immediate: true })
 

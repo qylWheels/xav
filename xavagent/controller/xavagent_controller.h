@@ -8,7 +8,7 @@
 #include <thread>
 
 #include "../dto/DTOs.h"
-#include "../edr/execution_monitor.h"
+#include "../edr/on_access_scanner.h"
 #include "../edr/scanner.h"
 #include "xavlib/malware_info.pb.h"
 
@@ -20,9 +20,9 @@ public:
     XavAgentController(OATPP_COMPONENT(
         std::shared_ptr<oatpp::web::mime::ContentMappers>, api_content_mappers))
         : oatpp::web::server::api::ApiController(api_content_mappers) {
-        std::thread execution_monitor_thread(
-            [this]() { this->execution_monitor_.start_monitoring(); });
-        execution_monitor_thread.detach();
+        std::thread on_access_scanner_thread(
+            [this]() { this->on_access_scanner_.start_monitoring(); });
+        on_access_scanner_thread.detach();
     }
 
 public:
@@ -78,18 +78,18 @@ public:
         return this->createDtoResponse(Status::CODE_200, status);
     }
 
-    ENDPOINT("GET", "/execution-monitor/status", execution_monitor_status) {
-        auto status = ExecutionMonitorStatusDto::createShared();
-        status->scanned_file_count =
-            this->execution_monitor_.scanned_file_count();
-        status->blocked_file_count =
-            this->execution_monitor_.blocked_file_count();
+    ENDPOINT("GET", "/on-access-scanner/status", on_access_scanner_status) {
+        auto status = OnAccessScannerStatusDto::createShared();
+        status->scanned_object_count =
+            this->on_access_scanner_.scanned_object_count();
+        status->blocked_object_count =
+            this->on_access_scanner_.blocked_object_count();
         return this->createDtoResponse(Status::CODE_200, status);
     }
 
 private:
     Scanner scanner_;
-    ExecutionMonitor execution_monitor_;
+    OnAccessScanner on_access_scanner_;
 };
 }  // namespace xavagent
 
