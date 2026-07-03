@@ -41,12 +41,14 @@
                                         <el-statistic title="Real-time Protection Scanned Files"
                                             :value="realTimeProtectionScanFileCount" />
                                         <div class="statistic-margin" />
-                                        <el-statistic title="Malware Blocked" :value="malwareBlockedCount" />
+                                        <el-statistic title="Malware Blocked" :value="malwareBlockedCount"
+                                            :value-style="{ color: dangerColor }" />
                                     </el-col>
                                     <el-col :span="3">
                                         <el-statistic title="Analyzed Behaviors" :value="analyzedBehaviorsCount" />
                                         <div class="statistic-margin" />
-                                        <el-statistic title="Suspicious Behaviors" :value="suspiciousBehaviorCount" />
+                                        <el-statistic title="Suspicious Behaviors" :value="suspiciousBehaviorCount"
+                                            :value-style="{ color: warningColor }" />
                                     </el-col>
                                     <el-col :span="3">
                                         <el-progress type="dashboard" :percentage="cpuUsage" :color="dangerColor">
