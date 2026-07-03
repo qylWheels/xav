@@ -22,6 +22,7 @@ OnAccessScanner::OnAccessScanner()
     }
 
     // Mark the root directory for monitoring.
+    // FIXME: This should be in start_monitoring().
     if (fanotify_mark(this->fanfd_, FAN_MARK_ADD | FAN_MARK_MOUNT,
                       FAN_OPEN_EXEC_PERM, AT_FDCWD, "/") < 0) {
         perror("fanotify_mark failed");
