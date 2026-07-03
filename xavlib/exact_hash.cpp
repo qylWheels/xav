@@ -6,6 +6,7 @@
 #include <format>
 
 #include "malware_info.pb.h"
+#include "xavlib/leveldb_ref.h"
 
 // FIXME: Only for tests.
 #define XAV_EXACT_HASH_DB \
@@ -13,12 +14,7 @@
 
 namespace xavlib {
 ExactHashEngine::ExactHashEngine() {
-    leveldb::Status status =
-        leveldb::DB::Open(leveldb::Options{}, XAV_EXACT_HASH_DB, &this->db_);
-    if (!status.ok()) {
-        perror("leveldb::DB::Open");
-        exit(1);
-    }
+    this->db_ = LevelDbRef::get_leveldb_ref();
 }
 
 ExactHashEngine::~ExactHashEngine() {
