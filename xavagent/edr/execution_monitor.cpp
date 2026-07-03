@@ -13,9 +13,9 @@ namespace xavagent {
 ExecutionMonitor::ExecutionMonitor()
     : scanned_file_count_(0), blocked_file_count_(0) {
     // Initialize the fanotify descriptor.
-    this->fanfd_ = fanotify_init(FAN_CLASS_CONTENT | FAN_CLOEXEC |
-                                     FAN_UNLIMITED_QUEUE | FAN_REPORT_PIDFD,
-                                 O_RDONLY | O_LARGEFILE);
+    this->fanfd_ =
+        fanotify_init(FAN_CLASS_CONTENT | FAN_CLOEXEC | FAN_UNLIMITED_QUEUE,
+                      O_RDONLY | O_LARGEFILE);
     if (this->fanfd_ < 0) {
         perror("fanotify_init failed");
         exit(1);
