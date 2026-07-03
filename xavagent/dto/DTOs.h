@@ -26,11 +26,11 @@ class ScanStatusDto : public oatpp::DTO {
     DTO_FIELD(String, curr_scanning_file);
 };
 
-class ExecutionMonitorStatusDto : public oatpp::DTO {
-    DTO_INIT(ExecutionMonitorStatusDto, DTO)
+class OnAccessScannerStatusDto : public oatpp::DTO {
+    DTO_INIT(OnAccessScannerStatusDto, DTO)
 
-    DTO_FIELD(UInt64, scanned_file_count);
-    DTO_FIELD(UInt64, blocked_file_count);
+    DTO_FIELD(UInt64, scanned_object_count);
+    DTO_FIELD(UInt64, blocked_object_count);
 };
 }  // namespace xavagent
 
