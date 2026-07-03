@@ -1,0 +1,18 @@
+@startuml behavior-monitor-process
+
+start
+:Fanotify event received;
+:Get pid, start time and path of the process who triggered the event;
+
+switch(Determine which kind of event it is)
+case (create/delete/read/write/attribute change)
+    :Only log the file path into path1;
+case (rename/move)
+    :Log the file path both into path1 and path2;
+endswitch
+
+:Use (pid, start time) to get entry of event map;
+:enqueue the event into the entry of event map;
+stop
+
+@enduml
