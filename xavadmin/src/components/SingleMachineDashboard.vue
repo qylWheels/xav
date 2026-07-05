@@ -46,9 +46,9 @@
                                             :value-style="{ color: dangerColor }" />
                                     </el-col>
                                     <el-col :span="3">
-                                        <el-statistic title="Analyzed Behaviors" :value="analyzedBehaviorsCount" />
+                                        <el-statistic title="Total Events" :value="totalEventCount" />
                                         <div class="statistic-margin" />
-                                        <el-statistic title="Suspicious Behaviors" :value="suspiciousBehaviorCount"
+                                        <el-statistic title="Suspicious Events" :value="suspiciousEventCount"
                                             :value-style="{ color: warningColor }" />
                                     </el-col>
                                     <el-col :span="3">
@@ -181,8 +181,6 @@ const dangerColor = useCssVar('--el-color-danger')
 const machineName = ref("Comma")
 const color = ref("green")
 const system = ref("Linux")
-const analyzedBehaviorsCount = ref(1743)
-const suspiciousBehaviorCount = ref(15)
 const cpuUsage = ref(80)
 const memoryUsage = ref(60)
 const scanButtonDisabled = ref(false)
@@ -200,6 +198,22 @@ const {
             const data = res.data
             onAccessScannerScanObjectCount.value = data.scanned_object_count
             onAccessScannerBlockedThreatsCount.value = data.blocked_object_count
+        })
+}, 3000, { immediate: true })
+
+// Behavior monitor status.
+const totalEventCount = ref(0)
+const suspiciousEventCount = ref(0)
+const {
+    pause: pauseQueryBehaviorMonitorStatus,
+    resume: resumeQueryBehaviorMonitorStatus,
+    isActive: isQueryBehaviorMonitorStatusActive
+} = useIntervalFn(() => {
+    axios.get('/api/behavior-monitor/status')
+        .then((res) => {
+            const data = res.data
+            totalEventCount.value = data.total_event_count
+            suspiciousEventCount.value = data.suspicious_event_count
         })
 }, 3000, { immediate: true })
 
