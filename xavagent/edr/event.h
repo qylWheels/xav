@@ -1,10 +1,23 @@
 #pragma once
 
+#include <bitset>
 #include <optional>
 #include <string>
 #include <variant>
 
 namespace xavagent {
+struct Process {
+    int pid;
+    std::optional<unsigned long long> start_time_tick;
+    std::optional<std::string> exe_path;
+    std::optional<std::string> cmdline;
+
+    bool operator==(const Process& other) const {
+        return pid == other.pid && start_time_tick == other.start_time_tick &&
+               exe_path == other.exe_path && cmdline == other.cmdline;
+    }
+};
+
 struct FileEvent {
     enum class FileEventType {
         Create,
@@ -15,12 +28,10 @@ struct FileEvent {
         Move,
         AttributeChange,
     };
-
-    FileEventType event_type;
+    std::bitset<16> event_type_mask;
 
     // Who did the operation.
-    int pid;
-    std::string proc_path;
+    Process proc;
 
     // Who is(are) affected by the operation.
     std::string path1;
@@ -29,3 +40,16 @@ struct FileEvent {
 
 using Event = std::variant<FileEvent>;
 }  // namespace xavagent
+
+namespace std {
+template <>
+struct hash<xavagent::Process> {
+    std::size_t operator()(const xavagent::Process& p) const {
+        std::size_t seed = std::hash<int>()(p.pid);
+        if (p.start_time_tick.has_value()) {
+            seed ^= std::hash<unsigned long long>()(p.start_time_tick.value());
+        }
+        return seed;
+    }
+};
+}  // namespace std
