@@ -8,6 +8,7 @@
 #include <thread>
 
 #include "../dto/DTOs.h"
+#include "../edr/behavior_monitor.h"
 #include "../edr/on_access_scanner.h"
 #include "../edr/scanner.h"
 #include "xavlib/malware_info.pb.h"
@@ -23,6 +24,10 @@ public:
         std::thread on_access_scanner_thread(
             [this]() { this->on_access_scanner_.start_monitoring(); });
         on_access_scanner_thread.detach();
+
+        std::thread behavior_monitor_thread(
+            [this]() { this->behavior_monitor_.start_monitoring(); });
+        behavior_monitor_thread.detach();
     }
 
 public:
@@ -87,9 +92,18 @@ public:
         return this->createDtoResponse(Status::CODE_200, status);
     }
 
+    ENDPOINT("GET", "/behavior-monitor/status", behavior_monitor_status) {
+        auto status = BehaviorMonitorStatusDto::createShared();
+        status->total_event_count = this->behavior_monitor_.total_event_count();
+        status->suspicious_event_count =
+            this->behavior_monitor_.suspicious_event_count();
+        return this->createDtoResponse(Status::CODE_200, status);
+    }
+
 private:
     Scanner scanner_;
     OnAccessScanner on_access_scanner_;
+    BehaviorMonitor behavior_monitor_;
 };
 }  // namespace xavagent
 
