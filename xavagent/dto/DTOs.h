@@ -32,6 +32,13 @@ class OnAccessScannerStatusDto : public oatpp::DTO {
     DTO_FIELD(UInt64, scanned_object_count);
     DTO_FIELD(UInt64, blocked_object_count);
 };
+
+class BehaviorMonitorStatusDto : public oatpp::DTO {
+    DTO_INIT(BehaviorMonitorStatusDto, DTO)
+
+    DTO_FIELD(UInt64, total_event_count);
+    DTO_FIELD(UInt64, suspicious_event_count);
+};
 }  // namespace xavagent
 
 #include OATPP_CODEGEN_END(DTO)
