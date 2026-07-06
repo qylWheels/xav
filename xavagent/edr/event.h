@@ -8,12 +8,14 @@
 namespace xavagent {
 struct Process {
     int pid;
+    std::optional<int> ppid;
     std::optional<unsigned long long> start_time_tick;
     std::optional<std::string> exe_path;
     std::optional<std::string> cmdline;
 
     bool operator==(const Process& other) const {
-        return pid == other.pid && start_time_tick == other.start_time_tick &&
+        return pid == other.pid && ppid == other.ppid &&
+               start_time_tick == other.start_time_tick &&
                exe_path == other.exe_path && cmdline == other.cmdline;
     }
 };
