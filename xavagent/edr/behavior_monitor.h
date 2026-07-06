@@ -34,9 +34,11 @@ public:
     }
 
 private:
+    std::optional<int> get_proc_ppid(int pid);
     std::optional<unsigned long long> get_proc_start_time_tick(int pid);
     std::optional<std::string> get_proc_exe_path(int pid);
     std::optional<std::string> get_proc_cmdline(int pid);
+    std::optional<std::string> get_proc_raw_stat(int pid, int n);
 
 private:
     int fanfd_;

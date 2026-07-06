@@ -125,6 +125,7 @@ void BehaviorMonitor::start_monitoring() {
             // Get information of the process which accessed the file.
             Process proc = {
                 .pid = metadata->pid,
+                .ppid = this->get_proc_ppid(metadata->pid),
                 .start_time_tick =
                     this->get_proc_start_time_tick(metadata->pid),
                 .exe_path = this->get_proc_exe_path(metadata->pid),
@@ -193,20 +194,27 @@ void BehaviorMonitor::stop_monitoring() {
     // TODO
 }
 
+std::optional<int> BehaviorMonitor::get_proc_ppid(int pid) {
+    try {
+        auto ppid_str = this->get_proc_raw_stat(pid, 18);
+        if (ppid_str.has_value()) {
+            return std::stoi(ppid_str.value());
+        }
+        return std::nullopt;
+    } catch (...) {
+        return std::nullopt;
+    }
+}
+
 std::optional<unsigned long long> BehaviorMonitor::get_proc_start_time_tick(
     int pid) {
     try {
-        std::string stat_path = std::format("/proc/{}/stat", pid);
-        std::ifstream stat_file(stat_path);
-        std::string stat_content{std::istreambuf_iterator<char>(stat_file),
-                                 std::istreambuf_iterator<char>()};
-        auto start_time_tick_iter = stat_content | std::views::split(' ') |
-                                    std::views::drop(21) | std::views::take(1);
-        auto start_time_tick_iter2 = *start_time_tick_iter.begin();
-        std::string start_time_tick_str{start_time_tick_iter2.begin(),
-                                        start_time_tick_iter2.end()};
-        return std::stoull(start_time_tick_str);
-    } catch (const std::exception &e) {
+        auto start_time_tick_str = this->get_proc_raw_stat(pid, 22);
+        if (start_time_tick_str.has_value()) {
+            return std::stoull(start_time_tick_str.value());
+        }
+        return std::nullopt;
+    } catch (...) {
         return std::nullopt;
     }
 }
@@ -217,7 +225,7 @@ std::optional<std::string> BehaviorMonitor::get_proc_exe_path(int pid) {
         std::string exe_path_str;
         exe_path_str = std::filesystem::read_symlink(exe_path);
         return exe_path_str;
-    } catch (const std::exception &e) {
+    } catch (...) {
         return std::nullopt;
     }
 }
@@ -233,7 +241,23 @@ std::optional<std::string> BehaviorMonitor::get_proc_cmdline(int pid) {
             cmdline_content.begin(), cmdline_content.end(),
             [](char c) { return c == '\0'; }, ' ');
         return std::string(cmdline_content.begin(), cmdline_content.end());
-    } catch (const std::exception &e) {
+    } catch (...) {
+        return std::nullopt;
+    }
+}
+
+std::optional<std::string> BehaviorMonitor::get_proc_raw_stat(int pid, int n) {
+    try {
+        std::string stat_path = std::format("/proc/{}/stat", pid);
+        std::ifstream stat_file(stat_path);
+        std::string stat_content{std::istreambuf_iterator<char>(stat_file),
+                                 std::istreambuf_iterator<char>()};
+        auto take_view = stat_content | std::views::split(' ') |
+                         std::views::drop(n - 1) | std::views::take(1);
+        auto value = *take_view.begin();
+        std::string value_str{value.begin(), value.end()};
+        return value_str;
+    } catch (...) {
         return std::nullopt;
     }
 }
