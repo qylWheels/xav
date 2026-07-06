@@ -20,6 +20,7 @@
 #include <stdexcept>
 
 #include "spdlog/common.h"
+#include "xavagent/edr/event.h"
 
 #define BUFSIZE (4 * 1024)  // 4KB
 
@@ -132,6 +133,11 @@ void BehaviorMonitor::start_monitoring() {
                 .cmdline = this->get_proc_cmdline(metadata->pid),
             };
 
+            // Generate event.
+            FileEvent event = {
+                .proc = proc,
+            };
+
             // Get fd of the file which is accessed.
             struct file_handle *handle =
                 (struct file_handle *)fid_record->handle;
@@ -146,31 +152,31 @@ void BehaviorMonitor::start_monitoring() {
                                        "open_by_handle_at failed: {} ({})",
                                        errno, std::strerror(errno));
                 }
-                continue;
-            }
-
-            // Get path of the file which is accessed.
-            auto fd_path = std::format("/proc/self/fd/{}", fd);
-            char real_path[PATH_MAX + 5] = {0};
-            ssize_t path_len =
-                readlink(fd_path.c_str(), real_path, sizeof(real_path) - 1);
-            bool can_get_path = true;
-            if (path_len == -1) {
-                this->logger_->log(
-                    {__FILE__, __LINE__, __FUNCTION__}, spdlog::level::warn,
-                    "readlink failed: {} ({})", errno, std::strerror(errno));
-                can_get_path = false;
             } else {
-                real_path[path_len] = '\0';
-                can_get_path = true;
-            }
-            close(fd);
+                // Get path of the file which is accessed.
+                auto fd_path = std::format("/proc/self/fd/{}", fd);
+                char real_path[PATH_MAX + 5] = {0};
+                ssize_t path_len =
+                    readlink(fd_path.c_str(), real_path, sizeof(real_path) - 1);
+                bool can_get_path = true;
+                if (path_len == -1) {
+                    this->logger_->log({__FILE__, __LINE__, __FUNCTION__},
+                                       spdlog::level::warn,
+                                       "readlink failed: {} ({})", errno,
+                                       std::strerror(errno));
+                    can_get_path = false;
+                } else {
+                    real_path[path_len] = '\0';
+                    can_get_path = true;
+                }
+                close(fd);
 
-            // Generate event.
-            FileEvent event = {
-                .proc = proc,
-                .path1 = std::string(real_path),
-            };
+                if (can_get_path) {
+                    event.path1 = real_path;
+                }
+            }
+
+            // Set event mask.
             if (metadata->mask & FAN_ACCESS) {
                 event.event_type_mask.set(
                     static_cast<int>(FileEvent::FileEventType::Read), true);
@@ -182,6 +188,7 @@ void BehaviorMonitor::start_monitoring() {
 
             // Add event into map.
             this->procs_events_[proc].push_back(event);
+            this->logger_->info("proc count: {}", this->procs_events_.size());
 
             this->total_event_count_++;
 
