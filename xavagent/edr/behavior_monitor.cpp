@@ -155,25 +155,17 @@ void BehaviorMonitor::start_monitoring() {
             } else {
                 // Get path of the file which is accessed.
                 auto fd_path = std::format("/proc/self/fd/{}", fd);
-                char real_path[PATH_MAX + 5] = {0};
-                ssize_t path_len =
-                    readlink(fd_path.c_str(), real_path, sizeof(real_path) - 1);
-                bool can_get_path = true;
-                if (path_len == -1) {
+                std::string realpath;
+                try {
+                    realpath = std::filesystem::read_symlink(fd_path);
+                } catch (...) {
                     this->logger_->log({__FILE__, __LINE__, __FUNCTION__},
                                        spdlog::level::warn,
-                                       "readlink failed: {} ({})", errno,
+                                       "get file path failed: {} ({})", errno,
                                        std::strerror(errno));
-                    can_get_path = false;
-                } else {
-                    real_path[path_len] = '\0';
-                    can_get_path = true;
                 }
+                event.path1 = realpath;
                 close(fd);
-
-                if (can_get_path) {
-                    event.path1 = real_path;
-                }
             }
 
             // Set event mask.
