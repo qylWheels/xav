@@ -26,7 +26,6 @@ struct FileEvent {
         Delete,
         Read,
         Write,
-        Rename,
         Move,
         AttributeChange,
     };
