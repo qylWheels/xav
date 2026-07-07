@@ -158,8 +158,11 @@ void BehaviorMonitor::start_monitoring() {
 
             if (old_dfid_name_record == nullptr &&
                 new_dfid_name_record == nullptr) {  // NOT move event.
-                auto result =
-                    this->get_path_from_dfid_name_record(dfid_name_record);
+                std::optional<std::string> result = std::nullopt;
+                if (dfid_name_record != nullptr) {
+                    result =
+                        this->get_path_from_dfid_name_record(dfid_name_record);
+                }
                 event.path1 = result.has_value() ? result.value() : "";
 
                 // Get file status.
@@ -169,11 +172,18 @@ void BehaviorMonitor::start_monitoring() {
                     event.stat1 = std::nullopt;
                 }
             } else {  // IS move event.
-                auto result1 =
-                    this->get_path_from_dfid_name_record(old_dfid_name_record);
+                std::optional<std::string> result1 = std::nullopt;
+                if (old_dfid_name_record != nullptr) {
+                    result1 = this->get_path_from_dfid_name_record(
+                        old_dfid_name_record);
+                }
                 event.path1 = result1.has_value() ? result1.value() : "";
-                auto result2 =
-                    this->get_path_from_dfid_name_record(new_dfid_name_record);
+
+                std::optional<std::string> result2 = std::nullopt;
+                if (new_dfid_name_record != nullptr) {
+                    result2 = this->get_path_from_dfid_name_record(
+                        new_dfid_name_record);
+                }
                 event.path2 = result2.has_value() ? result2.value() : "";
 
                 // Get file status.
