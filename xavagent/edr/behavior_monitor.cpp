@@ -65,8 +65,10 @@ void BehaviorMonitor::start_monitoring() {
     // Mark the root directory for monitoring.
     // TODO: Monitor other type of event: create, delete, rename, move,
     // attribute change.
-    if (fanotify_mark(this->fanfd_, FAN_MARK_ADD | FAN_MARK_FILESYSTEM,
-                      FAN_ACCESS | FAN_MODIFY, AT_FDCWD, "/") < 0) {
+    if (fanotify_mark(
+            this->fanfd_, FAN_MARK_ADD | FAN_MARK_FILESYSTEM,
+            FAN_CREATE | FAN_DELETE | FAN_ACCESS | FAN_MODIFY | FAN_ONDIR,
+            AT_FDCWD, "/") < 0) {
         throw std::runtime_error(
             std::format("fanotify_mark failed: {} ({}) at {}:{}", errno,
                         std::strerror(errno), __FILE__, __LINE__));
@@ -138,11 +140,12 @@ void BehaviorMonitor::start_monitoring() {
                 .proc = proc,
             };
 
-            // Get fd of the file which is accessed.
-            struct file_handle *handle =
-                (struct file_handle *)fid_record->handle;
-            int fd = open_by_handle_at(this->mount_fd_, handle, O_RDONLY);
-            if (fd == -1) {
+            // Get fd of the directory of the file which is accessed.
+            struct file_handle *dir_handle =
+                (struct file_handle *)dfid_name_record->handle;
+            int dir_fd =
+                open_by_handle_at(this->mount_fd_, dir_handle, O_RDONLY);
+            if (dir_fd == -1) {
                 if (errno == ESTALE) {
                     this->logger_->log({__FILE__, __LINE__, __FUNCTION__},
                                        spdlog::level::info, "ESTALE, skip");
@@ -153,22 +156,37 @@ void BehaviorMonitor::start_monitoring() {
                                        errno, std::strerror(errno));
                 }
             } else {
-                // Get path of the file which is accessed.
-                auto fd_path = std::format("/proc/self/fd/{}", fd);
-                std::string realpath;
+                // Get path of the directory.
+                std::string dir_path;
                 try {
-                    realpath = std::filesystem::read_symlink(fd_path);
+                    dir_path = std::filesystem::read_symlink(
+                        std::format("/proc/self/fd/{}", dir_fd));
                 } catch (...) {
                     this->logger_->log({__FILE__, __LINE__, __FUNCTION__},
                                        spdlog::level::warn,
                                        "get file path failed: {} ({})", errno,
                                        std::strerror(errno));
                 }
-                event.path1 = realpath;
-                close(fd);
+
+                // Get direntry name of the file which is accessed.
+                std::string filename = (const char *)(dir_handle->f_handle +
+                                                      dir_handle->handle_bytes);
+
+                event.path1 = dir_path + "/" + filename;
+                close(dir_fd);
             }
 
             // Set event mask.
+            if (metadata->mask & FAN_CREATE) {
+                this->logger_->info("[CREATE] path: {}", event.path1);
+                event.event_type_mask.set(
+                    static_cast<int>(FileEvent::FileEventType::Create), true);
+            }
+            if (metadata->mask & FAN_DELETE) {
+                this->logger_->info("[DELETE] path: {}", event.path1);
+                event.event_type_mask.set(
+                    static_cast<int>(FileEvent::FileEventType::Delete), true);
+            }
             if (metadata->mask & FAN_ACCESS) {
                 event.event_type_mask.set(
                     static_cast<int>(FileEvent::FileEventType::Read), true);
@@ -180,7 +198,6 @@ void BehaviorMonitor::start_monitoring() {
 
             // Add event into map.
             this->procs_events_[proc].push_back(event);
-            this->logger_->info("proc count: {}", this->procs_events_.size());
 
             this->total_event_count_++;
 
