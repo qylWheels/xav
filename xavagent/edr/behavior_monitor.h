@@ -1,5 +1,6 @@
 #pragma once
 
+#include <linux/fanotify.h>
 #include <spdlog/spdlog.h>
 
 #include <atomic>
@@ -32,6 +33,10 @@ public:
     std::uint64_t suspicious_event_count() const {
         return this->suspicious_event_count_;
     }
+
+private:
+    std::optional<std::string> get_path_from_dfid_name_record(
+        fanotify_event_info_fid* dfid_name_record);
 
 private:
     std::optional<int> get_proc_ppid(int pid);
