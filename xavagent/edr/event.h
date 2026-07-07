@@ -1,6 +1,7 @@
 #pragma once
 
 #include <bitset>
+#include <filesystem>
 #include <optional>
 #include <string>
 #include <variant>
@@ -37,6 +38,10 @@ struct FileEvent {
     // Who is(are) affected by the operation.
     std::string path1;
     std::optional<std::string> path2;
+
+    // Attributes of files.
+    std::optional<std::filesystem::file_status> stat1;
+    std::optional<std::filesystem::file_status> stat2;
 };
 
 using Event = std::variant<FileEvent>;
