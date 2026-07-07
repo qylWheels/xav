@@ -21,6 +21,8 @@ struct Process {
     }
 };
 
+#define FILE_EVENT_TYPE_MASK_SIZE 16
+
 struct FileEvent {
     enum class FileEventType {
         Create,
@@ -30,7 +32,7 @@ struct FileEvent {
         Move,
         AttributeChange,
     };
-    std::bitset<16> event_type_mask;
+    std::bitset<FILE_EVENT_TYPE_MASK_SIZE> event_type_mask;
 
     // Who did the operation.
     Process proc;
