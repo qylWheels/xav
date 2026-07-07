@@ -209,9 +209,11 @@ void BehaviorMonitor::start_monitoring() {
             if (metadata->mask & FAN_RENAME) {
                 event.event_type_mask.set(
                     static_cast<int>(FileEvent::FileEventType::Move), true);
-                this->logger_->info(
-                    "[MOVE] path: {} -> {}", event.path1,
-                    event.path2.has_value() ? event.path2.value() : "");
+            }
+            if (metadata->mask & FAN_ATTRIB) {
+                event.event_type_mask.set(
+                    static_cast<int>(FileEvent::FileEventType::AttributeChange),
+                    true);
             }
 
             // Add event into map.
