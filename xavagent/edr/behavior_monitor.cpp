@@ -67,7 +67,7 @@ void BehaviorMonitor::start_monitoring() {
     // TODO: Monitor other type of event: attribute change.
     if (fanotify_mark(this->fanfd_, FAN_MARK_ADD | FAN_MARK_FILESYSTEM,
                       FAN_CREATE | FAN_DELETE | FAN_ACCESS | FAN_MODIFY |
-                          FAN_RENAME | FAN_ONDIR,
+                          FAN_RENAME | FAN_ATTRIB | FAN_ONDIR,
                       AT_FDCWD, "/") < 0) {
         throw std::runtime_error(
             std::format("fanotify_mark failed: {} ({}) at {}:{}", errno,
@@ -161,6 +161,13 @@ void BehaviorMonitor::start_monitoring() {
                 auto result =
                     this->get_path_from_dfid_name_record(dfid_name_record);
                 event.path1 = result.has_value() ? result.value() : "";
+
+                // Get file status.
+                try {
+                    event.stat1 = std::filesystem::status(event.path1);
+                } catch (...) {
+                    event.stat1 = std::nullopt;
+                }
             } else {  // IS move event.
                 auto result1 =
                     this->get_path_from_dfid_name_record(old_dfid_name_record);
@@ -168,6 +175,18 @@ void BehaviorMonitor::start_monitoring() {
                 auto result2 =
                     this->get_path_from_dfid_name_record(new_dfid_name_record);
                 event.path2 = result2.has_value() ? result2.value() : "";
+
+                // Get file status.
+                try {
+                    event.stat1 = std::filesystem::status(event.path1);
+                } catch (...) {
+                    event.stat1 = std::nullopt;
+                }
+                try {
+                    event.stat2 = std::filesystem::status(event.path2.value());
+                } catch (...) {
+                    event.stat2 = std::nullopt;
+                }
             }
 
             // Set event mask.
