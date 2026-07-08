@@ -6,7 +6,7 @@ add_requires(
     "leveldb", "cryptopp", "protobuf-cpp", "wxwidgets",
     "oatpp", "spdlog", "yaml-cpp", "openssl"
 )
-add_requires("vcpkg::yara", {alias = "yara"})
+add_requires("apt::libyara-dev", {alias = "yara"})
 
 includes("xavcommon")
 includes("xavagent")
