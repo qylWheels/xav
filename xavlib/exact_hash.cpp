@@ -5,7 +5,7 @@
 
 #include <format>
 
-#include "malware_info.pb.h"
+#include "xavcommon/malware_info.pb.h"
 #include "xavlib/leveldb_ref.h"
 
 // FIXME: Only for tests.
