@@ -1,5 +1,5 @@
 target("xavcommon")
-    set_kind("phony")
+    set_kind("shared")
     set_languages("c++20")
     add_packages("protobuf-cpp", {public = true})
     add_rules("protobuf.cpp")
