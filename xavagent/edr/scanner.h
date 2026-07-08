@@ -7,8 +7,8 @@
 #include <string>
 #include <vector>
 
+#include "xavcommon/malware_info.pb.h"
 #include "xavlib/exact_hash.h"
-#include "xavlib/malware_info.pb.h"
 
 namespace xavagent {
 struct MalwareInfo {

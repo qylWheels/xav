@@ -5,7 +5,8 @@ target("xavagent")
     add_packages(
         "leveldb", "cryptopp", "wxwidgets", "oatpp", "protobuf-cpp",
         "spdlog", "yaml-cpp"
-    )   
+    )
+    add_deps("xavcommon")
 
     on_run(function (target)
         import("core.base.option")

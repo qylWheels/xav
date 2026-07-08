@@ -11,7 +11,7 @@
 #include "../edr/behavior_monitor.h"
 #include "../edr/on_access_scanner.h"
 #include "../edr/scanner.h"
-#include "xavlib/malware_info.pb.h"
+#include "xavcommon/malware_info.pb.h"
 
 #include OATPP_CODEGEN_BEGIN(ApiController)
 
