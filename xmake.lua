@@ -6,6 +6,7 @@ add_requires(
     "leveldb", "cryptopp", "protobuf-cpp", "wxwidgets",
     "oatpp", "spdlog", "yaml-cpp"
 )
+add_requires("vcpkg::yara", {alias = "yara"})
 
 includes("xavcommon")
 includes("xavagent")
