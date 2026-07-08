@@ -1,3 +1,5 @@
+#include <exception>
+
 #include "app_component.h"
 #include "controller/xavagent_controller.h"
 #include "oatpp/network/Server.hpp"
@@ -32,10 +34,7 @@ void run() {
     server.run();
 }
 
-/**
- *  main
- */
-int main(int argc, const char* argv[]) {
+int run_main(int argc, const char* argv[]) {
     oatpp::Environment::init();
 
     run();
@@ -43,4 +42,12 @@ int main(int argc, const char* argv[]) {
     oatpp::Environment::destroy();
 
     return 0;
+}
+
+int main(int argc, const char* argv[]) {
+    try {
+        return run_main(argc, argv);
+    } catch (std::exception& e) {
+        exit(EXIT_FAILURE);
+    }
 }

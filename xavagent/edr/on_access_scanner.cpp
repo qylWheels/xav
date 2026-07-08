@@ -1,4 +1,4 @@
-#include "execution_monitor.h"
+#include "on_access_scanner.h"
 
 #include <fcntl.h>
 #include <limits.h>
@@ -10,17 +10,19 @@
 #define BUFSIZE (1 * 1024 * 1024)  // 1MB
 
 namespace xavagent {
-ExecutionMonitor::ExecutionMonitor() {
+OnAccessScanner::OnAccessScanner()
+    : scanned_object_count_(0), blocked_object_count_(0) {
     // Initialize the fanotify descriptor.
-    this->fanfd_ = fanotify_init(FAN_CLASS_CONTENT | FAN_CLOEXEC |
-                                     FAN_UNLIMITED_QUEUE | FAN_REPORT_PIDFD,
-                                 O_RDONLY | O_LARGEFILE);
+    this->fanfd_ =
+        fanotify_init(FAN_CLASS_CONTENT | FAN_CLOEXEC | FAN_UNLIMITED_QUEUE,
+                      O_RDONLY | O_LARGEFILE);
     if (this->fanfd_ < 0) {
         perror("fanotify_init failed");
         exit(1);
     }
 
     // Mark the root directory for monitoring.
+    // FIXME: This should be in start_monitoring().
     if (fanotify_mark(this->fanfd_, FAN_MARK_ADD | FAN_MARK_MOUNT,
                       FAN_OPEN_EXEC_PERM, AT_FDCWD, "/") < 0) {
         perror("fanotify_mark failed");
@@ -35,13 +37,13 @@ ExecutionMonitor::ExecutionMonitor() {
     }
 }
 
-ExecutionMonitor::~ExecutionMonitor() {
+OnAccessScanner::~OnAccessScanner() {
     close(this->fanfd_);
     delete[] this->buf_;
     this->buf_ = nullptr;
 }
 
-void ExecutionMonitor::start_monitoring() {
+void OnAccessScanner::start_monitoring() {
     // Poll and process fanotify events.
     while (true) {
         ssize_t len = read(this->fanfd_, this->buf_, BUFSIZE);
@@ -68,15 +70,11 @@ void ExecutionMonitor::start_monitoring() {
                     struct fanotify_response resp = {.fd = metadata->fd};
                     const auto result =
                         this->exact_hash_engine_.scan(std::string{path});
+                    this->scanned_object_count_++;
                     if (result.has_value()) {
-                        printf("[BLOCK] %s\n", path);
                         const auto result_value = result.value();
-                        std::cout
-                            << std::format(
-                                   "<MalwareBazaar><ExactHash> Generic.{}",
-                                   result_value.variant())
-                            << std::endl;
                         resp.response = FAN_DENY;
+                        this->blocked_object_count_++;
                     } else {
                         // printf("[ALLOW] %s\n", path);
                         resp.response = FAN_ALLOW;
@@ -93,7 +91,7 @@ void ExecutionMonitor::start_monitoring() {
     }
 }
 
-void ExecutionMonitor::stop_monitoring() {
+void OnAccessScanner::stop_monitoring() {
     // TODO
 }
 }  // namespace xavagent

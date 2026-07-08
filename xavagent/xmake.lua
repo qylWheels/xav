@@ -3,7 +3,8 @@ target("xavagent")
     add_files("**.cpp")
     add_deps("xavlib")
     add_packages(
-        "leveldb", "cryptopp", "wxwidgets", "oatpp", "protobuf-cpp"
+        "leveldb", "cryptopp", "wxwidgets", "oatpp", "protobuf-cpp",
+        "spdlog", "yaml-cpp"
     )   
 
     on_run(function (target)

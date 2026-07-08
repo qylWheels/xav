@@ -18,7 +18,7 @@
                                 <el-row>
                                     <el-col :span="2"></el-col>
                                     <el-col :span="2">
-                                        <el-icon class="monitor-icon" size="128" :color="color">
+                                        <el-icon class="monitor-icon" size="128" :color="successColor">
                                             <Monitor />
                                         </el-icon>
                                     </el-col>
@@ -38,18 +38,21 @@
                                         <el-button type="danger" plain disabled>Disconnect</el-button>
                                     </el-col>
                                     <el-col :span="4">
-                                        <el-statistic title="Real-time Protection Scanned Files"
-                                            :value="realTimeProtScanFiles" />
+                                        <el-statistic title="On Access Scanner Scanned Objects"
+                                            :value="onAccessScannerScanObjectCount" />
                                         <div class="statistic-margin" />
-                                        <el-statistic title="Malware Blocked" :value="malwareBlockedCount" />
+                                        <el-statistic title="On Access Scanner Blocked Threats"
+                                            :value="onAccessScannerBlockedThreatsCount"
+                                            :value-style="{ color: dangerColor }" />
                                     </el-col>
                                     <el-col :span="3">
-                                        <el-statistic title="Analyzed Behaviors" :value="analyzedBehaviorsCount" />
+                                        <el-statistic title="Total Events" :value="totalEventCount" />
                                         <div class="statistic-margin" />
-                                        <el-statistic title="Suspicious Behaviors" :value="suspiciousBehaviorCount" />
+                                        <el-statistic title="Suspicious Events" :value="suspiciousEventCount"
+                                            :value-style="{ color: warningColor }" />
                                     </el-col>
                                     <el-col :span="3">
-                                        <el-progress type="dashboard" :percentage="cpuUsage" :color="color">
+                                        <el-progress type="dashboard" :percentage="cpuUsage" :color="dangerColor">
                                             <template #default="{ percentage }">
                                                 <el-text class="percentage-value">{{ percentage }}%</el-text>
                                                 <el-text class="percentage-label">CPU Usage</el-text>
@@ -57,7 +60,7 @@
                                         </el-progress>
                                     </el-col>
                                     <el-col :span="3">
-                                        <el-progress type="dashboard" :percentage="memoryUsage" :color="color">
+                                        <el-progress type="dashboard" :percentage="memoryUsage" :color="warningColor">
                                             <template #default="{ percentage }">
                                                 <el-text class="percentage-value">{{ percentage }}%</el-text>
                                                 <el-text class="percentage-label">Memory Usage</el-text>
@@ -83,11 +86,11 @@
                             </template>
                             <template #default>
                                 <el-row>
-                                    <el-button type="primary" plain @click="handleQuickScanBtnClick"
+                                    <el-button plain @click="handleQuickScanBtnClick"
                                         :disabled="scanButtonDisabled">Quick
                                         Scan</el-button>
-                                    <el-button type="primary" plain disabled>Full Scan</el-button>
-                                    <el-button type="primary" plain disabled>Custom Scan</el-button>
+                                    <el-button plain disabled>Full Scan</el-button>
+                                    <el-button plain disabled>Custom Scan</el-button>
                                 </el-row>
                                 <div class="scan-margin"></div>
                                 <el-row>
@@ -166,18 +169,53 @@
 <script setup lang="ts">
 import axios from 'axios'
 import { ref, computed } from 'vue'
-import { useIntervalFn } from '@vueuse/core'
+import { useIntervalFn, useCssVar } from '@vueuse/core'
+
+// Colors.
+const primaryColor = useCssVar('--el-color-primary')
+const successColor = useCssVar('--el-color-success')
+const warningColor = useCssVar('--el-color-warning')
+const infoColor = useCssVar('--el-color-info')
+const dangerColor = useCssVar('--el-color-danger')
 
 const machineName = ref("Comma")
 const color = ref("green")
 const system = ref("Linux")
-const realTimeProtScanFiles = ref(32917)
-const malwareBlockedCount = ref(21)
-const analyzedBehaviorsCount = ref(1743)
-const suspiciousBehaviorCount = ref(15)
 const cpuUsage = ref(80)
 const memoryUsage = ref(60)
 const scanButtonDisabled = ref(false)
+
+// Real-time protection status.
+const onAccessScannerScanObjectCount = ref(0)
+const onAccessScannerBlockedThreatsCount = ref(0)
+const {
+    pause: pauseQueryRealTimeProtectionStatus,
+    resume: resumeQueryRealTimeProtectionStatus,
+    isActive: isQueryRealTimeProtectionStatusActive
+} = useIntervalFn(() => {
+    axios.get('/api/on-access-scanner/status')
+        .then((res) => {
+            const data = res.data
+            onAccessScannerScanObjectCount.value = data.scanned_object_count
+            onAccessScannerBlockedThreatsCount.value = data.blocked_object_count
+        })
+}, 3000, { immediate: true })
+
+// Behavior monitor status.
+const totalEventCount = ref(0)
+const suspiciousEventCount = ref(0)
+const {
+    pause: pauseQueryBehaviorMonitorStatus,
+    resume: resumeQueryBehaviorMonitorStatus,
+    isActive: isQueryBehaviorMonitorStatusActive
+} = useIntervalFn(() => {
+    axios.get('/api/behavior-monitor/status')
+        .then((res) => {
+            const data = res.data
+            totalEventCount.value = data.total_event_count
+            suspiciousEventCount.value = data.suspicious_event_count
+        })
+}, 3000, { immediate: true })
 
 // Scan status.
 const scanStatus = ref(undefined)
