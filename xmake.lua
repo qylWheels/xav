@@ -4,7 +4,7 @@ set_languages("c++20")
 
 add_requires(
     "leveldb", "cryptopp", "protobuf-cpp", "wxwidgets",
-    "oatpp", "spdlog", "yaml-cpp"
+    "oatpp", "spdlog", "yaml-cpp", "openssl"
 )
 add_requires("vcpkg::yara", {alias = "yara"})
 
