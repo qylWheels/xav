@@ -7,5 +7,6 @@ add_requires(
     "oatpp", "spdlog", "yaml-cpp"
 )
 
+includes("xavcommon")
 includes("xavagent")
 includes("xavlib")
