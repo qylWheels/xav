@@ -13,8 +13,8 @@ public:
     virtual ~IStaticHeuristicEngine() = default;
 
 public:
-    std::optional<malware_info::MalwareInfo> scan(
-        const std::filesystem::path& path);
+    virtual std::optional<malware_info::MalwareInfo> scan(
+        const std::filesystem::path& path) = 0;
 };
 
 class StaticHeuristicEngineManager {
