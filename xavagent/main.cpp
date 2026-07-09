@@ -48,6 +48,7 @@ int main(int argc, const char* argv[]) {
     try {
         return run_main(argc, argv);
     } catch (std::exception& e) {
+        std::cerr << "Fatal error: " << e.what() << std::endl;
         exit(EXIT_FAILURE);
     }
 }

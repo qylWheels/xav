@@ -6,6 +6,11 @@
 #include <unistd.h>
 
 #include <format>
+#include <memory>
+#include <ranges>
+
+#include "xavlib/heuristic/static_heuristic.h"
+#include "xavlib/heuristic/yara_static_heuristic_engine.h"
 
 #define BUFSIZE (1 * 1024 * 1024)  // 1MB
 
@@ -35,6 +40,10 @@ OnAccessScanner::OnAccessScanner()
         perror("malloc failed");
         exit(1);
     }
+
+    // Initialize the static heuristic engine manager.
+    this->static_heur_engine_manager_.add_engine(
+        std::make_unique<xavlib::YaraStaticHeuristicEngine>());
 }
 
 OnAccessScanner::~OnAccessScanner() {
@@ -49,8 +58,8 @@ void OnAccessScanner::start_monitoring() {
         ssize_t len = read(this->fanfd_, this->buf_, BUFSIZE);
         if (len <= 0) continue;
 
-        struct fanotify_event_metadata *metadata =
-            reinterpret_cast<fanotify_event_metadata *>(this->buf_);
+        struct fanotify_event_metadata* metadata =
+            reinterpret_cast<fanotify_event_metadata*>(this->buf_);
 
         while (FAN_EVENT_OK(metadata, len)) {
             if (metadata->vers != FANOTIFY_METADATA_VERSION) {
@@ -68,17 +77,38 @@ void OnAccessScanner::start_monitoring() {
 
                 if (path_len > 0) {
                     struct fanotify_response resp = {.fd = metadata->fd};
+
+                    // TODO: Report when detected malware.
+                    // Use the exact hash engine first.
                     const auto result =
                         this->exact_hash_engine_.scan(std::string{path});
-                    this->scanned_object_count_++;
                     if (result.has_value()) {
                         const auto result_value = result.value();
                         resp.response = FAN_DENY;
                         this->blocked_object_count_++;
                     } else {
-                        // printf("[ALLOW] %s\n", path);
-                        resp.response = FAN_ALLOW;
+                        // If the exact hash engine does not detect any malware,
+                        // use the static heuristic engine.
+                        auto result_from_heur_engine_noerr_nonull =
+                            this->static_heur_engine_manager_.scan(path) |
+                            std::views::filter(
+                                [](const auto& r) { return r.has_value(); }) |
+                            std::views::transform(
+                                [](const auto& r) { return r.value(); }) |
+                            std::views::filter(
+                                [](const auto& r) { return r.has_value(); }) |
+                            std::views::transform(
+                                [](const auto& r) { return r.value(); });
+                        if (std::ranges::empty(
+                                result_from_heur_engine_noerr_nonull)) {
+                            resp.response = FAN_ALLOW;
+                        } else {
+                            resp.response = FAN_DENY;
+                            this->blocked_object_count_++;
+                        }
                     }
+
+                    this->scanned_object_count_++;
 
                     write(this->fanfd_, &resp, sizeof(resp));
                 }

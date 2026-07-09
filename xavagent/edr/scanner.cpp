@@ -1,7 +1,11 @@
 #include "scanner.h"
 
-#include <filesystem>
+#include <outcome/outcome.hpp>
+#include <outcome/try.hpp>
+#include <ranges>
 #include <thread>
+
+#include "xavlib/heuristic/yara_static_heuristic_engine.h"
 
 #define MAX_FILES_IN_QUEUE 8192
 
@@ -10,7 +14,10 @@ Scanner::Scanner()
     : traverse_finished_(false),
       scan_status_(ScanStatus::Stopped),
       total_file_count_{0},
-      scanned_file_count_{0} {}
+      scanned_file_count_{0} {
+    this->static_heur_engine_manager_.add_engine(
+        std::make_shared<xavlib::YaraStaticHeuristicEngine>());
+}
 
 Scanner::~Scanner() {}
 
@@ -42,11 +49,45 @@ void Scanner::scan(const std::filesystem::path& path, int nthreads) {
             auto file = this->files_to_scan_.front();
             this->files_to_scan_.pop();
             this->curr_scanning_file_ = file;
-            auto result = this->exact_hash_engine_.scan(file);
-            this->scanned_file_count_++;
-            if (result.has_value()) {
-                this->malware_infos_.push_back({file, result.value()});
+
+            // Use exact hash engine first.
+            auto result_from_exact_hash_engine =
+                this->exact_hash_engine_.scan(file);
+            if (result_from_exact_hash_engine.has_value()) {
+                this->malware_infos_.push_back(
+                    {file, result_from_exact_hash_engine.value()});
+            } else {
+                // If exact hash engine not detect any malware,
+                // use static heuristic engine.
+                auto result_from_heur_engine =
+                    this->static_heur_engine_manager_.scan(file);
+
+                // TODO: Handle failure. We just ignore it for now.
+                auto result_from_heur_engine_noerr_nonull =
+                    result_from_heur_engine |
+                    std::views::filter(
+                        [](const auto& r) { return r.has_value(); }) |
+                    std::views::transform(
+                        [](const auto& r) { return r.value(); }) |
+                    std::views::filter(
+                        [](const auto& r) { return r.has_value(); }) |
+                    std::views::transform(
+                        [](const auto& r) { return r.value(); });
+
+                // We just take the result that has the highest score for now.
+                auto result_from_heur_engine_noerr_vec =
+                    std::vector(result_from_heur_engine_noerr_nonull.begin(),
+                                result_from_heur_engine_noerr_nonull.end());
+                if (!result_from_heur_engine_noerr_vec.empty()) {
+                    std::ranges::sort(result_from_heur_engine_noerr_vec,
+                                      [](const auto& a, const auto& b) {
+                                          return a.score() > b.score();
+                                      });
+                    this->malware_infos_.push_back(
+                        {file, result_from_heur_engine_noerr_vec.front()});
+                }
             }
+            this->scanned_file_count_++;
             lock.unlock();
         }
     };

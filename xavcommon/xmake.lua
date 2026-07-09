@@ -1,0 +1,6 @@
+target("xavcommon")
+    set_kind("shared")
+    set_languages("c++20")
+    add_packages("protobuf-cpp", {public = true})
+    add_rules("protobuf.cpp")
+    add_files("*.proto", {proto_public = true, proto_rootdir = "./"})
