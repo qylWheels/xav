@@ -1,0 +1,121 @@
+#include "yara_static_heuristic_engine.h"
+
+#include <fcntl.h>
+#include <unistd.h>
+#include <yara.h>
+
+#include <format>
+#include <system_error>
+#include <utility>
+
+#include "xavcommon/malware_info.pb.h"
+
+namespace xavlib {
+#define YARA_RULES_FILE "/var/lib/xav/yara_rules/yara_forge_extended_rule.yar"
+#define YARA_FORGE_NAMESPACE "yara_forge"
+
+YaraStaticHeuristicEngine::YaraStaticHeuristicEngine()
+    : yara_compiler_(nullptr), yara_rules_(nullptr) {
+    int ret;
+
+    // Only initialize Yara in the main thread.
+    if (getpid() == gettid()) {
+        yr_initialize();
+    }
+
+    // Create a Yara compiler.
+    ret = yr_compiler_create(&this->yara_compiler_);
+    if (ret != ERROR_SUCCESS) {
+        throw std::runtime_error(
+            std::format("yr_compiler_create failed: {}", ret));
+    }
+
+    // Set the error callback.
+    yr_compiler_set_callback(this->yara_compiler_,
+                             YaraStaticHeuristicEngine::yara_err_callback,
+                             nullptr);
+
+    // Add rules to the compiler.
+    int rule_fd = open(YARA_RULES_FILE, O_RDONLY);
+    if (rule_fd < 0) {
+        throw std::runtime_error(
+            std::format("open yara rule file failed: {}", ret));
+    }
+    ret = yr_compiler_add_fd(this->yara_compiler_, rule_fd,
+                             YARA_FORGE_NAMESPACE, nullptr);
+    if (ret != ERROR_SUCCESS) {
+        throw std::runtime_error(
+            std::format("yr_compiler_add_fd failed: {}", ret));
+    }
+    close(rule_fd);
+
+    // Get the compiled rules.
+    ret = yr_compiler_get_rules(this->yara_compiler_, &this->yara_rules_);
+    if (ret != ERROR_SUCCESS) {
+        throw std::runtime_error(
+            std::format("yr_compiler_get_rules failed: {}", ret));
+    }
+}
+
+YaraStaticHeuristicEngine::~YaraStaticHeuristicEngine() {
+    yr_rules_destroy(this->yara_rules_);
+    yr_compiler_destroy(this->yara_compiler_);
+    // Only finalize Yara in the main thread.
+    if (getpid() == gettid()) {
+        yr_finalize();
+    }
+}
+
+outcome::result<std::optional<malware_info::MalwareInfo>>
+YaraStaticHeuristicEngine::scan(const std::filesystem::path& path) {
+    std::optional<malware_info::MalwareInfo> result = std::nullopt;
+    auto user_data = std::make_pair(this, &result);
+    int ret = yr_rules_scan_file(
+        this->yara_rules_, path.c_str(),
+        SCAN_FLAGS_REPORT_RULES_MATCHING | SCAN_FLAGS_FAST_MODE,
+        YaraStaticHeuristicEngine::yara_scan_callback, &user_data, 0);
+    if (ret != ERROR_SUCCESS) {
+        return std::make_error_code(std::errc::io_error);
+    }
+    return result;
+}
+
+int YaraStaticHeuristicEngine::yara_scan_callback(YR_SCAN_CONTEXT* context,
+                                                  int message,
+                                                  void* message_data,
+                                                  void* user_data) {
+    if (message == CALLBACK_MSG_RULE_MATCHING) {
+        // Get the user data.
+        auto user_data_pair =
+            static_cast<std::pair<YaraStaticHeuristicEngine*,
+                                  std::optional<malware_info::MalwareInfo>*>*>(
+                user_data);
+        auto self = user_data_pair->first;
+        auto result = user_data_pair->second;
+
+        // Get the score from rule.
+        YR_RULE* rule = (YR_RULE*)message_data;
+        YR_META* meta;
+        double score = 0.0;
+        yr_rule_metas_foreach(rule, meta) {
+            if (strcmp(meta->identifier, "score") == 0) {
+                score = meta->integer;
+                break;
+            }
+        }
+
+        // Set the result.
+        malware_info::MalwareInfo malware_info;
+        malware_info.set_engine(malware_info::DetectionEngine::StaticHeuristic);
+        malware_info.set_dbvendor(malware_info::DatabaseVendor::YaraForge);
+        malware_info.set_type(malware_info::MalwareType::Generic);
+        malware_info.clear_family();
+        malware_info.clear_variant();
+        malware_info.set_score(score);
+        *result = malware_info;
+
+        return CALLBACK_CONTINUE;
+    }
+    return CALLBACK_CONTINUE;
+}
+}  // namespace xavlib
