@@ -48,10 +48,10 @@ void OnAccessScanner::start_monitoring() {
     int ret;
 
     // Mark the root directory for monitoring.
-    ret = fanotify_mark(this->fanfd_, FAN_MARK_ADD | FAN_MARK_MOUNT,
+    ret = fanotify_mark(this->fanfd_, FAN_MARK_ADD | FAN_MARK_FILESYSTEM,
                         FAN_OPEN_EXEC_PERM, AT_FDCWD, "/");
     if (ret < 0) {
-        throw std::runtime_error("fanotify_mark failed");
+        throw std::runtime_error("Add fanotify mark failed");
     }
 
     // Poll and process fanotify events.
@@ -123,6 +123,12 @@ void OnAccessScanner::start_monitoring() {
 }
 
 void OnAccessScanner::stop_monitoring() {
-    // TODO
+    int ret;
+
+    ret = fanotify_mark(this->fanfd_, FAN_MARK_REMOVE | FAN_MARK_FILESYSTEM,
+                        FAN_OPEN_EXEC_PERM, AT_FDCWD, "/");
+    if (ret < 0) {
+        throw std::runtime_error("Remove fanotify mark failed");
+    }
 }
 }  // namespace xavagent
