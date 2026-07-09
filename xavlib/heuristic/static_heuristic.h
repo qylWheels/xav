@@ -32,7 +32,7 @@ public:
         delete;
 
 public:
-    outcome::result<std::optional<malware_info::MalwareInfo>> scan(
+    std::vector<outcome::result<std::optional<malware_info::MalwareInfo>>> scan(
         const std::filesystem::path& path);
     void add_engine(std::shared_ptr<IStaticHeuristicEngine> engine);
 
