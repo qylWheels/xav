@@ -15,14 +15,14 @@ System_Boundary(scan_engine, "Scan Engine") {
     System_Boundary(static_engine, "Static Engine") {
         Container(exact_hash_engine, "Exact Hash Engine", "SHA256")
         Container(fuzzy_hash_engine, "Fuzzy Hash Engine", "CTPH")
-        Container(heur_engine, "Heuristic Engine", "NULL")
+        Container(heur_engine, "Heuristic Engine", "yara")
     }
 }
 
 System_Boundary(database, "Database") {
     ContainerDb(exact_hash_db, "Exact Hash Database", "KV Database")
     ContainerDb(fuzzy_hash_db, "Fuzzy Hash Database", "NULL")
-    ContainerDb(heur_db, "Heuristic Database", "NULL")
+    ContainerDb(heur_db, "Heuristic Database", "yara files")
     ContainerDb(behavior_db, "Behavior Database", "NULL")
 }
 
