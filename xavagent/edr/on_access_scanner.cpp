@@ -22,16 +22,11 @@ OnAccessScanner::OnAccessScanner()
         fanotify_init(FAN_CLASS_CONTENT | FAN_CLOEXEC | FAN_UNLIMITED_QUEUE,
                       O_RDONLY | O_LARGEFILE);
     if (this->fanfd_ < 0) {
-        perror("fanotify_init failed");
-        exit(1);
+        throw std::runtime_error("fanotify_init failed");
     }
 
     // Allocate buffer for reading fanotify events.
     this->buf_ = new char[BUFSIZE];
-    if (this->buf_ == nullptr) {
-        perror("malloc failed");
-        exit(1);
-    }
 
     // Initialize the static heuristic engine manager.
     this->static_heur_engine_manager_.add_engine(
@@ -64,8 +59,7 @@ void OnAccessScanner::start_monitoring() {
 
         while (FAN_EVENT_OK(metadata, len)) {
             if (metadata->vers != FANOTIFY_METADATA_VERSION) {
-                perror("fanotify metadata version mismatch");
-                exit(1);
+                throw std::runtime_error("fanotify metadata version mismatch");
             }
 
             if (metadata->fd >= 0) {
