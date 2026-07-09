@@ -3,6 +3,7 @@
 #include <cstdint>
 
 #include "xavlib/exact_hash.h"
+#include "xavlib/heuristic/static_heuristic.h"
 
 namespace xavagent {
 class OnAccessScanner {
@@ -30,6 +31,9 @@ private:
     int fanfd_;
     char* buf_;
     xavlib::ExactHashEngine exact_hash_engine_;
+    xavlib::StaticHeuristicEngineManager static_heur_engine_manager_;
+
+    // Statistics.
     std::atomic_uint64_t scanned_object_count_;
     std::atomic_uint64_t blocked_object_count_;
 };
