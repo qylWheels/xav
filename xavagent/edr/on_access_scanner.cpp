@@ -5,14 +5,14 @@
 #include <sys/fanotify.h>
 #include <unistd.h>
 
-#include <format>
 #include <memory>
 #include <ranges>
+#include <stdexcept>
 
 #include "xavlib/heuristic/static_heuristic.h"
 #include "xavlib/heuristic/yara_static_heuristic_engine.h"
 
-#define BUFSIZE (1 * 1024 * 1024)  // 1MB
+#define BUFSIZE (8 * 1024)  // 8KB
 
 namespace xavagent {
 OnAccessScanner::OnAccessScanner()
@@ -22,24 +22,11 @@ OnAccessScanner::OnAccessScanner()
         fanotify_init(FAN_CLASS_CONTENT | FAN_CLOEXEC | FAN_UNLIMITED_QUEUE,
                       O_RDONLY | O_LARGEFILE);
     if (this->fanfd_ < 0) {
-        perror("fanotify_init failed");
-        exit(1);
-    }
-
-    // Mark the root directory for monitoring.
-    // FIXME: This should be in start_monitoring().
-    if (fanotify_mark(this->fanfd_, FAN_MARK_ADD | FAN_MARK_MOUNT,
-                      FAN_OPEN_EXEC_PERM, AT_FDCWD, "/") < 0) {
-        perror("fanotify_mark failed");
-        exit(1);
+        throw std::runtime_error("fanotify_init failed");
     }
 
     // Allocate buffer for reading fanotify events.
     this->buf_ = new char[BUFSIZE];
-    if (this->buf_ == nullptr) {
-        perror("malloc failed");
-        exit(1);
-    }
 
     // Initialize the static heuristic engine manager.
     this->static_heur_engine_manager_.add_engine(
@@ -53,6 +40,15 @@ OnAccessScanner::~OnAccessScanner() {
 }
 
 void OnAccessScanner::start_monitoring() {
+    int ret;
+
+    // Mark the root directory for monitoring.
+    ret = fanotify_mark(this->fanfd_, FAN_MARK_ADD | FAN_MARK_FILESYSTEM,
+                        FAN_OPEN_EXEC_PERM, AT_FDCWD, "/");
+    if (ret < 0) {
+        throw std::runtime_error("Add fanotify mark failed");
+    }
+
     // Poll and process fanotify events.
     while (true) {
         ssize_t len = read(this->fanfd_, this->buf_, BUFSIZE);
@@ -63,8 +59,7 @@ void OnAccessScanner::start_monitoring() {
 
         while (FAN_EVENT_OK(metadata, len)) {
             if (metadata->vers != FANOTIFY_METADATA_VERSION) {
-                perror("fanotify metadata version mismatch");
-                exit(1);
+                throw std::runtime_error("fanotify metadata version mismatch");
             }
 
             if (metadata->fd >= 0) {
@@ -75,6 +70,8 @@ void OnAccessScanner::start_monitoring() {
                 ssize_t path_len =
                     readlink(fdpath.c_str(), path, sizeof(path) - 1);
 
+                // TODO: Handle the case where we can't read the path.
+                // I.e. implement scan function on fd.
                 if (path_len > 0) {
                     struct fanotify_response resp = {.fd = metadata->fd};
 
@@ -122,6 +119,12 @@ void OnAccessScanner::start_monitoring() {
 }
 
 void OnAccessScanner::stop_monitoring() {
-    // TODO
+    int ret;
+
+    ret = fanotify_mark(this->fanfd_, FAN_MARK_REMOVE | FAN_MARK_FILESYSTEM,
+                        FAN_OPEN_EXEC_PERM, AT_FDCWD, "/");
+    if (ret < 0) {
+        throw std::runtime_error("Remove fanotify mark failed");
+    }
 }
 }  // namespace xavagent
