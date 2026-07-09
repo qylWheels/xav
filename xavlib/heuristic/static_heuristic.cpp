@@ -6,8 +6,6 @@
 #include <outcome/try.hpp>
 #include <vector>
 
-#include "outcome/success_failure.hpp"
-
 namespace xavlib {
 StaticHeuristicEngineManager::StaticHeuristicEngineManager() {}
 
