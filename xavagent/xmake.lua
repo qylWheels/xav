@@ -4,7 +4,7 @@ target("xavagent")
     add_deps("xavlib")
     add_packages(
         "leveldb", "cryptopp", "wxwidgets", "oatpp", "protobuf-cpp",
-        "spdlog", "yaml-cpp", "yara", "outcome"
+        "spdlog", "yaml-cpp", "yara", "outcome", "rapidfuzz"
     )
     add_deps("xavcommon")
 
