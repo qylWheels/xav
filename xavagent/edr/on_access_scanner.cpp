@@ -70,6 +70,8 @@ void OnAccessScanner::start_monitoring() {
                 ssize_t path_len =
                     readlink(fdpath.c_str(), path, sizeof(path) - 1);
 
+                // TODO: Handle the case where we can't read the path.
+                // I.e. implement scan function on fd.
                 if (path_len > 0) {
                     struct fanotify_response resp = {.fd = metadata->fd};
 
