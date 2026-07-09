@@ -5,14 +5,14 @@
 #include <sys/fanotify.h>
 #include <unistd.h>
 
-#include <format>
 #include <memory>
 #include <ranges>
+#include <stdexcept>
 
 #include "xavlib/heuristic/static_heuristic.h"
 #include "xavlib/heuristic/yara_static_heuristic_engine.h"
 
-#define BUFSIZE (1 * 1024 * 1024)  // 1MB
+#define BUFSIZE (8 * 1024)  // 8KB
 
 namespace xavagent {
 OnAccessScanner::OnAccessScanner()
@@ -23,14 +23,6 @@ OnAccessScanner::OnAccessScanner()
                       O_RDONLY | O_LARGEFILE);
     if (this->fanfd_ < 0) {
         perror("fanotify_init failed");
-        exit(1);
-    }
-
-    // Mark the root directory for monitoring.
-    // FIXME: This should be in start_monitoring().
-    if (fanotify_mark(this->fanfd_, FAN_MARK_ADD | FAN_MARK_MOUNT,
-                      FAN_OPEN_EXEC_PERM, AT_FDCWD, "/") < 0) {
-        perror("fanotify_mark failed");
         exit(1);
     }
 
@@ -53,6 +45,15 @@ OnAccessScanner::~OnAccessScanner() {
 }
 
 void OnAccessScanner::start_monitoring() {
+    int ret;
+
+    // Mark the root directory for monitoring.
+    ret = fanotify_mark(this->fanfd_, FAN_MARK_ADD | FAN_MARK_MOUNT,
+                        FAN_OPEN_EXEC_PERM, AT_FDCWD, "/");
+    if (ret < 0) {
+        throw std::runtime_error("fanotify_mark failed");
+    }
+
     // Poll and process fanotify events.
     while (true) {
         ssize_t len = read(this->fanfd_, this->buf_, BUFSIZE);
