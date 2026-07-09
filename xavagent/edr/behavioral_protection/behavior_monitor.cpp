@@ -21,7 +21,7 @@
 #include <stdexcept>
 
 #include "spdlog/common.h"
-#include "xavagent/edr/event.h"
+#include "xavagent/edr/behavioral_protection/event.h"
 
 #define BUFSIZE (4 * 1024)  // 4KB
 
