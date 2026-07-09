@@ -2,23 +2,28 @@
 
 #include <algorithm>
 #include <optional>
+#include <outcome/outcome.hpp>
+#include <outcome/try.hpp>
 #include <vector>
+
+#include "outcome/success_failure.hpp"
 
 namespace xavlib {
 StaticHeuristicEngineManager::StaticHeuristicEngineManager() {}
 
 StaticHeuristicEngineManager::~StaticHeuristicEngineManager() {}
 
-std::optional<malware_info::MalwareInfo> StaticHeuristicEngineManager::scan(
-    const std::filesystem::path& path) {
+outcome::result<std::optional<malware_info::MalwareInfo>>
+StaticHeuristicEngineManager::scan(const std::filesystem::path& path) {
     std::vector<std::optional<malware_info::MalwareInfo>> results;
 
     // Scan the file with all static heuristic engines.
     for (auto& engine : this->heur_engines_) {
-        auto result = engine->scan(path);
+        OUTCOME_TRY(auto result, engine->scan(path));
+
         // We only care about results that are not empty.
         if (result.has_value()) {
-            results.push_back(result);
+            results.push_back(result.value());
         }
     }
 
