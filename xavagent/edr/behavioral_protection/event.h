@@ -31,6 +31,8 @@ struct FileEvent {
         Write,
         Move,
         AttributeChange,
+
+        Count,
     };
     std::bitset<FILE_EVENT_TYPE_MASK_SIZE> event_type_mask;
 
