@@ -4,7 +4,8 @@ set_languages("c++20")
 
 add_requires(
     "leveldb", "cryptopp", "protobuf-cpp", "wxwidgets",
-    "oatpp", "spdlog", "yaml-cpp", "openssl", "outcome"
+    "oatpp", "spdlog", "yaml-cpp", "openssl", "outcome",
+    "rapidfuzz"
 )
 add_requires("apt::libyara-dev", {alias = "yara"})
 
