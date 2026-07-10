@@ -1,3 +1,5 @@
+#include <cpptrace/cpptrace.hpp>
+#include <csignal>
 #include <exception>
 
 #include "app_component.h"
@@ -44,11 +46,19 @@ int run_main(int argc, const char* argv[]) {
     return 0;
 }
 
+void sigsegv_handler(int signum) {
+    std::cerr << "SIGSEGV signal received" << std::endl;
+    cpptrace::generate_trace().print();
+    std::exit(signum);
+}
+
 int main(int argc, const char* argv[]) {
+    std::signal(SIGSEGV, sigsegv_handler);
     try {
         return run_main(argc, argv);
     } catch (std::exception& e) {
         std::cerr << "Fatal error: " << e.what() << std::endl;
+        cpptrace::generate_trace().print();
         exit(EXIT_FAILURE);
     }
 }
