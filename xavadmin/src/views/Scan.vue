@@ -26,7 +26,7 @@
             </el-row>
             <el-row>
                 <el-col :span="24">
-                    <el-table :data="malwareInfos" :height="335">
+                    <el-table :data="malwareInfos" :height="348">
                         <el-table-column prop="file_path" label="Path" />
                         <el-table-column prop="malware_name" label="Malware Name">
                             <template #default="scope">
@@ -80,6 +80,8 @@ const scanStatusText = computed(() => {
             ret += 'no threat detected.'
         }
         return ret
+    } else {
+        return ''
     }
 })
 
