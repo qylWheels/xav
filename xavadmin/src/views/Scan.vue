@@ -13,7 +13,7 @@
                 <el-button plain disabled>Full Scan</el-button>
                 <el-button plain disabled>Custom Scan</el-button>
             </el-row>
-            <div class="scan-margin"></div>
+            <el-divider></el-divider>
             <el-row>
                 <el-col :span="24">
                     <el-progress :percentage="scanProgress" :status="scanProgressBarStatus"></el-progress>
@@ -21,12 +21,12 @@
             </el-row>
             <el-row>
                 <el-col :span="24">
-                    <el-text>{{ scanStatusText }}</el-text>
+                    <el-text truncated>{{ scanStatusText }}</el-text>
                 </el-col>
             </el-row>
             <el-row>
                 <el-col :span="24">
-                    <el-table :data="malwareInfos" :max-height="400">
+                    <el-table :data="malwareInfos" :height="335">
                         <el-table-column prop="file_path" label="Path" />
                         <el-table-column prop="malware_name" label="Malware Name">
                             <template #default="scope">
@@ -37,8 +37,8 @@
                 </el-col>
             </el-row>
             <el-row :style="{ marginTop: '15px' }">
-                <el-col :span="20"></el-col>
-                <el-col :span="4">
+                <el-col :span="19"></el-col>
+                <el-col :span="5">
                     <el-button type="primary" plain disabled>Quarantine</el-button>
                     <el-button type="danger" plain disabled>Ignore</el-button>
                 </el-col>
