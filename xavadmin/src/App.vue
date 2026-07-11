@@ -4,7 +4,7 @@
 <template>
     <el-container>
         <el-aside>
-            <el-menu default-active="/">
+            <el-menu :default-active="$route.path" router>
                 <el-menu-item index="/">
                     <el-icon>
                         <Monitor />
