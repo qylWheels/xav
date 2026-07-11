@@ -5,7 +5,7 @@
     <el-container>
         <el-aside>
             <el-menu :default-active="$route.path" router>
-                <el-menu-item index="/">
+                <el-menu-item index="/dashboard">
                     <el-icon>
                         <Monitor />
                     </el-icon>
