@@ -5,6 +5,10 @@ import Scan from '@/views/Scan.vue'
 
 const routes = [
     {
+        path: '/',
+        redirect: '/dashboard'
+    },
+    {
         path: '/dashboard',
         name: 'dashboard',
         component: Dashboard
