@@ -41,7 +41,7 @@
         </el-aside>
         <el-container>
             <el-header>
-                <h2>Xav Admin Management Platform</h2>
+                <h3>Xav Admin Management Platform</h3>
             </el-header>
             <el-main>
                 <router-view />
