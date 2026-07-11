@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import SingleMachineDashboard from '@/components/SingleMachineDashboard.vue'
 </script>
 
 <template>
-    <SingleMachineDashboard />
+    <router-view />
 </template>
 
 <style scoped></style>
