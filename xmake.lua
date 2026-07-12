@@ -8,6 +8,7 @@ add_requires(
     "rapidfuzz", "cpptrace"
 )
 add_requires("apt::libyara-dev", {alias = "yara"})
+add_requires("vcpkg::boost-beast", {alias = "boost-beast"})
 
 includes("xavcommon")
 includes("xavagent")
