@@ -18,7 +18,7 @@ ExactHashEngine::ExactHashEngine() {
 }
 
 ExactHashEngine::~ExactHashEngine() {
-    delete this->db_;
+    // XXX: Don't close the db here, Because we don't own it.
     this->db_ = nullptr;
 }
 
