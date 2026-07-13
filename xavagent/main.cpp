@@ -1,3 +1,7 @@
+#include <boost/asio/connect.hpp>
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/beast/core.hpp>
+#include <boost/beast/websocket.hpp>
 #include <cpptrace/cpptrace.hpp>
 #include <csignal>
 #include <exception>
@@ -6,7 +10,14 @@
 #include "controller/xavagent_controller.h"
 #include "oatpp/network/Server.hpp"
 
+namespace beast = boost::beast;
+namespace http = beast::http;
+namespace websocket = beast::websocket;
+namespace net = boost::asio;
+using tcp = boost::asio::ip::tcp;
+
 void run() {
+    // ====================== oatpp ======================
     // Register Components in scope of run() method
     xavagent::AppComponent components;
 
@@ -31,6 +42,58 @@ void run() {
     // Print info about server port
     OATPP_LOGi("Xav Agent", "Server running on port {}",
                connection_provider->getProperty("port").toString());
+
+    // ====================== boost.beast ======================
+    // Configs.
+    std::string host = "0.0.0.0";
+    std::string port = "8001";
+
+    // The io_context is required for all I/O
+    net::io_context ioc;
+
+    // These objects perform our I/O
+    tcp::resolver resolver{ioc};
+    websocket::stream<tcp::socket> ws{ioc};
+
+    // Look up the domain name
+    auto const results = resolver.resolve(host, port);
+
+    // Make the connection on the IP address we get from a lookup
+    auto ep = net::connect(ws.next_layer(), results);
+
+    // Update the host_ string. This will provide the value of the
+    // Host HTTP header during the WebSocket handshake.
+    // See https://tools.ietf.org/html/rfc7230#section-5.4
+    host += ':' + std::to_string(ep.port());
+
+    // Set a decorator to change the User-Agent of the handshake
+    ws.set_option(
+        websocket::stream_base::decorator([](websocket::request_type& req) {
+            req.set(http::field::user_agent,
+                    std::string(BOOST_BEAST_VERSION_STRING) +
+                        " websocket-client-coro");
+        }));
+
+    // Perform the websocket handshake
+    ws.handshake(host, "/ws");
+
+    // Send the message
+    ws.write(
+        net::buffer(std::string("Hello, websocket! This is agent speaking")));
+
+    // This buffer will hold the incoming message
+    beast::flat_buffer buffer;
+
+    // Read a message into our buffer
+    ws.read(buffer);
+
+    // Close the WebSocket connection
+    ws.close(websocket::close_code::normal);
+
+    // If we get here then the connection is closed gracefully
+
+    // The make_printable() function helps print a ConstBufferSequence
+    std::cout << beast::make_printable(buffer.data()) << std::endl;
 
     // Run server
     server.run();
