@@ -151,6 +151,9 @@ void Scanner::scan(const std::filesystem::path& path, int nthreads) {
     // Stop report scan status thread.
     report_scan_status_thread.request_stop();
 
+    // Send final scan status.
+    this->ws_send_scan_status();
+
     lock.lock();
     this->scan_status_ = ScanStatus::Stopped;
 
