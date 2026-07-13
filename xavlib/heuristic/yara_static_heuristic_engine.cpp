@@ -18,10 +18,7 @@ YaraStaticHeuristicEngine::YaraStaticHeuristicEngine()
     : yara_compiler_(nullptr), yara_rules_(nullptr) {
     int ret;
 
-    // Only initialize Yara in the main thread.
-    if (getpid() == gettid()) {
-        yr_initialize();
-    }
+    yr_initialize();
 
     // Create a Yara compiler.
     ret = yr_compiler_create(&this->yara_compiler_);
@@ -60,10 +57,7 @@ YaraStaticHeuristicEngine::YaraStaticHeuristicEngine()
 YaraStaticHeuristicEngine::~YaraStaticHeuristicEngine() {
     yr_rules_destroy(this->yara_rules_);
     yr_compiler_destroy(this->yara_compiler_);
-    // Only finalize Yara in the main thread.
-    if (getpid() == gettid()) {
-        yr_finalize();
-    }
+    yr_finalize();
 }
 
 outcome::result<std::optional<malware_info::MalwareInfo>>
