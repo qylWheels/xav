@@ -2,6 +2,7 @@
 
 #include "xavagent/edr/behavioral_protection/behavior_monitor.h"
 #include "xavagent/edr/on_access_scanner.h"
+#include "xavagent/edr/scanner.h"
 
 namespace xavagent {
 class GlobalContext {
@@ -10,6 +11,8 @@ public:
         static GlobalContext instance;
         return instance;
     }
+
+    Scanner& scanner() { return this->scanner_; }
 
     OnAccessScanner& on_access_scanner() { return this->on_access_scanner_; }
 
@@ -24,6 +27,7 @@ private:
     GlobalContext& operator=(GlobalContext&&) = delete;
 
 private:
+    Scanner scanner_;
     OnAccessScanner on_access_scanner_;
     BehaviorMonitor behavior_monitor_;
 };
