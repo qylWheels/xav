@@ -1,11 +1,14 @@
 #include "global_context.h"
 
+#include <boost/asio.hpp>
+
 #include "xavlib/heuristic/yara_static_heuristic_engine.h"
 
 namespace http = beast::http;
 
 namespace xavagent {
-GlobalContext::GlobalContext(net::io_context& ioc) : ws_(ioc) {
+GlobalContext::GlobalContext(net::io_context& ioc)
+    : ws_(net::make_strand(ioc)) {
     // Websocket configs.
     std::string host = "0.0.0.0";
     std::string port = "8001";
