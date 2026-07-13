@@ -14,7 +14,7 @@ namespace xavagent {
 GlobalContext::GlobalContext(net::io_context& ioc)
     : ws_(net::make_strand(ioc)) {
     // Set up logger.
-    this->logger_ = spdlog::stdout_color_mt("behavior_monitor");
+    this->logger_ = spdlog::stdout_color_mt("global_context");
     this->logger_->set_level(spdlog::level::info);
 
     // Websocket configs.
