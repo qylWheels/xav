@@ -5,7 +5,7 @@
 #include <ranges>
 #include <thread>
 
-#include "xavlib/heuristic/yara_static_heuristic_engine.h"
+#include "xavagent/global_context.h"
 
 #define MAX_FILES_IN_QUEUE 8192
 
@@ -14,10 +14,7 @@ Scanner::Scanner()
     : traverse_finished_(false),
       scan_status_(ScanStatus::Stopped),
       total_file_count_{0},
-      scanned_file_count_{0} {
-    this->static_heur_engine_manager_.add_engine(
-        std::make_shared<xavlib::YaraStaticHeuristicEngine>());
-}
+      scanned_file_count_{0} {}
 
 Scanner::~Scanner() {}
 
@@ -52,7 +49,8 @@ void Scanner::scan(const std::filesystem::path& path, int nthreads) {
 
             // Use exact hash engine first.
             auto result_from_exact_hash_engine =
-                this->exact_hash_engine_.scan(file);
+                GlobalContext::get_global_context().exact_hash_engine().scan(
+                    file);
             if (result_from_exact_hash_engine.has_value()) {
                 this->malware_infos_.push_back(
                     {file, result_from_exact_hash_engine.value()});
@@ -60,7 +58,9 @@ void Scanner::scan(const std::filesystem::path& path, int nthreads) {
                 // If exact hash engine not detect any malware,
                 // use static heuristic engine.
                 auto result_from_heur_engine =
-                    this->static_heur_engine_manager_.scan(file);
+                    GlobalContext::get_global_context()
+                        .static_heur_engine_manager()
+                        .scan(file);
 
                 // TODO: Handle failure. We just ignore it for now.
                 auto result_from_heur_engine_noerr_nonull =

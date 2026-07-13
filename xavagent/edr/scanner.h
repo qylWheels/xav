@@ -8,8 +8,6 @@
 #include <vector>
 
 #include "xavcommon/malware_info.pb.h"
-#include "xavlib/exact_hash.h"
-#include "xavlib/heuristic/static_heuristic.h"
 
 namespace xavagent {
 struct MalwareInfo {
@@ -76,8 +74,6 @@ public:
 private:
     std::mutex mutex_;
     std::queue<std::filesystem::path> files_to_scan_;
-    xavlib::ExactHashEngine exact_hash_engine_;
-    xavlib::StaticHeuristicEngineManager static_heur_engine_manager_;
     bool traverse_finished_;
 
     // information of scan.

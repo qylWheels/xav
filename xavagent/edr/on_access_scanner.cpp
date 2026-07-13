@@ -5,12 +5,10 @@
 #include <sys/fanotify.h>
 #include <unistd.h>
 
-#include <memory>
 #include <ranges>
 #include <stdexcept>
 
-#include "xavlib/heuristic/static_heuristic.h"
-#include "xavlib/heuristic/yara_static_heuristic_engine.h"
+#include "xavagent/global_context.h"
 
 #define BUFSIZE (8 * 1024)  // 8KB
 
@@ -27,10 +25,6 @@ OnAccessScanner::OnAccessScanner()
 
     // Allocate buffer for reading fanotify events.
     this->buf_ = new char[BUFSIZE];
-
-    // Initialize the static heuristic engine manager.
-    this->static_heur_engine_manager_.add_engine(
-        std::make_unique<xavlib::YaraStaticHeuristicEngine>());
 }
 
 OnAccessScanner::~OnAccessScanner() {
@@ -77,8 +71,9 @@ void OnAccessScanner::start_monitoring() {
 
                     // TODO: Report when detected malware.
                     // Use the exact hash engine first.
-                    const auto result =
-                        this->exact_hash_engine_.scan(std::string{path});
+                    const auto result = GlobalContext::get_global_context()
+                                            .exact_hash_engine()
+                                            .scan(std::string{path});
                     if (result.has_value()) {
                         const auto result_value = result.value();
                         resp.response = FAN_DENY;
@@ -87,7 +82,9 @@ void OnAccessScanner::start_monitoring() {
                         // If the exact hash engine does not detect any malware,
                         // use the static heuristic engine.
                         auto result_from_heur_engine_noerr_nonull =
-                            this->static_heur_engine_manager_.scan(path) |
+                            GlobalContext::get_global_context()
+                                .static_heur_engine_manager()
+                                .scan(path) |
                             std::views::filter(
                                 [](const auto& r) { return r.has_value(); }) |
                             std::views::transform(
