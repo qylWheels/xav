@@ -176,7 +176,6 @@ void Scanner::ws_send_scan_status() {
 
     // Construct Message.
     msg::Message msg;
-    msg.set_type(msg::MessageType::ScanStatus);
     *msg.mutable_scan_status() = scan_status;
 
     // Send Message.
