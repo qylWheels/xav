@@ -4,8 +4,12 @@
 #include <outcome/try.hpp>
 #include <ranges>
 #include <thread>
+#include <vector>
 
 #include "xavagent/global_context.h"
+#include "xavcommon/malware_info.pb.h"
+#include "xavcommon/message.pb.h"
+#include "xavcommon/scan_status.pb.h"
 
 #define MAX_FILES_IN_QUEUE 8192
 
@@ -102,6 +106,43 @@ void Scanner::scan(const std::filesystem::path& path, int nthreads) {
         threads.push_back(std::thread{scanner});
     }
 
+    // Report scan status every periodically.
+    std::jthread report_scan_status_thread([this](std::stop_token stopToken) {
+        while (!stopToken.stop_requested()) {
+            // Construct ScanStatus.
+            scan_status::ScanStatus scan_status;
+            scan_status.set_scan_status(
+                static_cast<scan_status::ScanStatusEnum>(this->scan_status_));
+            scan_status.set_total_file_count(this->total_file_count_);
+            scan_status.set_scanned_file_count(this->scanned_file_count_);
+            for (const auto& info : this->malware_infos_) {
+                auto new_malware_info = scan_status.add_malware_infos();
+                *new_malware_info = info.malware_info;
+            }
+            scan_status.set_curr_scanning_file(this->curr_scanning_file_);
+
+            // Construct Message.
+            msg::Message msg;
+            msg.set_type(msg::MessageType::ScanStatus);
+            *msg.mutable_scan_status() = scan_status;
+
+            // Send Message.
+            std::string bytes = msg.SerializeAsString();
+            try {
+                GlobalContext::get_global_context().ws().write(
+                    net::buffer(bytes));
+            } catch (const std::exception& e) {
+                std::cout << std::format(
+                                 "Failed to send scan status message: {}",
+                                 e.what())
+                          << std::endl;
+            }
+
+            // Sleep for a while.
+            std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        }
+    });
+
     // Traverse directory to find files to scan.
     try {
         for (const auto& entry :
@@ -125,6 +166,9 @@ void Scanner::scan(const std::filesystem::path& path, int nthreads) {
     for (auto& thread : threads) {
         thread.join();
     }
+
+    // Stop report scan status thread.
+    report_scan_status_thread.request_stop();
 
     lock.lock();
     this->scan_status_ = ScanStatus::Stopped;
