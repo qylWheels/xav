@@ -11,7 +11,7 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-from xavadmin_backend.protobufs import scan_status_pb2 as xavcommon_dot_scan__status__pb2
+from xavcommon import scan_status_pb2 as xavcommon_dot_scan__status__pb2
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x13xavcommon/msg.proto\x12\x03msg\x1a\x1bxavcommon/scan_status.proto\"a\n\x07Message\x12\x1e\n\x04type\x18\x01 \x01(\x0e\x32\x10.msg.MessageType\x12.\n\x0bscan_status\x18\x02 \x01(\x0b\x32\x17.scan_status.ScanStatusH\x00\x42\x06\n\x04\x64\x61ta*\x1d\n\x0bMessageType\x12\x0e\n\nScanStatus\x10\x00\x62\x06proto3')

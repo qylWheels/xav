@@ -11,7 +11,7 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-from xavadmin_backend.protobufs import malware_info_pb2 as xavcommon_dot_malware__info__pb2
+from xavcommon import malware_info_pb2 as xavcommon_dot_malware__info__pb2
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1bxavcommon/scan_status.proto\x12\x0bscan_status\x1a\x1cxavcommon/malware_info.proto\"\xc2\x01\n\nScanStatus\x12\x30\n\x0bscan_status\x18\x01 \x01(\x0e\x32\x1b.scan_status.ScanStatusEnum\x12\x18\n\x10total_file_count\x18\x02 \x01(\r\x12\x1a\n\x12scanned_file_count\x18\x03 \x01(\r\x12\x30\n\rmalware_infos\x18\x04 \x03(\x0b\x32\x19.malware_info.MalwareInfo\x12\x1a\n\x12\x63urr_scanning_file\x18\x05 \x01(\t*7\n\x0eScanStatusEnum\x12\x0c\n\x08Scanning\x10\x00\x12\n\n\x06Paused\x10\x01\x12\x0b\n\x07Stopped\x10\x02\x62\x06proto3')
