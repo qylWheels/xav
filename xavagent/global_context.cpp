@@ -1,5 +1,8 @@
 #include "global_context.h"
 
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/spdlog.h>
+
 #include <boost/asio.hpp>
 #include <thread>
 
@@ -10,6 +13,10 @@ namespace http = beast::http;
 namespace xavagent {
 GlobalContext::GlobalContext(net::io_context& ioc)
     : ws_(net::make_strand(ioc)) {
+    // Set up logger.
+    this->logger_ = spdlog::stdout_color_mt("behavior_monitor");
+    this->logger_->set_level(spdlog::level::info);
+
     // Websocket configs.
     std::string host = "0.0.0.0";
     std::string port = "8001";

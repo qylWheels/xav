@@ -1,9 +1,12 @@
 #pragma once
 
+#include <spdlog/spdlog.h>
+
 #include <boost/asio/connect.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
+#include <memory>
 
 #include "xavagent/edr/behavioral_protection/behavior_monitor.h"
 #include "xavagent/edr/on_access_scanner.h"
@@ -41,6 +44,8 @@ public:
 
     websocket::stream<tcp::socket>& ws() { return this->ws_; }
 
+    std::shared_ptr<spdlog::logger>& logger() { return this->logger_; }
+
 private:
     GlobalContext(net::io_context& ioc);
     ~GlobalContext() = default;
@@ -56,5 +61,6 @@ private:
     xavlib::ExactHashEngine exact_hash_engine_;
     xavlib::StaticHeuristicEngineManager static_heur_engine_manager_;
     websocket::stream<tcp::socket> ws_;
+    std::shared_ptr<spdlog::logger> logger_;
 };
 }  // namespace xavagent
