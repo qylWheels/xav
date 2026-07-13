@@ -72,6 +72,9 @@ public:
     }
 
 private:
+    void ws_send_scan_status();
+
+private:
     std::mutex mutex_;
     std::queue<std::filesystem::path> files_to_scan_;
     bool traverse_finished_;

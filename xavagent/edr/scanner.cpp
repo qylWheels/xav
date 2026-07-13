@@ -109,28 +109,9 @@ void Scanner::scan(const std::filesystem::path& path, int nthreads) {
     // Report scan status every periodically.
     std::jthread report_scan_status_thread([this](std::stop_token stopToken) {
         while (!stopToken.stop_requested()) {
-            // Construct ScanStatus.
-            scan_status::ScanStatus scan_status;
-            scan_status.set_scan_status(
-                static_cast<scan_status::ScanStatusEnum>(this->scan_status_));
-            scan_status.set_total_file_count(this->total_file_count_);
-            scan_status.set_scanned_file_count(this->scanned_file_count_);
-            for (const auto& info : this->malware_infos_) {
-                auto new_malware_info = scan_status.add_malware_infos();
-                *new_malware_info = info.malware_info;
-            }
-            scan_status.set_curr_scanning_file(this->curr_scanning_file_);
-
-            // Construct Message.
-            msg::Message msg;
-            msg.set_type(msg::MessageType::ScanStatus);
-            *msg.mutable_scan_status() = scan_status;
-
-            // Send Message.
-            std::string bytes = msg.SerializeAsString();
+            // Send scan status.
             try {
-                GlobalContext::get_global_context().ws().write(
-                    net::buffer(bytes));
+                this->ws_send_scan_status();
             } catch (const std::exception& e) {
                 std::cout << std::format(
                                  "Failed to send scan status message: {}",
@@ -179,4 +160,26 @@ void Scanner::scan(const std::filesystem::path& path, int nthreads) {
     lock.unlock();
 }
 
+void Scanner::ws_send_scan_status() {
+    // Construct ScanStatus.
+    scan_status::ScanStatus scan_status;
+    scan_status.set_scan_status(
+        static_cast<scan_status::ScanStatusEnum>(this->scan_status_));
+    scan_status.set_total_file_count(this->total_file_count_);
+    scan_status.set_scanned_file_count(this->scanned_file_count_);
+    for (const auto& info : this->malware_infos_) {
+        auto new_malware_info = scan_status.add_malware_infos();
+        *new_malware_info = info.malware_info;
+    }
+    scan_status.set_curr_scanning_file(this->curr_scanning_file_);
+
+    // Construct Message.
+    msg::Message msg;
+    msg.set_type(msg::MessageType::ScanStatus);
+    *msg.mutable_scan_status() = scan_status;
+
+    // Send Message.
+    std::string bytes = msg.SerializeAsString();
+    GlobalContext::get_global_context().ws().write(net::buffer(bytes));
+}
 }  // namespace xavagent
