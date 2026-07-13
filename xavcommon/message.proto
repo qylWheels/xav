@@ -1,0 +1,16 @@
+syntax = "proto3";
+package msg;
+
+import "scan_status.proto";
+import "google/protobuf/any.proto";
+
+enum MessageType {
+    ScanStatus = 0;
+}
+
+message Message {
+    MessageType type = 1;
+    oneof data {
+        scan_status.ScanStatus scan_status = 2;
+    }
+}

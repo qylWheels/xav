@@ -1,0 +1,18 @@
+syntax = "proto3";
+package scan_status;
+
+import "malware_info.proto";
+
+enum ScanStatusEnum {
+    Scanning = 0;
+    Paused = 1;
+    Stopped = 2;
+};
+
+message ScanStatus {
+    ScanStatusEnum scan_status = 1;
+    uint32 total_file_count = 2;
+    uint32 scanned_file_count = 3;
+    repeated malware_info.MalwareInfo malware_infos = 4;
+    string curr_scanning_file = 5;
+}
