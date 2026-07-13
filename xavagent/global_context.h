@@ -5,6 +5,8 @@
 #include "xavagent/edr/scanner.h"
 
 namespace xavagent {
+class GlobalContext;
+
 class GlobalContext {
 public:
     static GlobalContext& get_global_context() {
@@ -19,8 +21,8 @@ public:
     BehaviorMonitor& behavior_monitor() { return this->behavior_monitor_; }
 
 private:
-    GlobalContext();
-    ~GlobalContext();
+    GlobalContext() = default;
+    ~GlobalContext() = default;
     GlobalContext(const GlobalContext&) = delete;
     GlobalContext& operator=(const GlobalContext&) = delete;
     GlobalContext(GlobalContext&&) = delete;
