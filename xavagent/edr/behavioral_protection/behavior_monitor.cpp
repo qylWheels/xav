@@ -9,6 +9,7 @@
 #include <unistd.h>
 
 #include <algorithm>
+#include <bitset>
 #include <cerrno>
 #include <cstddef>
 #include <cstdio>
@@ -16,12 +17,14 @@
 #include <filesystem>
 #include <format>
 #include <fstream>
+#include <iostream>
 #include <optional>
 #include <ranges>
 #include <stdexcept>
 
 #include "spdlog/common.h"
 #include "xavagent/edr/behavioral_protection/event.h"
+#include "xavagent/edr/behavioral_protection/levenshtein_similarity.h"
 
 #define BUFSIZE (4 * 1024)  // 4KB
 
@@ -228,8 +231,35 @@ void BehaviorMonitor::start_monitoring() {
 
             // Add event into map.
             this->procs_events_[proc].push_back(event);
-
             this->total_event_count_++;
+
+            // // TODO: Only for test.
+            // std::deque<Event> mal_event_seq(
+            //     18,
+            //     FileEvent{
+            //         .event_type_mask =
+            //         std::bitset<FILE_EVENT_TYPE_MASK_SIZE>(
+            //             static_cast<int>(FileEvent::FileEventType::Write)),
+            //         .proc =
+            //             Process{
+            //                 .exe_path =
+            //                 "/home/comma/miniconda3/bin/python3.13",
+            //             },
+            //         .path1 = "/tmp/a0",
+            //     });
+            // auto &proc_events = this->procs_events_[proc];
+            // if (proc_events.size() >= mal_event_seq.size() &&
+            //     proc.exe_path.has_value() &&
+            //     proc.exe_path.value().find("python") != std::string::npos) {
+            //     std::deque<Event> event_seq(
+            //         proc_events.end() - mal_event_seq.size(),
+            //         proc_events.end());
+            //     LevenshteinSimilarity levenshtein_similarity;
+            //     double similarity = levenshtein_similarity.calc_similarity(
+            //         mal_event_seq, event_seq);
+            //     std::cout << "similarity of event sequence: " << similarity
+            //               << std::endl;
+            // }
 
             metadata = FAN_EVENT_NEXT(metadata, len);
         }
