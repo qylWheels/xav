@@ -7,11 +7,9 @@
 #include <oatpp/web/server/api/ApiController.hpp>
 #include <thread>
 
-#include "../dto/DTOs.h"
-#include "../edr/on_access_scanner.h"
-#include "../edr/scanner.h"
-#include "xavagent/edr/behavioral_protection/behavior_monitor.h"
-#include "xavcommon/malware_info.pb.h"
+#include "xavagent/dto/DTOs.h"
+#include "xavagent/edr/scanner.h"
+#include "xavagent/global_context.h"
 
 #include OATPP_CODEGEN_BEGIN(ApiController)
 
@@ -21,12 +19,18 @@ public:
     XavAgentController(OATPP_COMPONENT(
         std::shared_ptr<oatpp::web::mime::ContentMappers>, api_content_mappers))
         : oatpp::web::server::api::ApiController(api_content_mappers) {
-        std::thread on_access_scanner_thread(
-            [this]() { this->on_access_scanner_.start_monitoring(); });
+        std::thread on_access_scanner_thread([this]() {
+            GlobalContext::get_global_context()
+                .on_access_scanner()
+                .start_monitoring();
+        });
         on_access_scanner_thread.detach();
 
-        std::thread behavior_monitor_thread(
-            [this]() { this->behavior_monitor_.start_monitoring(); });
+        std::thread behavior_monitor_thread([this]() {
+            GlobalContext::get_global_context()
+                .behavior_monitor()
+                .start_monitoring();
+        });
         behavior_monitor_thread.detach();
     }
 
@@ -39,21 +43,22 @@ public:
     }
 
     ENDPOINT("GET", "/scan/quick/start", quick_scan) {
-        if (this->scanner_.scan_status() != ScanStatus::Stopped) {
+        auto& scanner = GlobalContext::get_global_context().scanner();
+        if (scanner.scan_status() != ScanStatus::Stopped) {
             OATPP_LOGi("Xav Agent", "Quick scan is already running");
             return this->createResponse(Status::CODE_403);
         }
 
         OATPP_LOGi("Xav Agent", "Execute quick scan");
 
-        std::thread t([this]() {
+        std::thread t([this, &scanner]() {
             // std::vector<std::string> critical_paths{
             //     "/home", "/tmp",     "/var/tmp", "/bin",
             //     "/sbin", "/usr/bin", "/usr/sbin"};
             // FIXME: Only for test.
             std::vector<const char*> critical_paths{"/home/comma/projs/xav/"};
             for (const auto& path : critical_paths) {
-                this->scanner_.scan(path, 4);
+                scanner.scan(path, 4);
             }
             OATPP_LOGi("Xav Agent", "Quick scan completed");
         });
@@ -64,10 +69,11 @@ public:
 
     ENDPOINT("GET", "/scan/quick/status", quick_scan_status) {
         auto status = ScanStatusDto::createShared();
-        status->scan_status = ScanStatusEnumDto(this->scanner_.scan_status());
-        status->total_file_count = this->scanner_.total_file_count();
-        status->scanned_file_count = this->scanner_.scanned_file_count();
-        auto malware_infos = this->scanner_.malware_infos();
+        auto& scanner = GlobalContext::get_global_context().scanner();
+        status->scan_status = ScanStatusEnumDto(scanner.scan_status());
+        status->total_file_count = scanner.total_file_count();
+        status->scanned_file_count = scanner.scanned_file_count();
+        auto malware_infos = scanner.malware_infos();
         status->malware_infos = {};
         for (const auto& info : malware_infos) {
             auto info_dto = MalwareInfoDto::createShared();
@@ -78,32 +84,27 @@ public:
                 info.malware_info.family(), info.malware_info.variant());
             status->malware_infos->push_back(info_dto);
         }
-        status->curr_scanning_file =
-            this->scanner_.curr_scanning_file().string();
+        status->curr_scanning_file = scanner.curr_scanning_file().string();
         return this->createDtoResponse(Status::CODE_200, status);
     }
 
     ENDPOINT("GET", "/on-access-scanner/status", on_access_scanner_status) {
         auto status = OnAccessScannerStatusDto::createShared();
-        status->scanned_object_count =
-            this->on_access_scanner_.scanned_object_count();
-        status->blocked_object_count =
-            this->on_access_scanner_.blocked_object_count();
+        auto& on_access_scanner =
+            GlobalContext::get_global_context().on_access_scanner();
+        status->scanned_object_count = on_access_scanner.scanned_object_count();
+        status->blocked_object_count = on_access_scanner.blocked_object_count();
         return this->createDtoResponse(Status::CODE_200, status);
     }
 
     ENDPOINT("GET", "/behavior-monitor/status", behavior_monitor_status) {
         auto status = BehaviorMonitorStatusDto::createShared();
-        status->total_event_count = this->behavior_monitor_.total_event_count();
-        status->suspicious_event_count =
-            this->behavior_monitor_.suspicious_event_count();
+        auto& behav_monitor =
+            GlobalContext::get_global_context().behavior_monitor();
+        status->total_event_count = behav_monitor.total_event_count();
+        status->suspicious_event_count = behav_monitor.suspicious_event_count();
         return this->createDtoResponse(Status::CODE_200, status);
     }
-
-private:
-    Scanner scanner_;
-    OnAccessScanner on_access_scanner_;
-    BehaviorMonitor behavior_monitor_;
 };
 }  // namespace xavagent
 
