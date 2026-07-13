@@ -19,6 +19,7 @@ GlobalContext::GlobalContext(net::io_context& ioc) : ws_(ioc) {
                     std::string(BOOST_BEAST_VERSION_STRING) +
                         " websocket-client-coro");
         }));
+    this->ws_.binary(true);
     this->ws_.handshake(host, "/ws");
 
     // Add Yara static heuristic engine to the manager.
