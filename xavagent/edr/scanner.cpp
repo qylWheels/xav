@@ -113,10 +113,8 @@ void Scanner::scan(const std::filesystem::path& path, int nthreads) {
             try {
                 this->ws_send_scan_status();
             } catch (const std::exception& e) {
-                std::cout << std::format(
-                                 "Failed to send scan status message: {}",
-                                 e.what())
-                          << std::endl;
+                GlobalContext::get_global_context().logger()->warn(std::format(
+                    "Failed to send scan status message: {}", e.what()));
             }
 
             // Sleep for a while.
