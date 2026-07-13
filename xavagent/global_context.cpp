@@ -1,6 +1,7 @@
 #include "global_context.h"
 
 #include <boost/asio.hpp>
+#include <thread>
 
 #include "xavlib/heuristic/yara_static_heuristic_engine.h"
 
@@ -24,6 +25,15 @@ GlobalContext::GlobalContext(net::io_context& ioc)
         }));
     this->ws_.binary(true);
     this->ws_.handshake(host, "/ws");
+
+    // Start a thread to read from websocket to handle ping frame.
+    std::jthread ws_read_thread([this]() {
+        while (true) {
+            beast::flat_buffer buffer;
+            this->ws_.read(buffer);
+        }
+    });
+    ws_read_thread.detach();
 
     // Add Yara static heuristic engine to the manager.
     this->static_heur_engine_manager_.add_engine(
