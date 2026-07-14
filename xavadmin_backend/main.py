@@ -7,7 +7,7 @@ async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     try:
         while True:
-            data = await websocket.receive_text()
+            data = await websocket.receive_bytes()
             print(f"receive: {data}")
     except Exception as e:
         print(f"连接断开: {e}")
