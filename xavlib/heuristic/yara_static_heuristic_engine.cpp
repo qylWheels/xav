@@ -11,7 +11,7 @@
 #include "xavcommon/malware_info.pb.h"
 
 namespace xavlib {
-#define YARA_RULES_FILE "/var/lib/xav/yara_rules/yara_forge_extended_rule.yar"
+#define YARA_RULES_FILE "/home/qyl/projects/xav/xavdb/db/yara-rules-extended.yar"
 #define YARA_FORGE_NAMESPACE "yara_forge"
 
 YaraStaticHeuristicEngine::YaraStaticHeuristicEngine()

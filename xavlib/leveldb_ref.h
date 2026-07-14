@@ -4,7 +4,7 @@
 
 // FIXME: Only for tests.
 #define XAV_EXACT_HASH_DB \
-    "/home/comma/projs/xav-db/malware_database/malware-bazaar-sha256.db"
+    "/home/qyl/projects/xav/xavdb/db/malware-bazaar-sha256.db"
 
 class LevelDbRef {
 public:
