@@ -3,7 +3,7 @@ add_rules("mode.debug", "mode.release")
 set_languages("c++20")
 
 add_requires(
-    "leveldb", "cryptopp", "protobuf-cpp", "wxwidgets",
+    "leveldb", "cryptopp", "protobuf-cpp",
     "oatpp", "spdlog", "yaml-cpp", "openssl", "outcome",
     "rapidfuzz", "cpptrace"
 )
