@@ -16,6 +16,7 @@
     "format": "prettier --write --experimental-cli src/"
   },
   "dependencies": {
+    "@element-plus/icons-vue": "^2.3.2",
     "@vueuse/core": "^14.3.0",
     "axios": "^1.18.1",
     "element-plus": "^2.14.2",
