@@ -3,12 +3,7 @@ package msg;
 
 import "xavcommon/scan_status.proto";
 
-enum MessageType {
-    ScanStatus = 0;
-}
-
 message Message {
-    MessageType type = 1;
     oneof data {
         scan_status.ScanStatus scan_status = 2;
     }
