@@ -56,7 +56,7 @@ public:
             //     "/home", "/tmp",     "/var/tmp", "/bin",
             //     "/sbin", "/usr/bin", "/usr/sbin"};
             // FIXME: Only for test.
-            std::vector<const char*> critical_paths{"/home/comma/projs/xav/"};
+            std::vector<const char*> critical_paths{"/home/qyl/projects/xav/"};
             for (const auto& path : critical_paths) {
                 scanner.scan(path, 4);
             }
