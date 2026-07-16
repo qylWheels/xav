@@ -1,22 +1,37 @@
 #include "vmlinux.h"
+
+// XXX: vmlinux.h must be at top.
+
 #include <bpf/bpf_helpers.h>
 #include <bpf/bpf_tracing.h>
 
-SEC("tracepoint/raw_syscalls/sys_exit")
-int trace_sys_exit(struct trace_event_raw_sys_exit *ctx)
-{
-    int syscall_id = ctx->id;
-    long ret_val = ctx->ret;
-    
-    __u64 pid_tgid = bpf_get_current_pid_tgid();
-    __u32 pid = pid_tgid >> 32;
-    
-    char comm[16] = {};
-    bpf_get_current_comm(&comm, sizeof(comm));
-    
-    bpf_printk("PID %d (%s): %d sys_exit returned %ld\n", 
-                pid, comm, syscall_id, ret_val);
-    
+#include "xavagent/edr/behavioral_protection/ebpf/raw_syscall_event.h"
+
+struct {
+    __uint(type, BPF_MAP_TYPE_RINGBUF);
+    __uint(max_entries, 1 * 1024 * 1024);  // 1MB
+} rb SEC(".maps");
+
+SEC("tp/raw_syscalls/sys_enter")
+int trace_sys_enter(struct trace_event_raw_sys_enter* ctx) {
+    struct RawSyscallEvent* e = bpf_ringbuf_reserve(&rb, sizeof(*e), 0);
+    if (!e) {
+        // Let it go.
+        return 0;
+    }
+
+    // Fill in the event fields.
+    e->pid = bpf_get_current_pid_tgid() >> 32;
+    e->syscall_id = ctx->id;
+    e->args[0] = ctx->args[0];
+    e->args[1] = ctx->args[1];
+    e->args[2] = ctx->args[2];
+    e->args[3] = ctx->args[3];
+    e->args[4] = ctx->args[4];
+    e->args[5] = ctx->args[5];
+
+    bpf_ringbuf_submit(e, 0);
+
     return 0;
 }
 
