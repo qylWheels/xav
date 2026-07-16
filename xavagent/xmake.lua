@@ -14,3 +14,5 @@ target("xavagent")
         os.cd(os.projectdir()) 
         os.exec(target:targetfile())
     end)
+
+includes("edr/behavioral_protection/ebpf")
