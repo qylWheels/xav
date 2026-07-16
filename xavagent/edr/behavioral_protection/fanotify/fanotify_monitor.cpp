@@ -27,7 +27,7 @@
 #define BUFSIZE (4 * 1024)  // 4KB
 
 namespace xavagent {
-BehaviorMonitorManager::BehaviorMonitorManager()
+FanotifyMonitor::FanotifyMonitor()
     : total_event_count_(0), suspicious_event_count_(0) {
     // Initialize logger.
     this->logger_ = spdlog::stdout_color_mt("behavior_monitor");
@@ -56,14 +56,14 @@ BehaviorMonitorManager::BehaviorMonitorManager()
     }
 }
 
-BehaviorMonitorManager::~BehaviorMonitorManager() {
+FanotifyMonitor::~FanotifyMonitor() {
     close(this->fanfd_);
     delete[] this->fanbuf_;
     this->fanbuf_ = nullptr;
     close(this->mount_fd_);
 }
 
-void BehaviorMonitorManager::start_monitoring() {
+void FanotifyMonitor::start_monitoring() {
     // Mark the root directory for monitoring.
     // TODO: Monitor other type of event: attribute change.
     if (fanotify_mark(this->fanfd_, FAN_MARK_ADD | FAN_MARK_FILESYSTEM,
@@ -264,12 +264,11 @@ void BehaviorMonitorManager::start_monitoring() {
     }
 }
 
-void BehaviorMonitorManager::stop_monitoring() {
+void FanotifyMonitor::stop_monitoring() {
     // TODO
 }
 
-std::optional<std::string>
-BehaviorMonitorManager::get_path_from_dfid_name_record(
+std::optional<std::string> FanotifyMonitor::get_path_from_dfid_name_record(
     fanotify_event_info_fid *dfid_name_record) {
     // Get fd of the directory.
     struct file_handle *dir_handle =
@@ -307,7 +306,7 @@ BehaviorMonitorManager::get_path_from_dfid_name_record(
     }
 }
 
-std::optional<int> BehaviorMonitorManager::get_proc_ppid(int pid) {
+std::optional<int> FanotifyMonitor::get_proc_ppid(int pid) {
     try {
         auto ppid_str = this->get_proc_raw_stat(pid, 18);
         if (ppid_str.has_value()) {
@@ -319,8 +318,8 @@ std::optional<int> BehaviorMonitorManager::get_proc_ppid(int pid) {
     }
 }
 
-std::optional<unsigned long long>
-BehaviorMonitorManager::get_proc_start_time_tick(int pid) {
+std::optional<unsigned long long> FanotifyMonitor::get_proc_start_time_tick(
+    int pid) {
     try {
         auto start_time_tick_str = this->get_proc_raw_stat(pid, 22);
         if (start_time_tick_str.has_value()) {
@@ -332,7 +331,7 @@ BehaviorMonitorManager::get_proc_start_time_tick(int pid) {
     }
 }
 
-std::optional<std::string> BehaviorMonitorManager::get_proc_exe_path(int pid) {
+std::optional<std::string> FanotifyMonitor::get_proc_exe_path(int pid) {
     try {
         std::string exe_path = std::format("/proc/{}/exe", pid);
         std::string exe_path_str;
@@ -343,7 +342,7 @@ std::optional<std::string> BehaviorMonitorManager::get_proc_exe_path(int pid) {
     }
 }
 
-std::optional<std::string> BehaviorMonitorManager::get_proc_cmdline(int pid) {
+std::optional<std::string> FanotifyMonitor::get_proc_cmdline(int pid) {
     try {
         std::string cmdline_path = std::format("/proc/{}/cmdline", pid);
         std::ifstream cmdline_file(cmdline_path);
@@ -359,8 +358,7 @@ std::optional<std::string> BehaviorMonitorManager::get_proc_cmdline(int pid) {
     }
 }
 
-std::optional<std::string> BehaviorMonitorManager::get_proc_raw_stat(int pid,
-                                                                     int n) {
+std::optional<std::string> FanotifyMonitor::get_proc_raw_stat(int pid, int n) {
     try {
         std::string stat_path = std::format("/proc/{}/stat", pid);
         std::ifstream stat_file(stat_path);

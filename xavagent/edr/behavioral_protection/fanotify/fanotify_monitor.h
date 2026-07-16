@@ -8,32 +8,20 @@
 #include <deque>
 #include <memory>
 #include <optional>
-#include <span>
 #include <unordered_map>
-#include <vector>
 
 #include "spdlog/logger.h"
 #include "xavagent/edr/behavioral_protection/event.h"
 
 namespace xavagent {
-class IBehaviorMonitor {
+class FanotifyMonitor {
 public:
-    virtual ~IBehaviorMonitor() = default;
-
-public:
-    virtual void start_monitoring() = 0;
-    virtual void stop_monitoring() = 0;
-    virtual std::span<Event> all_events() = 0;
-};
-
-class BehaviorMonitorManager {
-public:
-    BehaviorMonitorManager();
-    ~BehaviorMonitorManager();
-    BehaviorMonitorManager(const BehaviorMonitorManager&) = delete;
-    BehaviorMonitorManager& operator=(const BehaviorMonitorManager&) = delete;
-    BehaviorMonitorManager(BehaviorMonitorManager&&) = delete;
-    BehaviorMonitorManager& operator=(BehaviorMonitorManager&&) = delete;
+    FanotifyMonitor();
+    ~FanotifyMonitor();
+    FanotifyMonitor(const FanotifyMonitor&) = delete;
+    FanotifyMonitor& operator=(const FanotifyMonitor&) = delete;
+    FanotifyMonitor(FanotifyMonitor&&) = delete;
+    FanotifyMonitor& operator=(FanotifyMonitor&&) = delete;
 
 public:
     void start_monitoring();
@@ -65,6 +53,5 @@ private:
     std::atomic_uint64_t total_event_count_;
     std::atomic_uint64_t suspicious_event_count_;
     std::shared_ptr<spdlog::logger> logger_;
-    std::vector<std::shared_ptr<IBehaviorMonitor>> behavior_monitors_;
 };
 }  // namespace xavagent
