@@ -6,7 +6,7 @@
 #include <outcome/outcome.hpp>
 #include <vector>
 
-#include "xavcommon/malware_info.pb.h"
+#include "malware_info.pb.h"
 
 namespace outcome = OUTCOME_V2_NAMESPACE;
 

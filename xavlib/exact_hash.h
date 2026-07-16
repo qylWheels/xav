@@ -8,7 +8,7 @@
 #include <optional>
 #include <string>
 
-#include "xavcommon/malware_info.pb.h"
+#include "malware_info.pb.h"
 
 namespace xavlib {
 class ExactHashEngine {
