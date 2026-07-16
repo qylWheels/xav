@@ -32,7 +32,9 @@ public:
 
     OnAccessScanner& on_access_scanner() { return this->on_access_scanner_; }
 
-    BehaviorMonitor& behavior_monitor() { return this->behavior_monitor_; }
+    BehaviorMonitorManager& behavior_monitor() {
+        return this->behavior_monitor_;
+    }
 
     xavlib::ExactHashEngine& exact_hash_engine() {
         return this->exact_hash_engine_;
@@ -57,7 +59,7 @@ private:
 private:
     Scanner scanner_;
     OnAccessScanner on_access_scanner_;
-    BehaviorMonitor behavior_monitor_;
+    BehaviorMonitorManager behavior_monitor_;
     xavlib::ExactHashEngine exact_hash_engine_;
     xavlib::StaticHeuristicEngineManager static_heur_engine_manager_;
     websocket::stream<tcp::socket> ws_;
