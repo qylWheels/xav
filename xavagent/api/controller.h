@@ -18,21 +18,7 @@ class XavAgentController : public oatpp::web::server::api::ApiController {
 public:
     XavAgentController(OATPP_COMPONENT(
         std::shared_ptr<oatpp::web::mime::ContentMappers>, api_content_mappers))
-        : oatpp::web::server::api::ApiController(api_content_mappers) {
-        std::thread on_access_scanner_thread([this]() {
-            GlobalContext::get_global_context()
-                .on_access_scanner()
-                .start_monitoring();
-        });
-        on_access_scanner_thread.detach();
-
-        std::thread behavior_monitor_thread([this]() {
-            GlobalContext::get_global_context()
-                .behavior_monitor()
-                .start_monitoring();
-        });
-        behavior_monitor_thread.detach();
-    }
+        : oatpp::web::server::api::ApiController(api_content_mappers) {}
 
 public:
     ENDPOINT("GET", "/", root) {
