@@ -8,19 +8,10 @@
 #include "global_context.h"
 #include "protobufs/malware_info.pb.h"
 
-// FIXME: Only for tests.
-#define XAV_EXACT_HASH_DB \
-    "/home/comma/projs/xav-db/malware_database/malware-bazaar-sha256.db"
-
 namespace xavagent {
-ExactHashEngine::ExactHashEngine() {
-    this->db_ = GlobalContext::get_global_context().db();
-}
+ExactHashEngine::ExactHashEngine() {}
 
-ExactHashEngine::~ExactHashEngine() {
-    // XXX: Don't close the db here, Because we don't own it.
-    this->db_ = nullptr;
-}
+ExactHashEngine::~ExactHashEngine() {}
 
 std::optional<malware_info::MalwareInfo> ExactHashEngine::scan(
     const std::string& path) {
@@ -37,13 +28,13 @@ std::optional<malware_info::MalwareInfo> ExactHashEngine::scan(
         return std::nullopt;
     }
     std::string raw_malware_info;
-    leveldb::Status status =
-        this->db_->Get(leveldb::ReadOptions{}, sha256, &raw_malware_info);
+    leveldb::Status status = GlobalContext::get_global_context().db()->Get(
+        leveldb::ReadOptions{}, sha256, &raw_malware_info);
     if (!status.ok()) {
         return std::nullopt;
     } else {
         malware_info::MalwareInfo malware_info;
-        malware_info.ParseFromString(raw_malware_info);
+        (void)malware_info.ParseFromString(raw_malware_info);
         return malware_info;
     }
 }

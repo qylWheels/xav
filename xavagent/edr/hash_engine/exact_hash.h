@@ -27,8 +27,5 @@ public:
 
 private:
     std::string calc_sha256_of_file(const char* path) const;
-
-private:
-    leveldb::DB* db_;
 };
 }  // namespace xavagent
