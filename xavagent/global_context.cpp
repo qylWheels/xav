@@ -6,7 +6,7 @@
 #include <boost/asio.hpp>
 #include <thread>
 
-#include "xavlib/heuristic/yara_static_heuristic_engine.h"
+#include "edr/heuristic_engine/yara_static_heuristic_engine.h"
 
 namespace http = beast::http;
 
@@ -56,6 +56,6 @@ GlobalContext::GlobalContext(net::io_context& ioc)
 
     // Add Yara static heuristic engine to the manager.
     this->static_heur_engine_manager_.add_engine(
-        std::make_shared<xavlib::YaraStaticHeuristicEngine>());
+        std::make_shared<YaraStaticHeuristicEngine>());
 }
 }  // namespace xavagent

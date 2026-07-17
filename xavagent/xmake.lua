@@ -1,18 +1,23 @@
+add_rules("mode.debug", "mode.release")
+
+set_languages("c++20")
+
+add_requires(
+    "leveldb", "cryptopp", "protobuf-cpp",
+    "oatpp", "spdlog", "yaml-cpp", "openssl", "outcome",
+    "rapidfuzz", "cpptrace"
+)
+add_requires("apt::libyara-dev", {alias = "yara"})
+add_requires("vcpkg::boost-beast", {alias = "boost-beast"})
+
 target("xavagent")
     set_kind("binary")
     add_files("**.cpp")
-    add_deps("xavlib")
     add_packages(
         "leveldb", "cryptopp", "wxwidgets", "oatpp", "protobuf-cpp",
         "spdlog", "yaml-cpp", "yara", "outcome", "rapidfuzz", "cpptrace",
         "boost-beast"
     )
-    add_deps("xavcommon")
-
-    on_run(function (target)
-        import("core.base.option")
-        os.cd(os.projectdir()) 
-        os.exec(target:targetfile())
-    end)
+    add_includedirs("./")
 
 includes("edr/behavioral_protection/ebpf")

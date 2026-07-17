@@ -5,16 +5,16 @@
 
 #include <format>
 
-#include "malware_info.pb.h"
-#include "xavlib/leveldb_ref.h"
+#include "global_context.h"
+#include "protobufs/malware_info.pb.h"
 
 // FIXME: Only for tests.
 #define XAV_EXACT_HASH_DB \
     "/home/comma/projs/xav-db/malware_database/malware-bazaar-sha256.db"
 
-namespace xavlib {
+namespace xavagent {
 ExactHashEngine::ExactHashEngine() {
-    this->db_ = LevelDbRef::get_leveldb_ref();
+    this->db_ = GlobalContext::get_global_context().db();
 }
 
 ExactHashEngine::~ExactHashEngine() {
@@ -58,4 +58,4 @@ std::string ExactHashEngine::calc_sha256_of_file(const char* path) const {
             new CryptoPP::HexEncoder(new CryptoPP::StringSink(digest), false))};
     return digest;
 }
-}  // namespace xavlib
+}  // namespace xavagent

@@ -1,8 +1,9 @@
-#include "xavagent/edr/behavioral_protection/fanotify/fanotify_monitor.h"
+#include "fanotify_monitor.h"
 
 #include <fcntl.h>
 #include <limits.h>
 #include <linux/fanotify.h>
+#include <spdlog/common.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 #include <sys/fanotify.h>
@@ -21,8 +22,7 @@
 #include <ranges>
 #include <stdexcept>
 
-#include "spdlog/common.h"
-#include "xavagent/edr/behavioral_protection/event.h"
+#include "edr/behavioral_protection/event.h"
 
 #define BUFSIZE (4 * 1024)  // 4KB
 

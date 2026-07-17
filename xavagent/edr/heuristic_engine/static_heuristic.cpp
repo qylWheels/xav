@@ -5,7 +5,7 @@
 #include <outcome/try.hpp>
 #include <vector>
 
-namespace xavlib {
+namespace xavagent {
 StaticHeuristicEngineManager::StaticHeuristicEngineManager() {}
 
 StaticHeuristicEngineManager::~StaticHeuristicEngineManager() {}
@@ -28,4 +28,4 @@ void StaticHeuristicEngineManager::add_engine(
     this->heur_engines_.push_back(engine);
 }
 
-}  // namespace xavlib
+}  // namespace xavagent

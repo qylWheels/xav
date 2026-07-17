@@ -1,11 +1,10 @@
-#include "xavagent/edr/behavioral_protection/levenshtein_similarity.h"
+#include "levenshtein_similarity.h"
 
 #include <algorithm>
 #include <cstddef>
+#include <rapidfuzz/fuzz.hpp>
 #include <rapidfuzz/rapidfuzz_all.hpp>
 #include <vector>
-
-#include "rapidfuzz/fuzz.hpp"
 
 namespace xavagent {
 double LevenshteinSimilarity::calc_similarity(const std::deque<Event>& a,

@@ -1,4 +1,4 @@
-#include "xavagent/edr/behavioral_protection/behavior_monitor.h"
+#include "behavior_monitor.h"
 
 namespace xavagent {
 BehaviorMonitorManager::BehaviorMonitorManager()

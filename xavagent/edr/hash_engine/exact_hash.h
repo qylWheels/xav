@@ -8,9 +8,9 @@
 #include <optional>
 #include <string>
 
-#include "malware_info.pb.h"
+#include "protobufs/malware_info.pb.h"
 
-namespace xavlib {
+namespace xavagent {
 class ExactHashEngine {
 public:
     ExactHashEngine();
@@ -31,4 +31,4 @@ private:
 private:
     leveldb::DB* db_;
 };
-}  // namespace xavlib
+}  // namespace xavagent

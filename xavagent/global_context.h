@@ -9,11 +9,11 @@
 #include <boost/beast/websocket.hpp>
 #include <memory>
 
-#include "xavagent/edr/behavioral_protection/behavior_monitor.h"
-#include "xavagent/edr/on_access_scanner.h"
-#include "xavagent/edr/scanner.h"
-#include "xavlib/exact_hash.h"
-#include "xavlib/heuristic/static_heuristic.h"
+#include "edr/behavioral_protection/behavior_monitor.h"
+#include "edr/hash_engine/exact_hash.h"
+#include "edr/heuristic_engine/static_heuristic.h"
+#include "edr/on_access_protection/on_access_scanner.h"
+#include "edr/scanner/scanner.h"
 
 namespace beast = boost::beast;
 namespace websocket = beast::websocket;
@@ -37,11 +37,9 @@ public:
         return this->behavior_monitor_;
     }
 
-    xavlib::ExactHashEngine& exact_hash_engine() {
-        return this->exact_hash_engine_;
-    }
+    ExactHashEngine& exact_hash_engine() { return this->exact_hash_engine_; }
 
-    xavlib::StaticHeuristicEngineManager& static_heur_engine_manager() {
+    StaticHeuristicEngineManager& static_heur_engine_manager() {
         return this->static_heur_engine_manager_;
     }
 
@@ -63,8 +61,8 @@ private:
     Scanner scanner_;
     OnAccessScanner on_access_scanner_;
     BehaviorMonitorManager behavior_monitor_;
-    xavlib::ExactHashEngine exact_hash_engine_;
-    xavlib::StaticHeuristicEngineManager static_heur_engine_manager_;
+    ExactHashEngine exact_hash_engine_;
+    StaticHeuristicEngineManager static_heur_engine_manager_;
     websocket::stream<tcp::socket> ws_;
     std::shared_ptr<spdlog::logger> logger_;
     leveldb::DB* db_;

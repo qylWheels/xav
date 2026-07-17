@@ -1,6 +1,0 @@
-target("xavlib")
-    set_kind("shared")
-    add_files("**.cpp")
-    add_packages("leveldb", "cryptopp", "yara", "openssl", "outcome")
-    add_includedirs("../", {public = true})
-    add_deps("xavcommon")

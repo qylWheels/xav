@@ -8,9 +8,9 @@
 #include <system_error>
 #include <utility>
 
-#include "malware_info.pb.h"
+#include "protobufs/malware_info.pb.h"
 
-namespace xavlib {
+namespace xavagent {
 #define YARA_RULES_FILE \
     "/home/qyl/projects/xav/xavdb/db/yara-rules-extended.yar"
 #define YARA_FORGE_NAMESPACE "yara_forge"
@@ -113,4 +113,4 @@ int YaraStaticHeuristicEngine::yara_scan_callback(YR_SCAN_CONTEXT* context,
     }
     return CALLBACK_CONTINUE;
 }
-}  // namespace xavlib
+}  // namespace xavagent

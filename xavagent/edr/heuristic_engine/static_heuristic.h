@@ -6,11 +6,11 @@
 #include <outcome/outcome.hpp>
 #include <vector>
 
-#include "malware_info.pb.h"
+#include "protobufs/malware_info.pb.h"
 
 namespace outcome = OUTCOME_V2_NAMESPACE;
 
-namespace xavlib {
+namespace xavagent {
 class IStaticHeuristicEngine {
 public:
     virtual ~IStaticHeuristicEngine() = default;
@@ -39,4 +39,4 @@ public:
 private:
     std::vector<std::shared_ptr<IStaticHeuristicEngine>> heur_engines_;
 };
-}  // namespace xavlib
+}  // namespace xavagent

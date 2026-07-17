@@ -5,9 +5,9 @@
 #include <format>
 #include <iostream>
 
-#include "static_heuristic.h"
+#include "edr/heuristic_engine/static_heuristic.h"
 
-namespace xavlib {
+namespace xavagent {
 class YaraStaticHeuristicEngine : public IStaticHeuristicEngine {
 public:
     YaraStaticHeuristicEngine();
@@ -36,4 +36,4 @@ private:
     YR_COMPILER* yara_compiler_;
     YR_RULES* yara_rules_;
 };
-}  // namespace xavlib
+}  // namespace xavagent

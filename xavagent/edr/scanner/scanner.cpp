@@ -6,10 +6,10 @@
 #include <thread>
 #include <vector>
 
-#include "xavagent/global_context.h"
-#include "xavcommon/malware_info.pb.h"
-#include "xavcommon/msg.pb.h"
-#include "xavcommon/scan_status.pb.h"
+#include "global_context.h"
+#include "protobufs/malware_info.pb.h"
+#include "protobufs/msg.pb.h"
+#include "protobufs/scan_status.pb.h"
 
 #define MAX_FILES_IN_QUEUE 8192
 

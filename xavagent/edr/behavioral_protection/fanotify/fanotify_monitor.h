@@ -1,6 +1,7 @@
 #pragma once
 
 #include <linux/fanotify.h>
+#include <spdlog/logger.h>
 #include <spdlog/spdlog.h>
 
 #include <atomic>
@@ -10,8 +11,7 @@
 #include <optional>
 #include <unordered_map>
 
-#include "spdlog/logger.h"
-#include "xavagent/edr/behavioral_protection/event.h"
+#include "edr/behavioral_protection/event.h"
 
 namespace xavagent {
 class FanotifyMonitor {

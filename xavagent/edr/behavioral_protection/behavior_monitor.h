@@ -10,7 +10,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "xavagent/edr/behavioral_protection/event.h"
+#include "edr/behavioral_protection/event.h"
 
 namespace xavagent {
 class IBehaviorMonitor {
