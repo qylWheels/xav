@@ -10,6 +10,10 @@
 
 namespace http = beast::http;
 
+// FIXME: Only for tests.
+#define XAV_EXACT_HASH_DB \
+    "/home/qyl/projects/xav/xavdb/db/malware-bazaar-sha256.db"
+
 namespace xavagent {
 GlobalContext::GlobalContext(net::io_context& ioc)
     : ws_(net::make_strand(ioc)) {
@@ -41,6 +45,14 @@ GlobalContext::GlobalContext(net::io_context& ioc)
         }
     });
     ws_read_thread.detach();
+
+    // Initialize db.
+    leveldb::Status status =
+        leveldb::DB::Open(leveldb::Options{}, XAV_EXACT_HASH_DB, &this->db_);
+    if (!status.ok()) {
+        perror("leveldb::DB::Open");
+        exit(1);
+    }
 
     // Add Yara static heuristic engine to the manager.
     this->static_heur_engine_manager_.add_engine(
