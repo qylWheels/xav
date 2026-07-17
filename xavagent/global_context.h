@@ -1,5 +1,6 @@
 #pragma once
 
+#include <leveldb/db.h>
 #include <spdlog/spdlog.h>
 
 #include <boost/asio/connect.hpp>
@@ -48,6 +49,8 @@ public:
 
     std::shared_ptr<spdlog::logger>& logger() { return this->logger_; }
 
+    leveldb::DB* db() { return this->db_; }
+
 private:
     GlobalContext(net::io_context& ioc);
     ~GlobalContext() = default;
@@ -64,5 +67,6 @@ private:
     xavlib::StaticHeuristicEngineManager static_heur_engine_manager_;
     websocket::stream<tcp::socket> ws_;
     std::shared_ptr<spdlog::logger> logger_;
+    leveldb::DB* db_;
 };
 }  // namespace xavagent
