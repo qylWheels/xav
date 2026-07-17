@@ -47,7 +47,7 @@ public:
 
     std::shared_ptr<spdlog::logger>& logger() { return this->logger_; }
 
-    leveldb::DB* db() { return this->db_; }
+    leveldb::DB*& db() { return this->db_; }
 
 private:
     GlobalContext(net::io_context& ioc);
