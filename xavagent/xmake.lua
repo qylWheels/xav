@@ -12,7 +12,7 @@ add_requires("vcpkg::boost-beast", {alias = "boost-beast"})
 
 add_includedirs("$(projectdir)")
 
-includes("edr/behavioral_protection/syscall_monitor/ebpf")
+includes("edr/behavioral_protection/syscall_monitor")
 
 target("xavagent")
     set_kind("binary")
