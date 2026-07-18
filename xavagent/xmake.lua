@@ -20,4 +20,4 @@ target("xavagent")
     )
     add_includedirs("./")
 
-includes("edr/behavioral_protection/ebpf")
+includes("edr/behavioral_protection/syscall_monitor/ebpf")
