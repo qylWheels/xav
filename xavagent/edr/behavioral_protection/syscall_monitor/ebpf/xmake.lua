@@ -7,7 +7,7 @@ add_requires("llvm", {system = true})
 set_toolchains("@llvm")
 
 target("syscall_monitor")
-    set_kind("binary")
+    set_kind("shared")
     add_files("**.c")
     add_packages("linux-tools", "libbpf")
     set_license("GPL-2.0")
