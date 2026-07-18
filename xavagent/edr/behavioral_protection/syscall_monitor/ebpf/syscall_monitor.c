@@ -15,12 +15,19 @@ static int libbpf_print_fn(enum libbpf_print_level level, const char *format,
 
 static int print_event(void *ctx, void *data, size_t size) {
     struct RawSyscallEvent *e = (struct RawSyscallEvent *)data;
-    printf(
-        "pid: %lld, syscall_id: %ld, args: 0x%p, 0x%p, 0x%p, 0x%p, 0x%p, "
-        "0x%p\n",
-        e->pid, e->syscall_id, (void *)e->args[0], (void *)e->args[1],
-        (void *)e->args[2], (void *)e->args[3], (void *)e->args[4],
-        (void *)e->args[5]);
+    printf("pid: %lld, syscall_id: %ld, args: ", e->pid, e->syscall_id);
+    if (e->enter_captured) {
+        printf("%p, %p, %p, %p, %p, %p, ret: ", (void *)e->args[0],
+               (void *)e->args[1], (void *)e->args[2], (void *)e->args[3],
+               (void *)e->args[4], (void *)e->args[5]);
+    } else {
+        printf("?, ?, ?, ?, ?, ?, ret: ");
+    }
+    if (e->exit_captured) {
+        printf("%ld\n", e->ret);
+    } else {
+        printf("?\n");
+    }
     return 0;
 }
 
