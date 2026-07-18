@@ -1,12 +1,12 @@
-#include "xavagent/edr/behavioral_protection/ebpf/syscall_monitor.h"
+#include "syscall_monitor.h"
 
 #include <bpf/libbpf.h>
 #include <stdio.h>
 #include <sys/resource.h>
 #include <unistd.h>
 
+#include "edr/behavioral_protection/syscall_monitor/raw_syscall_event.h"
 #include "syscall_monitor.skel.h"
-#include "xavagent/edr/behavioral_protection/syscall_monitor/ebpf/raw_syscall_event.h"
 
 static int libbpf_print_fn(enum libbpf_print_level level, const char *format,
                            va_list args) {
@@ -14,7 +14,7 @@ static int libbpf_print_fn(enum libbpf_print_level level, const char *format,
 }
 
 static int print_event(void *ctx, void *data, size_t size) {
-    struct RawSyscallEvent *e = static_cast<struct RawSyscallEvent *>(data);
+    struct RawSyscallEvent *e = (struct RawSyscallEvent *)data;
     printf(
         "pid: %lld, syscall_id: %ld, args: 0x%p, 0x%p, 0x%p, 0x%p, 0x%p, "
         "0x%p\n",
@@ -36,13 +36,13 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    err = minimal_bpf__load(skel);
+    err = syscall_monitor_bpf__load(skel);
     if (err) {
         fprintf(stderr, "Failed to load and verify BPF skeleton\n");
         goto cleanup;
     }
 
-    err = minimal_bpf__attach(skel);
+    err = syscall_monitor_bpf__attach(skel);
     if (err) {
         fprintf(stderr, "Failed to attach BPF skeleton\n");
         goto cleanup;
@@ -62,6 +62,6 @@ int main(int argc, char **argv) {
     ring_buffer__free(rb);
 
 cleanup:
-    minimal_bpf__destroy(skel);
+    syscall_monitor_bpf__destroy(skel);
     return -err;
 }
