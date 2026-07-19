@@ -14,7 +14,7 @@ struct {
     __uint(max_entries, 65535);
     __type(key, u32);  // tid.
     __type(value, struct RawSyscallEvent);
-} map SEC(".maps");
+} raw_syscall_event_map SEC(".maps");
 
 struct {
     __uint(type, BPF_MAP_TYPE_RINGBUF);
@@ -43,7 +43,7 @@ int trace_sys_enter(struct trace_event_raw_sys_enter* ctx) {
     e.args[5] = ctx->args[5];
 
     // Store the event in the percpu map.
-    bpf_map_update_elem(&map, &tid, &e, BPF_ANY);
+    bpf_map_update_elem(&raw_syscall_event_map, &tid, &e, BPF_ANY);
 
     return 0;
 }
@@ -52,7 +52,8 @@ SEC("tp/raw_syscalls/sys_exit")
 int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
     u32 pid = bpf_get_current_pid_tgid() >> 32;
     u32 tid = bpf_get_current_pid_tgid() & 0xFFFFFFFF;
-    struct RawSyscallEvent* e = bpf_map_lookup_elem(&map, &tid);
+    struct RawSyscallEvent* e =
+        bpf_map_lookup_elem(&raw_syscall_event_map, &tid);
     if (!e) {
         struct RawSyscallEvent e2;
         e2.enter_captured = 0;
@@ -66,7 +67,7 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
     e->exit_captured = 1;
     e->ret = ctx->ret;
     bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
-    bpf_map_delete_elem(&map, &tid);
+    bpf_map_delete_elem(&raw_syscall_event_map, &tid);
     return 0;
 }
 
