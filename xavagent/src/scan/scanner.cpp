@@ -1,4 +1,4 @@
-#include "scanner.h"
+#include "xavagent/scan/scanner.h"
 
 #include <outcome/outcome.hpp>
 #include <outcome/try.hpp>
@@ -6,10 +6,10 @@
 #include <thread>
 #include <vector>
 
-#include "global_context.h"
-#include "protobufs/malware_info.pb.h"
-#include "protobufs/msg.pb.h"
-#include "protobufs/scan_status.pb.h"
+#include "xavagent/global_context.h"
+#include "xavagent/protobufs/malware_info.pb.h"
+#include "xavagent/protobufs/msg.pb.h"
+#include "xavagent/protobufs/scan_status.pb.h"
 
 #define MAX_FILES_IN_QUEUE 8192
 

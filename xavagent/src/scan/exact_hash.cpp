@@ -1,12 +1,12 @@
-#include "exact_hash.h"
+#include "xavagent/scan/exact_hash.h"
 
 #include <cryptopp/filters.h>
 #include <cryptopp/hex.h>
 
 #include <format>
 
-#include "global_context.h"
-#include "protobufs/malware_info.pb.h"
+#include "xavagent/global_context.h"
+#include "xavagent/protobufs/malware_info.pb.h"
 
 namespace xavagent {
 ExactHashEngine::ExactHashEngine() {}

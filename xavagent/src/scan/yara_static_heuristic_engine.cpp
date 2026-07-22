@@ -1,4 +1,4 @@
-#include "yara_static_heuristic_engine.h"
+#include "xavagent/scan/yara_static_heuristic_engine.h"
 
 #include <fcntl.h>
 #include <unistd.h>
@@ -8,7 +8,7 @@
 #include <system_error>
 #include <utility>
 
-#include "protobufs/malware_info.pb.h"
+#include "xavagent/protobufs/malware_info.pb.h"
 
 namespace xavagent {
 #define YARA_RULES_FILE \

@@ -1,4 +1,4 @@
-#include "static_heuristic.h"
+#include "xavagent/scan/static_heuristic.h"
 
 #include <optional>
 #include <outcome/outcome.hpp>
