@@ -23,16 +23,3 @@ find_package(protobuf CONFIG REQUIRED)
 find_package(cryptopp CONFIG REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(YARA REQUIRED IMPORTED_TARGET yara)
-
-# Target.
-add_executable(xavagent ${SRC_FILES})
-target_include_directories(xavagent PRIVATE ${CMAKE_SOURCE_DIR})
-target_link_libraries(xavagent PRIVATE
-    leveldb::leveldb
-    oatpp::oatpp
-    spdlog::spdlog
-    outcome::hl
-    rapidfuzz::rapidfuzz
-    cpptrace::cpptrace
-    Boost::beast
-)
