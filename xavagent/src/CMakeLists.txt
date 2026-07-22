@@ -12,3 +12,4 @@ target_link_libraries(
     spdlog::spdlog
     Boost::beast
 )
+target_link_libraries(global_context PUBLIC xavagent_includes)
