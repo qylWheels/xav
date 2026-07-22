@@ -1,2 +1,2 @@
 add_executable(xavagent)
-target_sources(xavagent main.cpp)
+target_sources(xavagent PRIVATE main.cpp)
