@@ -1,2 +1,3 @@
 add_library(syscall_monitor SHARED)
 target_sources(syscall_monitor PRIVATE syscall_monitor.cpp)
+target_link_libraries(syscall_monitor PUBLIC xavagent_includes)

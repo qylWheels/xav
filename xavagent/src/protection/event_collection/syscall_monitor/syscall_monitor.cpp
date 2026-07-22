@@ -1,4 +1,4 @@
-#include "syscall_monitor.h"
+#include "xavagent/protection/event_collection/syscall_monitor/syscall_monitor.h"
 
 #include <bpf/libbpf.h>
 #include <sys/resource.h>
@@ -6,8 +6,8 @@
 
 #include <stdexcept>
 
-#include "edr/behavioral_protection/syscall_monitor/raw_syscall_event.h"
 #include "syscall_monitor.skel.h"
+#include "xavagent/protection/event_collection/syscall_monitor/raw_syscall_event.h"
 
 namespace xavagent {
 SyscallMonitor::SyscallMonitor() : rb_(nullptr) {
