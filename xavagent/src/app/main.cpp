@@ -7,9 +7,9 @@
 #include <iostream>
 #include <thread>
 
-#include "edr/heuristic_engine/yara_static_heuristic_engine.h"
-#include "global_context.h"
 #include "xavagent/api/run_api_server.h"
+#include "xavagent/global_context.h"
+#include "xavagent/scan/yara_static_heuristic_engine.h"
 
 namespace http = beast::http;
 
