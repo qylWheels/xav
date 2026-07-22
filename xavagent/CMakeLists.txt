@@ -8,9 +8,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Subdirectories.
-add_subdirectory(src)
-
 # Packages from vcpkg.
 find_package(leveldb CONFIG REQUIRED)
 find_package(oatpp CONFIG REQUIRED)
@@ -23,6 +20,9 @@ find_package(protobuf CONFIG REQUIRED)
 find_package(cryptopp CONFIG REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(YARA REQUIRED IMPORTED_TARGET yara)
+
+# Subdirectories.
+add_subdirectory(src)
 
 # Include directories.
 add_library(xavagent_includes INTERFACE)
