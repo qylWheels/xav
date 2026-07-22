@@ -3,20 +3,21 @@
 // source: scan_status.proto
 // Protobuf C++ Version: 7.35.1
 
-#include "scan_status.pb.h"
+#include "xavagent/protobufs/scan_status.pb.h"
 
 #include <algorithm>
 #include <type_traits>
-#include "google/protobuf/io/coded_stream.h"
-#include "google/protobuf/generated_message_tctable_impl.h"
-#include "google/protobuf/internal_visibility.h"
-#include "google/protobuf/extension_set.h"
-#include "google/protobuf/generated_message_util.h"
-#include "google/protobuf/wire_format_lite.h"
+
 #include "google/protobuf/descriptor.h"
+#include "google/protobuf/extension_set.h"
 #include "google/protobuf/generated_message_reflection.h"
+#include "google/protobuf/generated_message_tctable_impl.h"
+#include "google/protobuf/generated_message_util.h"
+#include "google/protobuf/internal_visibility.h"
+#include "google/protobuf/io/coded_stream.h"
 #include "google/protobuf/reflection_ops.h"
 #include "google/protobuf/wire_format.h"
+#include "google/protobuf/wire_format_lite.h"
 // @@protoc_insertion_point(includes)
 
 // Must be included last.
@@ -30,109 +31,131 @@ namespace {
 PROTOBUF_CONSTINIT ::google::protobuf::internal::ReflectionData
     file_reflection_data[] = {
         // ::scan_status::ScanStatus
-        {&::_pbi::kDescriptorMethods, &::descriptor_table_scan_5fstatus_2eproto, /* tracker*/ nullptr,},
+        {
+            &::_pbi::kDescriptorMethods,
+            &::descriptor_table_scan_5fstatus_2eproto,
+            /* tracker*/ nullptr,
+        },
 };
 }  // namespace
 #endif
 namespace scan_status {
 class ScanStatus::_Internal {
- public:
-  using HasBits = decltype(::std::declval<ScanStatus>()._impl_._has_bits_);
-  static constexpr ::int32_t kHasBitsOffset =
-      8 * PROTOBUF_FIELD_OFFSET(ScanStatus, _impl_._has_bits_);
+public:
+    using HasBits = decltype(::std::declval<ScanStatus>()._impl_._has_bits_);
+    static constexpr ::int32_t kHasBitsOffset =
+        8 * PROTOBUF_FIELD_OFFSET(ScanStatus, _impl_._has_bits_);
 };
 
-constexpr ScanStatus::ParseTableT_ ScanStatus::InternalGenerateParseTable_(const ::_pbi::ClassData* class_data) {
-  return ParseTableT_{
-    {
-      PROTOBUF_FIELD_OFFSET(ScanStatus, _impl_._has_bits_),
-      0, // no _extensions_
-      5, 56,  // max_field_number, fast_idx_mask
-      offsetof(ParseTableT_, field_lookup_table),
-      4294967264,  // skipmap
-      offsetof(ParseTableT_, field_entries),
-      5,  // num_field_entries
-      1,  // num_aux_entries
-      offsetof(ParseTableT_, aux_entries),
-      class_data,
-      nullptr,  // post_loop_handler
-      ::_pbi::TcParser::GenericFallback,  // fallback
-      #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
-      ::_pbi::TcParser::GetTable<::scan_status::ScanStatus>(),  // to_prefetch
-      #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
-    }, {{
-      {::_pbi::TcParser::MiniParse, {}},
-      // .scan_status.ScanStatusEnum scan_status = 1;
-      {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(ScanStatus, _impl_.scan_status_), 2>(),
-       {8, 2, 0,
-        PROTOBUF_FIELD_OFFSET(ScanStatus, _impl_.scan_status_)}},
-      // uint32 total_file_count = 2;
-      {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(ScanStatus, _impl_.total_file_count_), 3>(),
-       {16, 3, 0,
-        PROTOBUF_FIELD_OFFSET(ScanStatus, _impl_.total_file_count_)}},
-      // uint32 scanned_file_count = 3;
-      {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(ScanStatus, _impl_.scanned_file_count_), 4>(),
-       {24, 4, 0,
-        PROTOBUF_FIELD_OFFSET(ScanStatus, _impl_.scanned_file_count_)}},
-      // repeated .malware_info.MalwareInfo malware_infos = 4;
-      {::_pbi::TcParser::FastMtR1,
-       {34, 0, 0,
-        PROTOBUF_FIELD_OFFSET(ScanStatus, _impl_.malware_infos_)}},
-      // string curr_scanning_file = 5;
-      {::_pbi::TcParser::FastUS1,
-       {42, 1, 0,
-        PROTOBUF_FIELD_OFFSET(ScanStatus, _impl_.curr_scanning_file_)}},
-      {::_pbi::TcParser::MiniParse, {}},
-      {::_pbi::TcParser::MiniParse, {}},
-    }}, {{
-      65535, 65535
-    }}, {{
-      // .scan_status.ScanStatusEnum scan_status = 1;
-      {PROTOBUF_FIELD_OFFSET(ScanStatus, _impl_.scan_status_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kOpenEnum)},
-      // uint32 total_file_count = 2;
-      {PROTOBUF_FIELD_OFFSET(ScanStatus, _impl_.total_file_count_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kUInt32)},
-      // uint32 scanned_file_count = 3;
-      {PROTOBUF_FIELD_OFFSET(ScanStatus, _impl_.scanned_file_count_), _Internal::kHasBitsOffset + 4, 0, (0 | ::_fl::kFcOptional | ::_fl::kUInt32)},
-      // repeated .malware_info.MalwareInfo malware_infos = 4;
-      {PROTOBUF_FIELD_OFFSET(ScanStatus, _impl_.malware_infos_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
-      // string curr_scanning_file = 5;
-      {PROTOBUF_FIELD_OFFSET(ScanStatus, _impl_.curr_scanning_file_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    }},
-    {{
-        #ifndef PROTOBUF_MESSAGE_GLOBALS
-        {::_pbi::TcParser::GetTable<::malware_info::MalwareInfo>()},
-        #else
-        {::_pbi::FieldAuxMessageGlobals(), &::malware_info::MalwareInfo_globals_},
-        #endif
-    }},
-    {{
-      "\26\0\0\0\0\22\0\0"
-      "scan_status.ScanStatus"
-      "curr_scanning_file"
-    }},
-  };
+constexpr ScanStatus::ParseTableT_ ScanStatus::InternalGenerateParseTable_(
+    const ::_pbi::ClassData* class_data) {
+    return ParseTableT_{
+        {
+            PROTOBUF_FIELD_OFFSET(ScanStatus, _impl_._has_bits_),
+            0,      // no _extensions_
+            5, 56,  // max_field_number, fast_idx_mask
+            offsetof(ParseTableT_, field_lookup_table),
+            4294967264,  // skipmap
+            offsetof(ParseTableT_, field_entries),
+            5,  // num_field_entries
+            1,  // num_aux_entries
+            offsetof(ParseTableT_, aux_entries), class_data,
+            nullptr,                            // post_loop_handler
+            ::_pbi::TcParser::GenericFallback,  // fallback
+#ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+            ::_pbi::TcParser::GetTable<
+                ::scan_status::ScanStatus>(),  // to_prefetch
+#endif                                         // PROTOBUF_PREFETCH_PARSE_TABLE
+        },
+        {{
+            {::_pbi::TcParser::MiniParse, {}},
+            // .scan_status.ScanStatusEnum scan_status = 1;
+            {::_pbi::TcParser::SingularVarintNoZag1<
+                 ::uint32_t, offsetof(ScanStatus, _impl_.scan_status_), 2>(),
+             {8, 2, 0, PROTOBUF_FIELD_OFFSET(ScanStatus, _impl_.scan_status_)}},
+            // uint32 total_file_count = 2;
+            {::_pbi::TcParser::SingularVarintNoZag1<
+                 ::uint32_t, offsetof(ScanStatus, _impl_.total_file_count_),
+                 3>(),
+             {16, 3, 0,
+              PROTOBUF_FIELD_OFFSET(ScanStatus, _impl_.total_file_count_)}},
+            // uint32 scanned_file_count = 3;
+            {::_pbi::TcParser::SingularVarintNoZag1<
+                 ::uint32_t, offsetof(ScanStatus, _impl_.scanned_file_count_),
+                 4>(),
+             {24, 4, 0,
+              PROTOBUF_FIELD_OFFSET(ScanStatus, _impl_.scanned_file_count_)}},
+            // repeated .malware_info.MalwareInfo malware_infos = 4;
+            {::_pbi::TcParser::FastMtR1,
+             {34, 0, 0,
+              PROTOBUF_FIELD_OFFSET(ScanStatus, _impl_.malware_infos_)}},
+            // string curr_scanning_file = 5;
+            {::_pbi::TcParser::FastUS1,
+             {42, 1, 0,
+              PROTOBUF_FIELD_OFFSET(ScanStatus, _impl_.curr_scanning_file_)}},
+            {::_pbi::TcParser::MiniParse, {}},
+            {::_pbi::TcParser::MiniParse, {}},
+        }},
+        {{65535, 65535}},
+        {{
+            // .scan_status.ScanStatusEnum scan_status = 1;
+            {PROTOBUF_FIELD_OFFSET(ScanStatus, _impl_.scan_status_),
+             _Internal::kHasBitsOffset + 2, 0,
+             (0 | ::_fl::kFcOptional | ::_fl::kOpenEnum)},
+            // uint32 total_file_count = 2;
+            {PROTOBUF_FIELD_OFFSET(ScanStatus, _impl_.total_file_count_),
+             _Internal::kHasBitsOffset + 3, 0,
+             (0 | ::_fl::kFcOptional | ::_fl::kUInt32)},
+            // uint32 scanned_file_count = 3;
+            {PROTOBUF_FIELD_OFFSET(ScanStatus, _impl_.scanned_file_count_),
+             _Internal::kHasBitsOffset + 4, 0,
+             (0 | ::_fl::kFcOptional | ::_fl::kUInt32)},
+            // repeated .malware_info.MalwareInfo malware_infos = 4;
+            {PROTOBUF_FIELD_OFFSET(ScanStatus, _impl_.malware_infos_),
+             _Internal::kHasBitsOffset + 0, 0,
+             (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
+            // string curr_scanning_file = 5;
+            {PROTOBUF_FIELD_OFFSET(ScanStatus, _impl_.curr_scanning_file_),
+             _Internal::kHasBitsOffset + 1, 0,
+             (0 | ::_fl::kFcOptional | ::_fl::kUtf8String |
+              ::_fl::kRepAString)},
+        }},
+        {{
+#ifndef PROTOBUF_MESSAGE_GLOBALS
+            {::_pbi::TcParser::GetTable<::malware_info::MalwareInfo>()},
+#else
+            {::_pbi::FieldAuxMessageGlobals(),
+             &::malware_info::MalwareInfo_globals_},
+#endif
+        }},
+        {{"\26\0\0\0\0\22\0\0"
+          "scan_status.ScanStatus"
+          "curr_scanning_file"}},
+    };
 }
 
-
 inline constexpr ScanStatus::Impl_::Impl_(
-    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility
+        visibility,
     ::_pbi::ConstantInitialized) noexcept
-      : _cached_size_{0},
-        malware_infos_ { visibility, ::_pbi::InternalMetadataOffset::Build<
-            ::scan_status::ScanStatus,
-            PROTOBUF_FIELD_OFFSET(::scan_status::ScanStatus, _impl_.malware_infos_)>()
-         }
-        ,
-        curr_scanning_file_(
-            &::google::protobuf::internal::fixed_address_empty_string,
-            ::_pbi::ConstantInitialized()),
-        scan_status_{static_cast< ::scan_status::ScanStatusEnum >(0)},
-        total_file_count_{0u},
-        scanned_file_count_{0u} {}
+    : _cached_size_{0},
+      malware_infos_{
+          visibility,
+          ::_pbi::InternalMetadataOffset::Build<::scan_status::ScanStatus,
+                                                PROTOBUF_FIELD_OFFSET(
+                                                    ::scan_status::ScanStatus,
+                                                    _impl_.malware_infos_)>()},
+      curr_scanning_file_(
+          &::google::protobuf::internal::fixed_address_empty_string,
+          ::_pbi::ConstantInitialized()),
+      scan_status_{static_cast<::scan_status::ScanStatusEnum>(0)},
+      total_file_count_{0u},
+      scanned_file_count_{0u} {}
 
 template <typename>
 constexpr ScanStatus::ScanStatus(::_pbi::ConstantInitialized,
-                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+                                 const ::_pbi::ClassData* PROTOBUF_NONNULL
+                                     class_data)
     : ::google::protobuf::Message(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -143,64 +166,64 @@ constexpr ScanStatus::ScanStatus(::_pbi::ConstantInitialized,
 inline void* PROTOBUF_NONNULL ScanStatus::PlacementNew_(
     const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
     ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
-  return ::new (mem) ScanStatus(arena);
+    return ::new (mem) ScanStatus(arena);
 }
 constexpr auto ScanStatus::InternalNewImpl_() {
-  return ::google::protobuf::internal::MessageCreator::CopyInit(sizeof(ScanStatus), alignof(ScanStatus));
+    return ::google::protobuf::internal::MessageCreator::CopyInit(
+        sizeof(ScanStatus), alignof(ScanStatus));
 }
 constexpr auto ScanStatus::InternalGenerateClassData_(
     const MessageLite& prototype,
     const ::google::protobuf::internal::TcParseTableBase* tc_table) {
-  return ::google::protobuf::internal::ClassDataFull{
-      ::google::protobuf::internal::ClassData{
-          &prototype,
+    return ::google::protobuf::internal::ClassDataFull{
+        ::google::protobuf::internal::ClassData{
+            &prototype,
 #ifndef PROTOBUF_MESSAGE_GLOBALS
-          &_table_.header,
+            &_table_.header,
 #else
-          tc_table,
+            tc_table,
 #endif
-          nullptr,  // IsInitialized
-          &ScanStatus::MergeImpl,
-          ::google::protobuf::Message::GetNewImpl<ScanStatus>(),
+            nullptr,  // IsInitialized
+            &ScanStatus::MergeImpl,
+            ::google::protobuf::Message::GetNewImpl<ScanStatus>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-          &ScanStatus::SharedDtor,
-          ::google::protobuf::Message::GetClearImpl<ScanStatus>(), &ScanStatus::ByteSizeLong,
-              &ScanStatus::_InternalSerialize,
+            &ScanStatus::SharedDtor,
+            ::google::protobuf::Message::GetClearImpl<ScanStatus>(),
+            &ScanStatus::ByteSizeLong,
+            &ScanStatus::_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
-          PROTOBUF_FIELD_OFFSET(ScanStatus, _impl_._cached_size_),
-          false,
-      },
+            PROTOBUF_FIELD_OFFSET(ScanStatus, _impl_._cached_size_),
+            false,
+        },
 #ifdef PROTOBUF_MESSAGE_GLOBALS
-      &file_reflection_data[0],
+        &file_reflection_data[0],
 #else   // !PROTOBUF_MESSAGE_GLOBALS
-      &::_pbi::kDescriptorMethods,
-      &descriptor_table_scan_5fstatus_2eproto,
-      nullptr,  // tracker
+        &::_pbi::kDescriptorMethods, &descriptor_table_scan_5fstatus_2eproto,
+        nullptr,  // tracker
 #endif  // PROTOBUF_MESSAGE_GLOBALS
-  };
+    };
 }
 struct ScanStatusGlobalsTypeInternal : ::_pbi::MessageGlobalsBase {
-  constexpr ScanStatusGlobalsTypeInternal()
-      :
+    constexpr ScanStatusGlobalsTypeInternal()
+        :
 #ifndef PROTOBUF_MESSAGE_GLOBALS
-        _default(::_pbi::ConstantInitialized{},
-                 ScanStatus_class_data_.base())
+          _default(::_pbi::ConstantInitialized{}, ScanStatus_class_data_.base())
 #else   // !PROTOBUF_MESSAGE_GLOBALS
-        MessageGlobalsBase(ScanStatus::InternalGenerateClassData_(
-            _default, &ScanStatus_globals_._table.header)),
-        _default(::_pbi::ConstantInitialized{}, GetClassData()),
-        _table(::_pbi::PrivateAccess::GenerateParseTable<ScanStatus>(
-            GetClassData()))
+          MessageGlobalsBase(ScanStatus::InternalGenerateClassData_(
+              _default, &ScanStatus_globals_._table.header)),
+          _default(::_pbi::ConstantInitialized{}, GetClassData()),
+          _table(::_pbi::PrivateAccess::GenerateParseTable<ScanStatus>(
+              GetClassData()))
 #endif  // PROTOBUF_MESSAGE_GLOBALS
-  {
-  }
-  ~ScanStatusGlobalsTypeInternal() {}
-  union {
-    alignas(::_pbi::kMaxMessageAlignment) ScanStatus _default;
-  };
+    {
+    }
+    ~ScanStatusGlobalsTypeInternal() {}
+    union {
+        alignas(::_pbi::kMaxMessageAlignment) ScanStatus _default;
+    };
 #ifdef PROTOBUF_MESSAGE_GLOBALS
-  decltype(::_pbi::PrivateAccess::GenerateParseTable<ScanStatus>(
-      ::std::declval<const ::_pbi::ClassData*>())) _table;
+    decltype(::_pbi::PrivateAccess::GenerateParseTable<ScanStatus>(
+        ::std::declval<const ::_pbi::ClassData*>())) _table;
 #endif
 };
 #ifdef PROTOBUF_MESSAGE_GLOBALS
@@ -209,15 +232,16 @@ static_assert(PROTOBUF_FIELD_OFFSET(ScanStatusGlobalsTypeInternal, _default) ==
 #endif  // PROTOBUF_MESSAGE_GLOBALS
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
-    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 PROTOBUF_MESSAGE_GLOBALS_CONST ScanStatusGlobalsTypeInternal ScanStatus_globals_
-        PROTOBUF_MESSAGE_GLOBALS_SECTION(.data.rel.ro);
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 PROTOBUF_MESSAGE_GLOBALS_CONST
+        ScanStatusGlobalsTypeInternal ScanStatus_globals_
+            PROTOBUF_MESSAGE_GLOBALS_SECTION(.data.rel.ro);
 #if defined(PROTOBUF_CUSTOM_VTABLE)
 namespace {
 const ::_pbi::ClassData* ScanStatus_get_class_data() {
 #ifdef PROTOBUF_MESSAGE_GLOBALS
-  return ScanStatus_globals_.GetClassData();
+    return ScanStatus_globals_.GetClassData();
 #else
-  return ScanStatus_class_data_.base();
+    return ScanStatus_class_data_.base();
 #endif  // PROTOBUF_MESSAGE_GLOBALS
 }
 }  // namespace
@@ -225,19 +249,22 @@ const ::_pbi::ClassData* ScanStatus_get_class_data() {
 }  // namespace scan_status
 static const ::_pb::EnumDescriptor* PROTOBUF_NONNULL
     file_level_enum_descriptors_scan_5fstatus_2eproto[1];
-static constexpr const ::_pb::ServiceDescriptor* PROTOBUF_NONNULL* PROTOBUF_NULLABLE
-    file_level_service_descriptors_scan_5fstatus_2eproto = nullptr;
-const ::uint32_t
-    TableStruct_scan_5fstatus_2eproto::offsets[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
-        protodesc_cold) = {
-        0x081, // bitmap
+static constexpr const ::_pb::ServiceDescriptor* PROTOBUF_NONNULL*
+    PROTOBUF_NULLABLE file_level_service_descriptors_scan_5fstatus_2eproto =
+        nullptr;
+const ::uint32_t TableStruct_scan_5fstatus_2eproto::offsets
+    [] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
+        0x081,  // bitmap
         PROTOBUF_FIELD_OFFSET(::scan_status::ScanStatus, _impl_._has_bits_),
-        8, // hasbit index offset
+        8,  // hasbit index offset
         PROTOBUF_FIELD_OFFSET(::scan_status::ScanStatus, _impl_.scan_status_),
-        PROTOBUF_FIELD_OFFSET(::scan_status::ScanStatus, _impl_.total_file_count_),
-        PROTOBUF_FIELD_OFFSET(::scan_status::ScanStatus, _impl_.scanned_file_count_),
+        PROTOBUF_FIELD_OFFSET(::scan_status::ScanStatus,
+                              _impl_.total_file_count_),
+        PROTOBUF_FIELD_OFFSET(::scan_status::ScanStatus,
+                              _impl_.scanned_file_count_),
         PROTOBUF_FIELD_OFFSET(::scan_status::ScanStatus, _impl_.malware_infos_),
-        PROTOBUF_FIELD_OFFSET(::scan_status::ScanStatus, _impl_.curr_scanning_file_),
+        PROTOBUF_FIELD_OFFSET(::scan_status::ScanStatus,
+                              _impl_.curr_scanning_file_),
         2,
         3,
         4,
@@ -245,60 +272,64 @@ const ::uint32_t
         1,
 };
 
-static const ::_pbi::MigrationSchema
-    schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-        {0, sizeof(::scan_status::ScanStatus)},
+static const ::_pbi::MigrationSchema schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
+    protodesc_cold) = {
+    {0, sizeof(::scan_status::ScanStatus)},
 };
 static const ::_pbi::MessageGlobalsBase* PROTOBUF_NONNULL const
     file_message_globals[] = {
         &::scan_status::ScanStatus_globals_,
 };
-const char descriptor_table_protodef_scan_5fstatus_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
-    protodesc_cold) = {
-    "\n\021scan_status.proto\022\013scan_status\032\022malwar"
-    "e_info.proto\"\302\001\n\nScanStatus\0220\n\013scan_stat"
-    "us\030\001 \001(\0162\033.scan_status.ScanStatusEnum\022\030\n"
-    "\020total_file_count\030\002 \001(\r\022\032\n\022scanned_file_"
-    "count\030\003 \001(\r\0220\n\rmalware_infos\030\004 \003(\0132\031.mal"
-    "ware_info.MalwareInfo\022\032\n\022curr_scanning_f"
-    "ile\030\005 \001(\t*7\n\016ScanStatusEnum\022\014\n\010Scanning\020"
-    "\000\022\n\n\006Paused\020\001\022\013\n\007Stopped\020\002b\006proto3"
-};
+const char descriptor_table_protodef_scan_5fstatus_2eproto
+    [] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
+        "\n\021scan_status.proto\022\013scan_status\032\022malwar"
+        "e_info.proto\"\302\001\n\nScanStatus\0220\n\013scan_stat"
+        "us\030\001 \001(\0162\033.scan_status.ScanStatusEnum\022\030\n"
+        "\020total_file_count\030\002 \001(\r\022\032\n\022scanned_file_"
+        "count\030\003 \001(\r\0220\n\rmalware_infos\030\004 \003(\0132\031.mal"
+        "ware_info.MalwareInfo\022\032\n\022curr_scanning_f"
+        "ile\030\005 \001(\t*7\n\016ScanStatusEnum\022\014\n\010Scanning\020"
+        "\000\022\n\n\006Paused\020\001\022\013\n\007Stopped\020\002b\006proto"
+        "3"};
 static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
     descriptor_table_scan_5fstatus_2eproto_deps[1] = {
         &::descriptor_table_malware_5finfo_2eproto,
 };
 static ::absl::once_flag descriptor_table_scan_5fstatus_2eproto_once;
-PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_scan_5fstatus_2eproto = {
-    false,
-    false,
-    314,
-    descriptor_table_protodef_scan_5fstatus_2eproto,
-    "scan_status.proto",
-    &descriptor_table_scan_5fstatus_2eproto_once,
-    descriptor_table_scan_5fstatus_2eproto_deps,
-    1,
-    1,
-    schemas,
-    file_message_globals,
-    TableStruct_scan_5fstatus_2eproto::offsets,
-    file_level_enum_descriptors_scan_5fstatus_2eproto,
-    file_level_service_descriptors_scan_5fstatus_2eproto,
+PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable
+    descriptor_table_scan_5fstatus_2eproto = {
+        false,
+        false,
+        314,
+        descriptor_table_protodef_scan_5fstatus_2eproto,
+        "scan_status.proto",
+        &descriptor_table_scan_5fstatus_2eproto_once,
+        descriptor_table_scan_5fstatus_2eproto_deps,
+        1,
+        1,
+        schemas,
+        file_message_globals,
+        TableStruct_scan_5fstatus_2eproto::offsets,
+        file_level_enum_descriptors_scan_5fstatus_2eproto,
+        file_level_service_descriptors_scan_5fstatus_2eproto,
 };
 namespace scan_status {
 [[nodiscard]] const ::google::protobuf::EnumDescriptor* PROTOBUF_NONNULL
 ScanStatusEnum_descriptor() {
-  ::google::protobuf::internal::AssignDescriptors(&descriptor_table_scan_5fstatus_2eproto);
-  return file_level_enum_descriptors_scan_5fstatus_2eproto[0];
+    ::google::protobuf::internal::AssignDescriptors(
+        &descriptor_table_scan_5fstatus_2eproto);
+    return file_level_enum_descriptors_scan_5fstatus_2eproto[0];
 }
 PROTOBUF_CONSTINIT const uint32_t ScanStatusEnum_internal_data_[] = {
-    196608u, 0u, };
+    196608u,
+    0u,
+};
 // ===================================================================
 
 void ScanStatus::clear_malware_infos() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.malware_infos_.Clear();
-  ClearHasBit(_impl_._has_bits_[0], 0x00000001U);
+    ::google::protobuf::internal::TSanWrite(&_impl_);
+    _impl_.malware_infos_.Clear();
+    ClearHasBit(_impl_._has_bits_[0], 0x00000001U);
 }
 ScanStatus::ScanStatus(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
@@ -306,101 +337,105 @@ ScanStatus::ScanStatus(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
 #else   // PROTOBUF_CUSTOM_VTABLE
     : ::google::protobuf::Message(arena) {
 #endif  // PROTOBUF_CUSTOM_VTABLE
-  SharedCtor(arena);
-  // @@protoc_insertion_point(arena_constructor:scan_status.ScanStatus)
+    SharedCtor(arena);
+    // @@protoc_insertion_point(arena_constructor:scan_status.ScanStatus)
 }
 PROTOBUF_NDEBUG_INLINE ScanStatus::Impl_::Impl_(
-    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
-    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility
+        visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
+    const Impl_& from,
     [[maybe_unused]] const ::scan_status::ScanStatus& from_msg)
-      : _has_bits_{from._has_bits_},
-        _cached_size_{0},
-        malware_infos_ {
-          visibility, ::_pbi::InternalMetadataOffset::Build<
-              ::scan_status::ScanStatus,
-              PROTOBUF_FIELD_OFFSET(::scan_status::ScanStatus, _impl_.malware_infos_)>()
-          , from.malware_infos_
-        }
-        ,
-        curr_scanning_file_(arena, from.curr_scanning_file_) {}
+    : _has_bits_{from._has_bits_},
+      _cached_size_{0},
+      malware_infos_{
+          visibility,
+          ::_pbi::InternalMetadataOffset::Build<::scan_status::ScanStatus,
+                                                PROTOBUF_FIELD_OFFSET(
+                                                    ::scan_status::ScanStatus,
+                                                    _impl_.malware_infos_)>(),
+          from.malware_infos_},
+      curr_scanning_file_(arena, from.curr_scanning_file_) {}
 
-ScanStatus::ScanStatus(
-    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
-    const ScanStatus& from)
+ScanStatus::ScanStatus(::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
+                       const ScanStatus& from)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
     : ::google::protobuf::Message(arena, ScanStatus_get_class_data()) {
 
 #else   // PROTOBUF_CUSTOM_VTABLE
     : ::google::protobuf::Message(arena) {
 #endif  // PROTOBUF_CUSTOM_VTABLE
-  ScanStatus* const _this = this;
-  (void)_this;
-  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
-      from._internal_metadata_);
-  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
-  ::memcpy(reinterpret_cast<char*>(&_impl_) +
-               offsetof(Impl_, scan_status_),
-           reinterpret_cast<const char*>(&from._impl_) +
-               offsetof(Impl_, scan_status_),
-           offsetof(Impl_, scanned_file_count_) -
-               offsetof(Impl_, scan_status_) +
-               sizeof(Impl_::scanned_file_count_));
+    ScanStatus* const _this = this;
+    (void)_this;
+    _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+        from._internal_metadata_);
+    new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+    ::memcpy(reinterpret_cast<char*>(&_impl_) + offsetof(Impl_, scan_status_),
+             reinterpret_cast<const char*>(&from._impl_) +
+                 offsetof(Impl_, scan_status_),
+             offsetof(Impl_, scanned_file_count_) -
+                 offsetof(Impl_, scan_status_) +
+                 sizeof(Impl_::scanned_file_count_));
 
-  // @@protoc_insertion_point(copy_constructor:scan_status.ScanStatus)
+    // @@protoc_insertion_point(copy_constructor:scan_status.ScanStatus)
 }
 PROTOBUF_NDEBUG_INLINE ScanStatus::Impl_::Impl_(
-    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility
+        visibility,
     [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
-      : _cached_size_{0},
-        malware_infos_ { visibility, ::_pbi::InternalMetadataOffset::Build<
-            ::scan_status::ScanStatus,
-            PROTOBUF_FIELD_OFFSET(::scan_status::ScanStatus, _impl_.malware_infos_)>()
-         }
-        ,
-        curr_scanning_file_(arena) {}
+    : _cached_size_{0},
+      malware_infos_{
+          visibility,
+          ::_pbi::InternalMetadataOffset::Build<::scan_status::ScanStatus,
+                                                PROTOBUF_FIELD_OFFSET(
+                                                    ::scan_status::ScanStatus,
+                                                    _impl_.malware_infos_)>()},
+      curr_scanning_file_(arena) {}
 
 inline void ScanStatus::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
-  new (&_impl_) Impl_(internal_visibility(), arena);
-  ::memset(reinterpret_cast<char*>(&_impl_) +
-               offsetof(Impl_, scan_status_),
-           0,
-           offsetof(Impl_, scanned_file_count_) -
-               offsetof(Impl_, scan_status_) +
-               sizeof(Impl_::scanned_file_count_));
+    new (&_impl_) Impl_(internal_visibility(), arena);
+    ::memset(
+        reinterpret_cast<char*>(&_impl_) + offsetof(Impl_, scan_status_), 0,
+        offsetof(Impl_, scanned_file_count_) - offsetof(Impl_, scan_status_) +
+            sizeof(Impl_::scanned_file_count_));
 }
 ScanStatus::~ScanStatus() {
-  // @@protoc_insertion_point(destructor:scan_status.ScanStatus)
-  SharedDtor(*this);
+    // @@protoc_insertion_point(destructor:scan_status.ScanStatus)
+    SharedDtor(*this);
 }
 inline void ScanStatus::SharedDtor(MessageLite& self) {
-  ScanStatus& this_ = static_cast<ScanStatus&>(self);
-  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
-    this_.CheckHasBitConsistency();
-  }
-  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
-  ABSL_DCHECK(this_.GetArena() == nullptr);
-  this_._impl_.curr_scanning_file_.Destroy();
-  this_._impl_.~Impl_();
+    ScanStatus& this_ = static_cast<ScanStatus&>(self);
+    if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+        this_.CheckHasBitConsistency();
+    }
+    this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+    ABSL_DCHECK(this_.GetArena() == nullptr);
+    this_._impl_.curr_scanning_file_.Destroy();
+    this_._impl_.~Impl_();
 }
 
 #ifndef PROTOBUF_MESSAGE_GLOBALS
-PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
-    ::google::protobuf::internal::ClassDataFull ScanStatus_class_data_ =
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const ::google::protobuf::
+    internal::ClassDataFull ScanStatus_class_data_ =
         ScanStatus::InternalGenerateClassData_(ScanStatus_globals_._default);
 
-PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
-ScanStatus::GetClassData() const {
-  ::google::protobuf::internal::PrefetchToLocalCache(&ScanStatus_class_data_);
-  ::google::protobuf::internal::PrefetchToLocalCache(ScanStatus_class_data_.tc_table);
-  return ScanStatus_class_data_.base();
+PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData*
+    PROTOBUF_NONNULL
+    ScanStatus::GetClassData() const {
+    ::google::protobuf::internal::PrefetchToLocalCache(&ScanStatus_class_data_);
+    ::google::protobuf::internal::PrefetchToLocalCache(
+        ScanStatus_class_data_.tc_table);
+    return ScanStatus_class_data_.base();
 }
 #else
-PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
-ScanStatus::GetClassData() const {
-  ::google::protobuf::internal::PrefetchToLocalCache(&ScanStatus_globals_);
-  ::google::protobuf::internal::PrefetchToLocalCache(
-      ::google::protobuf::internal::MessageGlobalsBase::ToParseTableBase(&ScanStatus_globals_));
-  return ScanStatus_globals_.GetClassData();
+PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData*
+    PROTOBUF_NONNULL
+    ScanStatus::GetClassData() const {
+    ::google::protobuf::internal::PrefetchToLocalCache(&ScanStatus_globals_);
+    ::google::protobuf::internal::PrefetchToLocalCache(
+        ::google::protobuf::internal::MessageGlobalsBase::ToParseTableBase(
+            &ScanStatus_globals_));
+    return ScanStatus_globals_.GetClassData();
 }
 #endif  // !PROTOBUF_MESSAGE_GLOBALS
 #ifndef PROTOBUF_MESSAGE_GLOBALS
@@ -410,251 +445,265 @@ PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const ScanStatus::ParseTableT_
         ScanStatus::InternalGenerateParseTable_(ScanStatus_class_data_.base());
 #endif  // !PROTOBUF_MESSAGE_GLOBALS
 PROTOBUF_NOINLINE void ScanStatus::Clear() {
-// @@protoc_insertion_point(message_clear_start:scan_status.ScanStatus)
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  ::uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
+    // @@protoc_insertion_point(message_clear_start:scan_status.ScanStatus)
+    ::google::protobuf::internal::TSanWrite(&_impl_);
+    ::uint32_t cached_has_bits = 0;
+    // Prevent compiler warnings about cached_has_bits being unused
+    (void)cached_has_bits;
 
-  cached_has_bits = _impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x00000003U)) {
-    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-      _impl_.malware_infos_.Clear();
+    cached_has_bits = _impl_._has_bits_[0];
+    if (BatchCheckHasBit(cached_has_bits, 0x00000003U)) {
+        if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+            _impl_.malware_infos_.Clear();
+        }
+        if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+            _impl_.curr_scanning_file_.ClearNonDefaultToEmpty();
+        }
     }
-    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      _impl_.curr_scanning_file_.ClearNonDefaultToEmpty();
+    if (BatchCheckHasBit(cached_has_bits, 0x0000001cU)) {
+        ::memset(&_impl_.scan_status_, 0,
+                 static_cast<::size_t>(
+                     reinterpret_cast<char*>(&_impl_.scanned_file_count_) -
+                     reinterpret_cast<char*>(&_impl_.scan_status_)) +
+                     sizeof(_impl_.scanned_file_count_));
     }
-  }
-  if (BatchCheckHasBit(cached_has_bits, 0x0000001cU)) {
-    ::memset(&_impl_.scan_status_, 0, static_cast<::size_t>(
-        reinterpret_cast<char*>(&_impl_.scanned_file_count_) -
-        reinterpret_cast<char*>(&_impl_.scan_status_)) + sizeof(_impl_.scanned_file_count_));
-  }
-  _impl_._has_bits_.Clear();
-  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+    _impl_._has_bits_.Clear();
+    _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
 ::uint8_t* PROTOBUF_NONNULL ScanStatus::_InternalSerialize(
-    const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
+    const ::google::protobuf::MessageLite& base,
+    ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
-  const ScanStatus& this_ = static_cast<const ScanStatus&>(base);
+    const ScanStatus& this_ = static_cast<const ScanStatus&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::uint8_t* PROTOBUF_NONNULL ScanStatus::_InternalSerialize(
     ::uint8_t* PROTOBUF_NONNULL target,
-    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
-  const ScanStatus& this_ = *this;
+    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL
+        stream) const {
+    const ScanStatus& this_ = *this;
 #endif  // PROTOBUF_CUSTOM_VTABLE
-  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
-    this_.CheckHasBitConsistency();
-  }
-  // @@protoc_insertion_point(serialize_to_array_start:scan_status.ScanStatus)
-  ::uint32_t cached_has_bits = 0;
-  (void)cached_has_bits;
-
-  cached_has_bits = this_._impl_._has_bits_[0];
-  // .scan_status.ScanStatusEnum scan_status = 1;
-  if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-    if (this_._internal_scan_status() != 0) {
-      target = stream->EnsureSpace(target);
-      target = ::_pbi::WireFormatLite::WriteEnumToArray(
-          1, this_._internal_scan_status(), target);
+    if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+        this_.CheckHasBitConsistency();
     }
-  }
+    // @@protoc_insertion_point(serialize_to_array_start:scan_status.ScanStatus)
+    ::uint32_t cached_has_bits = 0;
+    (void)cached_has_bits;
 
-  // uint32 total_file_count = 2;
-  if (CheckHasBit(cached_has_bits, 0x00000008U)) {
-    if (this_._internal_total_file_count() != 0) {
-      target = stream->EnsureSpace(target);
-      target = ::_pbi::WireFormatLite::WriteUInt32ToArray(
-          2, this_._internal_total_file_count(), target);
+    cached_has_bits = this_._impl_._has_bits_[0];
+    // .scan_status.ScanStatusEnum scan_status = 1;
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+        if (this_._internal_scan_status() != 0) {
+            target = stream->EnsureSpace(target);
+            target = ::_pbi::WireFormatLite::WriteEnumToArray(
+                1, this_._internal_scan_status(), target);
+        }
     }
-  }
 
-  // uint32 scanned_file_count = 3;
-  if (CheckHasBit(cached_has_bits, 0x00000010U)) {
-    if (this_._internal_scanned_file_count() != 0) {
-      target = stream->EnsureSpace(target);
-      target = ::_pbi::WireFormatLite::WriteUInt32ToArray(
-          3, this_._internal_scanned_file_count(), target);
+    // uint32 total_file_count = 2;
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+        if (this_._internal_total_file_count() != 0) {
+            target = stream->EnsureSpace(target);
+            target = ::_pbi::WireFormatLite::WriteUInt32ToArray(
+                2, this_._internal_total_file_count(), target);
+        }
     }
-  }
 
-  // repeated .malware_info.MalwareInfo malware_infos = 4;
-  if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-    for (unsigned i = 0, n = static_cast<unsigned>(
-                             this_._internal_malware_infos_size());
-         i < n; i++) {
-      const auto& repfield = this_._internal_malware_infos().Get(i);
-      target =
-          ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
-              4, repfield, repfield.GetCachedSize(),
-              target, stream);
+    // uint32 scanned_file_count = 3;
+    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+        if (this_._internal_scanned_file_count() != 0) {
+            target = stream->EnsureSpace(target);
+            target = ::_pbi::WireFormatLite::WriteUInt32ToArray(
+                3, this_._internal_scanned_file_count(), target);
+        }
     }
-  }
 
-  // string curr_scanning_file = 5;
-  if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-    if (!this_._internal_curr_scanning_file().empty()) {
-      const ::std::string& _s = this_._internal_curr_scanning_file();
-      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "scan_status.ScanStatus.curr_scanning_file");
-      target = stream->WriteStringMaybeAliased(5, _s, target);
+    // repeated .malware_info.MalwareInfo malware_infos = 4;
+    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+        for (unsigned i = 0, n = static_cast<unsigned>(
+                                 this_._internal_malware_infos_size());
+             i < n; i++) {
+            const auto& repfield = this_._internal_malware_infos().Get(i);
+            target = ::google::protobuf::internal::WireFormatLite::
+                InternalWriteMessage(4, repfield, repfield.GetCachedSize(),
+                                     target, stream);
+        }
     }
-  }
 
-  if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
-    target =
-        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
-            this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
-  }
-  // @@protoc_insertion_point(serialize_to_array_end:scan_status.ScanStatus)
-  return target;
+    // string curr_scanning_file = 5;
+    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+        if (!this_._internal_curr_scanning_file().empty()) {
+            const ::std::string& _s = this_._internal_curr_scanning_file();
+            ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+                _s.data(), static_cast<int>(_s.length()),
+                ::google::protobuf::internal::WireFormatLite::SERIALIZE,
+                "scan_status.ScanStatus.curr_scanning_file");
+            target = stream->WriteStringMaybeAliased(5, _s, target);
+        }
+    }
+
+    if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
+        target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            this_._internal_metadata_
+                .unknown_fields<::google::protobuf::UnknownFieldSet>(
+                    ::google::protobuf::UnknownFieldSet::default_instance),
+            target, stream);
+    }
+    // @@protoc_insertion_point(serialize_to_array_end:scan_status.ScanStatus)
+    return target;
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
 ::size_t ScanStatus::ByteSizeLong(const MessageLite& base) {
-  const ScanStatus& this_ = static_cast<const ScanStatus&>(base);
+    const ScanStatus& this_ = static_cast<const ScanStatus&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t ScanStatus::ByteSizeLong() const {
-  const ScanStatus& this_ = *this;
+    const ScanStatus& this_ = *this;
 #endif  // PROTOBUF_CUSTOM_VTABLE
-  // @@protoc_insertion_point(message_byte_size_start:scan_status.ScanStatus)
-  ::size_t total_size = 0;
+    // @@protoc_insertion_point(message_byte_size_start:scan_status.ScanStatus)
+    ::size_t total_size = 0;
 
-  ::uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void)cached_has_bits;
+    ::uint32_t cached_has_bits = 0;
+    // Prevent compiler warnings about cached_has_bits being unused
+    (void)cached_has_bits;
 
-  ::_pbi::Prefetch5LinesFrom7Lines(&this_);
-  cached_has_bits = this_._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x0000001fU)) {
-    // repeated .malware_info.MalwareInfo malware_infos = 4;
-    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-      total_size += 1UL * this_._internal_malware_infos_size();
-      for (const auto& msg : this_._internal_malware_infos()) {
-        total_size += ::google::protobuf::internal::WireFormatLite::MessageSize(msg);
-      }
+    ::_pbi::Prefetch5LinesFrom7Lines(&this_);
+    cached_has_bits = this_._impl_._has_bits_[0];
+    if (BatchCheckHasBit(cached_has_bits, 0x0000001fU)) {
+        // repeated .malware_info.MalwareInfo malware_infos = 4;
+        if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+            total_size += 1UL * this_._internal_malware_infos_size();
+            for (const auto& msg : this_._internal_malware_infos()) {
+                total_size +=
+                    ::google::protobuf::internal::WireFormatLite::MessageSize(
+                        msg);
+            }
+        }
+        // string curr_scanning_file = 5;
+        if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+            if (!this_._internal_curr_scanning_file().empty()) {
+                total_size +=
+                    1 +
+                    ::google::protobuf::internal::WireFormatLite::StringSize(
+                        this_._internal_curr_scanning_file());
+            }
+        }
+        // .scan_status.ScanStatusEnum scan_status = 1;
+        if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+            if (this_._internal_scan_status() != 0) {
+                total_size += 1 + ::_pbi::WireFormatLite::EnumSize(
+                                      this_._internal_scan_status());
+            }
+        }
+        // uint32 total_file_count = 2;
+        if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+            if (this_._internal_total_file_count() != 0) {
+                total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(
+                    this_._internal_total_file_count());
+            }
+        }
+        // uint32 scanned_file_count = 3;
+        if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+            if (this_._internal_scanned_file_count() != 0) {
+                total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(
+                    this_._internal_scanned_file_count());
+            }
+        }
     }
-    // string curr_scanning_file = 5;
-    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      if (!this_._internal_curr_scanning_file().empty()) {
-        total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
-                                        this_._internal_curr_scanning_file());
-      }
-    }
-    // .scan_status.ScanStatusEnum scan_status = 1;
-    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-      if (this_._internal_scan_status() != 0) {
-        total_size += 1 +
-                      ::_pbi::WireFormatLite::EnumSize(this_._internal_scan_status());
-      }
-    }
-    // uint32 total_file_count = 2;
-    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
-      if (this_._internal_total_file_count() != 0) {
-        total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(
-            this_._internal_total_file_count());
-      }
-    }
-    // uint32 scanned_file_count = 3;
-    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
-      if (this_._internal_scanned_file_count() != 0) {
-        total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(
-            this_._internal_scanned_file_count());
-      }
-    }
-  }
-  return this_.MaybeComputeUnknownFieldsSize(total_size,
-                                             &this_._impl_._cached_size_);
+    return this_.MaybeComputeUnknownFieldsSize(total_size,
+                                               &this_._impl_._cached_size_);
 }
 
 void ScanStatus::MergeImpl(::google::protobuf::MessageLite& to_msg,
-                      const ::google::protobuf::MessageLite& from_msg) {
-   auto* const _this = static_cast<ScanStatus*>(&to_msg);
-  auto& from = static_cast<const ScanStatus&>(from_msg);
-  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
-    from.CheckHasBitConsistency();
-  }
-  ::google::protobuf::Arena* arena = _this->GetArena();
-  // @@protoc_insertion_point(class_specific_merge_from_start:scan_status.ScanStatus)
-  ABSL_DCHECK_NE(&from, _this);
-  ::uint32_t cached_has_bits = 0;
-  (void)cached_has_bits;
+                           const ::google::protobuf::MessageLite& from_msg) {
+    auto* const _this = static_cast<ScanStatus*>(&to_msg);
+    auto& from = static_cast<const ScanStatus&>(from_msg);
+    if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+        from.CheckHasBitConsistency();
+    }
+    ::google::protobuf::Arena* arena = _this->GetArena();
+    // @@protoc_insertion_point(class_specific_merge_from_start:scan_status.ScanStatus)
+    ABSL_DCHECK_NE(&from, _this);
+    ::uint32_t cached_has_bits = 0;
+    (void)cached_has_bits;
 
-  cached_has_bits = from._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x0000001fU)) {
-    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-      _this->_internal_mutable_malware_infos()->InternalMergeFromWithArena(
-          ::google::protobuf::MessageLite::internal_visibility(), arena,
-          from._internal_malware_infos());
-    }
-    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      if (!from._internal_curr_scanning_file().empty()) {
-        _this->_internal_set_curr_scanning_file(from._internal_curr_scanning_file());
-      } else {
-        if (_this->_impl_.curr_scanning_file_.IsDefault()) {
-          _this->_internal_set_curr_scanning_file("");
+    cached_has_bits = from._impl_._has_bits_[0];
+    if (BatchCheckHasBit(cached_has_bits, 0x0000001fU)) {
+        if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+            _this->_internal_mutable_malware_infos()
+                ->InternalMergeFromWithArena(
+                    ::google::protobuf::MessageLite::internal_visibility(),
+                    arena, from._internal_malware_infos());
         }
-      }
+        if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+            if (!from._internal_curr_scanning_file().empty()) {
+                _this->_internal_set_curr_scanning_file(
+                    from._internal_curr_scanning_file());
+            } else {
+                if (_this->_impl_.curr_scanning_file_.IsDefault()) {
+                    _this->_internal_set_curr_scanning_file("");
+                }
+            }
+        }
+        if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+            if (from._internal_scan_status() != 0) {
+                _this->_impl_.scan_status_ = from._impl_.scan_status_;
+            }
+        }
+        if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+            if (from._internal_total_file_count() != 0) {
+                _this->_impl_.total_file_count_ = from._impl_.total_file_count_;
+            }
+        }
+        if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+            if (from._internal_scanned_file_count() != 0) {
+                _this->_impl_.scanned_file_count_ =
+                    from._impl_.scanned_file_count_;
+            }
+        }
     }
-    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-      if (from._internal_scan_status() != 0) {
-        _this->_impl_.scan_status_ = from._impl_.scan_status_;
-      }
-    }
-    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
-      if (from._internal_total_file_count() != 0) {
-        _this->_impl_.total_file_count_ = from._impl_.total_file_count_;
-      }
-    }
-    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
-      if (from._internal_scanned_file_count() != 0) {
-        _this->_impl_.scanned_file_count_ = from._impl_.scanned_file_count_;
-      }
-    }
-  }
-  _this->_impl_._has_bits_[0] |= cached_has_bits;
-  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
-      from._internal_metadata_);
+    _this->_impl_._has_bits_[0] |= cached_has_bits;
+    _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+        from._internal_metadata_);
 }
 
 void ScanStatus::CopyFrom(const ScanStatus& from) {
-  // @@protoc_insertion_point(class_specific_copy_from_start:scan_status.ScanStatus)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
+    // @@protoc_insertion_point(class_specific_copy_from_start:scan_status.ScanStatus)
+    if (&from == this) return;
+    Clear();
+    MergeFrom(from);
 }
 
-
-void ScanStatus::InternalSwap(ScanStatus* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
-  using ::std::swap;
-  auto* arena = GetArena();
-  ABSL_DCHECK_EQ(arena, other->GetArena());
-  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
-  _impl_.malware_infos_.InternalSwap(&other->_impl_.malware_infos_);
-  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.curr_scanning_file_, &other->_impl_.curr_scanning_file_, arena);
-  ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(ScanStatus, _impl_.scanned_file_count_)
-      + sizeof(ScanStatus::_impl_.scanned_file_count_)
-      - PROTOBUF_FIELD_OFFSET(ScanStatus, _impl_.scan_status_)>(
-          reinterpret_cast<char*>(&_impl_.scan_status_),
-          reinterpret_cast<char*>(&other->_impl_.scan_status_));
+void ScanStatus::InternalSwap(
+    ScanStatus* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
+    using ::std::swap;
+    auto* arena = GetArena();
+    ABSL_DCHECK_EQ(arena, other->GetArena());
+    _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+    swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+    _impl_.malware_infos_.InternalSwap(&other->_impl_.malware_infos_);
+    ::_pbi::ArenaStringPtr::InternalSwap(
+        &_impl_.curr_scanning_file_, &other->_impl_.curr_scanning_file_, arena);
+    ::google::protobuf::internal::memswap<
+        PROTOBUF_FIELD_OFFSET(ScanStatus, _impl_.scanned_file_count_) +
+        sizeof(ScanStatus::_impl_.scanned_file_count_) -
+        PROTOBUF_FIELD_OFFSET(ScanStatus, _impl_.scan_status_)>(
+        reinterpret_cast<char*>(&_impl_.scan_status_),
+        reinterpret_cast<char*>(&other->_impl_.scan_status_));
 }
 
 ::google::protobuf::Metadata ScanStatus::GetMetadata() const {
-  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+    return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace scan_status
 namespace google {
-namespace protobuf {
-}  // namespace protobuf
+namespace protobuf {}  // namespace protobuf
 }  // namespace google
 // @@protoc_insertion_point(global_scope)
-PROTOBUF_ATTRIBUTE_INIT_PRIORITY2 static ::std::false_type
-    _static_init2_ [[maybe_unused]] =
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY2 static ::std::false_type _static_init2_
+    [[maybe_unused]] =
         (::_pbi::AddDescriptors(&descriptor_table_scan_5fstatus_2eproto),
          ::std::false_type{});
 #include "google/protobuf/port_undef.inc"
