@@ -1,4 +1,4 @@
-#include "fanotify_monitor.h"
+#include "xavagent/protection/event_collection/fanotify/fanotify_monitor.h"
 
 #include <fcntl.h>
 #include <limits.h>
@@ -22,7 +22,7 @@
 #include <ranges>
 #include <stdexcept>
 
-#include "edr/behavioral_protection/event.h"
+#include "xavagent/protection/event.h"
 
 #define BUFSIZE (4 * 1024)  // 4KB
 
