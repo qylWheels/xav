@@ -1,0 +1,14 @@
+{
+  "dependencies": [
+    "leveldb",
+    "cryptopp",
+    "protobuf",
+    "oatpp",
+    "spdlog",
+    "outcome",
+    "rapidfuzz",
+    "cpptrace",
+    "yara",
+    "boost-beast"
+  ]
+}
