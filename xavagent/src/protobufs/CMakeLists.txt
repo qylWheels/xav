@@ -1,0 +1,2 @@
+add_library(protobufs SHARED)
+target_sources(protobufs malware_info.pb.cpp msg.pb.cpp scan_status.pb.cpp)

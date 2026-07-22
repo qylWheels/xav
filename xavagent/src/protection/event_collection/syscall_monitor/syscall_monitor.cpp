@@ -1,0 +1,56 @@
+#include "syscall_monitor.h"
+
+#include <bpf/libbpf.h>
+#include <sys/resource.h>
+#include <unistd.h>
+
+#include <stdexcept>
+
+#include "edr/behavioral_protection/syscall_monitor/raw_syscall_event.h"
+#include "syscall_monitor.skel.h"
+
+namespace xavagent {
+SyscallMonitor::SyscallMonitor() : rb_(nullptr) {
+    this->skel_ = syscall_monitor_bpf::open_and_load();
+    if (!this->skel_) {
+        throw std::runtime_error("Failed to open and load BPF skeleton");
+    }
+}
+
+SyscallMonitor::~SyscallMonitor() {
+    if (this->rb_) {
+        ring_buffer__free(this->rb_);
+    }
+    syscall_monitor_bpf::destroy(this->skel_);
+}
+
+void SyscallMonitor::start_monitoring() {
+    int ret = syscall_monitor_bpf::attach(this->skel_);
+    if (ret) {
+        throw std::runtime_error("Failed to attach BPF skeleton");
+    }
+    this->rb_ = ring_buffer__new(bpf_map__fd(this->skel_->maps.rb),
+                                 SyscallMonitor::event_handler, this, nullptr);
+    while (true) {
+        int err = ring_buffer__poll(this->rb_, 1000);
+        if (err < 0) {
+            throw std::runtime_error("Failed to poll ring buffer");
+        }
+    }
+}
+
+void SyscallMonitor::stop_monitoring() {
+    if (this->rb_) {
+        ring_buffer__free(this->rb_);
+        this->rb_ = nullptr;
+    }
+    syscall_monitor_bpf::detach(this->skel_);
+}
+
+std::span<Event> SyscallMonitor::all_events() const {}
+
+std::size_t SyscallMonitor::event_count() const {}
+
+int SyscallMonitor::event_handler(void* ctx, void* data, std::size_t size) {}
+
+}  // namespace xavagent
