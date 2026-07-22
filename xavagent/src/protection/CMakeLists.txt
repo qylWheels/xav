@@ -3,7 +3,7 @@ add_subdirectory(event_collection)
 
 add_library(protection SHARED)
 target_sources(protection PRIVATE
-    behavioral_monitor.cpp levenshtein_similarity.cpp
+    behavior_monitor.cpp levenshtein_similarity.cpp
     on_access_scanner.cpp
 )
 target_link_libraries(
@@ -11,3 +11,4 @@ target_link_libraries(
     rapidfuzz::rapidfuzz
     event_collection
 )
+target_link_libraries(protection PUBLIC xavagent_includes)

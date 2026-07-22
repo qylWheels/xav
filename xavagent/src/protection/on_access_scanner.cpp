@@ -1,4 +1,4 @@
-#include "on_access_scanner.h"
+#include "xavagent/protection/on_access_scanner.h"
 
 #include <fcntl.h>
 #include <limits.h>
@@ -8,7 +8,7 @@
 #include <ranges>
 #include <stdexcept>
 
-#include "global_context.h"
+#include "xavagent/global_context.h"
 
 #define BUFSIZE (8 * 1024)  // 8KB
 
