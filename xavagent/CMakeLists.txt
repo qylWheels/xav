@@ -23,3 +23,9 @@ find_package(protobuf CONFIG REQUIRED)
 find_package(cryptopp CONFIG REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(YARA REQUIRED IMPORTED_TARGET yara)
+
+# Include directories.
+add_library(xavagent_includes INTERFACE)
+target_include_directories(xavagent_includes INTERFACE
+    ${PROJECT_SOURCE_DIR}/src/include
+)
