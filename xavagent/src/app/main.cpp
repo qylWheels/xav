@@ -85,9 +85,6 @@ void init() {
 
     // Configure API server.
     auto& server = xavagent::GlobalContext::get_global_context().httpserver();
-    server.Get("/hi", [](const httplib::Request& req, httplib::Response& res) {
-        res.set_content("Hello!", "text/plain");
-    });
     server.Get("/scan/quick/start", [](const httplib::Request& req,
                                        httplib::Response& res) {
         auto& scanner = xavagent::GlobalContext::get_global_context().scanner();
