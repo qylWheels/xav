@@ -1,8 +1,8 @@
 #pragma once
 
-#include <oatpp/json/ObjectMapper.hpp>
-#include <oatpp/macro/component.hpp>
+#include <oatpp/core/macro/component.hpp>
 #include <oatpp/network/tcp/server/ConnectionProvider.hpp>
+#include <oatpp/parser/json/mapping/ObjectMapper.hpp>
 #include <oatpp/web/mime/ContentMappers.hpp>
 #include <oatpp/web/server/HttpConnectionHandler.hpp>
 
