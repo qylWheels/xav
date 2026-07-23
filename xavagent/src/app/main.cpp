@@ -121,6 +121,8 @@ int main(int argc, const char* argv[]) {
     std::signal(SIGSEGV, sigsegv_handler);
     try {
         init();
+        xavagent::GlobalContext::get_global_context().logger()->info(
+            std::format("XAV agent started at {}:{}", "0.0.0.0", "8000"));
         return xavagent::GlobalContext::get_global_context()
             .httpserver()
             .listen("0.0.0.0", 8000);
