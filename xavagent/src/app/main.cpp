@@ -7,7 +7,6 @@
 #include <iostream>
 #include <thread>
 
-#include "xavagent/api/run_api_server.h"
 #include "xavagent/global_context/global_context.h"
 #include "xavagent/scan/yara_static_heuristic_engine.h"
 
@@ -83,13 +82,48 @@ void init() {
     });
     on_access_scanner_thread.detach();
     behavior_monitor_thread.detach();
+
+    // Configure API server.
+    auto& server = xavagent::GlobalContext::get_global_context().httpserver();
+    server.Get("/hi", [](const httplib::Request& req, httplib::Response& res) {
+        res.set_content("Hello!", "text/plain");
+    });
+    server.Get("/scan/quick/start", [](const httplib::Request& req,
+                                       httplib::Response& res) {
+        auto& scanner = xavagent::GlobalContext::get_global_context().scanner();
+        if (scanner.scan_status() != xavagent::ScanStatus::Stopped) {
+            xavagent::GlobalContext::get_global_context().logger()->info(
+                "Quick scan is already running!");
+            res.status = 403;
+            return;
+        }
+
+        std::jthread t([&scanner]() {
+            // std::vector<std::string> critical_paths{
+            //     "/home", "/tmp",     "/var/tmp", "/bin",
+            //     "/sbin", "/usr/bin", "/usr/sbin"};
+            // FIXME: Only for test.
+            std::vector<const char*> critical_paths{"/home/qyl/projects/xav/"};
+            for (const auto& path : critical_paths) {
+                scanner.scan(path, 4);
+            }
+            xavagent::GlobalContext::get_global_context().logger()->info(
+                "Quick scan completed");
+        });
+        t.detach();
+
+        res.status = 200;
+        return;
+    });
 }
 
 int main(int argc, const char* argv[]) {
     std::signal(SIGSEGV, sigsegv_handler);
     try {
         init();
-        return xavagent::run_api_server(argc, argv);
+        return xavagent::GlobalContext::get_global_context()
+            .httpserver()
+            .listen("0.0.0.0", 8000);
     } catch (std::exception& e) {
         std::cerr << "Fatal error: " << e.what() << std::endl;
         cpptrace::generate_trace().print();
