@@ -24,6 +24,8 @@ add_custom_command(
         -g
         -c ${CMAKE_CURRENT_SOURCE_DIR}/syscall_monitor.bpf.c
         -o ${EBPF_OUTPUT}
+        -I${CMAKE_CURRENT_BINARY_DIR}
+        -I${CMAKE_SOURCE_DIR}/src/include
 
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/syscall_monitor.bpf.c
 )
