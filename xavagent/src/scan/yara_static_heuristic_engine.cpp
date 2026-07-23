@@ -8,7 +8,7 @@
 #include <system_error>
 #include <utility>
 
-#include "xavagent/protobufs/malware_info.pb.h"
+#include "malware_info.pb.h"
 
 namespace xavagent {
 #define YARA_RULES_FILE \
