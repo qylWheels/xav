@@ -9,7 +9,6 @@ target_sources(protection PRIVATE
 target_link_libraries(
     protection PUBLIC
     rapidfuzz::rapidfuzz
-    event_collection
     protobufs
 )
 target_link_libraries(protection PUBLIC xavagent_includes)
