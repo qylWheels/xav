@@ -1,14 +1,16 @@
 {
   "dependencies": [
-    "leveldb",
-    "cryptopp",
-    "protobuf",
-    "oatpp",
-    "spdlog",
-    "outcome",
-    "rapidfuzz",
+    "boost-beast",
     "cpptrace",
+    "cryptopp",
+    "leveldb",
+    "oatpp",
+    "outcome",
+    "protobuf",
+    "rapidfuzz",
+    "spdlog",
     "yara",
-    "boost-beast"
+    "nlohmann-json",
+    "cpp-httplib"
   ]
 }
