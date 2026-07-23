@@ -5,6 +5,8 @@ add_custom_command(
     
     COMMAND
         sudo bpftool btf dump file /sys/kernel/btf/vmlinux format c > ${VMLINUX_HEADER}
+
+    USES_TERMINAL
 )
 add_custom_target(vmlinux_header DEPENDS ${VMLINUX_HEADER})
 
@@ -39,9 +41,11 @@ set(
 add_custom_command(
     OUTPUT ${SKELETON_HEADER}
 
-    COMMAND bpftool gen skeleton ${EBPF_OUTPUT} > ${SKELETON_HEADER}
+    COMMAND sudo bpftool gen skeleton ${EBPF_OUTPUT} > ${SKELETON_HEADER}
 
     DEPENDS ${EBPF_OUTPUT}
+
+    USES_TERMINAL
 )
 add_custom_target(
     syscall_monitor_skeleton_header
