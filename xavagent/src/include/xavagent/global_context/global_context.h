@@ -1,5 +1,6 @@
 #pragma once
 
+#include <httplib.h>
 #include <leveldb/db.h>
 #include <spdlog/spdlog.h>
 
@@ -49,6 +50,8 @@ public:
 
     leveldb::DB*& db() { return this->db_; }
 
+    httplib::Server& httpserver() { return this->httpserver_; }
+
 private:
     GlobalContext(net::io_context& ioc);
     ~GlobalContext() = default;
@@ -66,5 +69,6 @@ private:
     websocket::stream<tcp::socket> ws_;
     std::shared_ptr<spdlog::logger> logger_;
     leveldb::DB* db_;
+    httplib::Server httpserver_;
 };
 }  // namespace xavagent
