@@ -8,7 +8,7 @@
 #include <ranges>
 #include <stdexcept>
 
-#include "xavagent/global_context.h"
+#include "xavagent/global_context/global_context.h"
 
 #define BUFSIZE (8 * 1024)  // 8KB
 

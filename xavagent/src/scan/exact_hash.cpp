@@ -6,7 +6,7 @@
 #include <format>
 
 #include "malware_info.pb.h"
-#include "xavagent/global_context.h"
+#include "xavagent/global_context/global_context.h"
 
 namespace xavagent {
 ExactHashEngine::ExactHashEngine() {}

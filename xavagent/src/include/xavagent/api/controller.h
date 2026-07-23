@@ -8,7 +8,7 @@
 #include <thread>
 
 #include "xavagent/api/DTOs.h"
-#include "xavagent/global_context.h"
+#include "xavagent/global_context/global_context.h"
 #include "xavagent/scan/scanner.h"
 
 #include OATPP_CODEGEN_BEGIN(ApiController)

@@ -8,7 +8,7 @@
 #include <thread>
 
 #include "xavagent/api/run_api_server.h"
-#include "xavagent/global_context.h"
+#include "xavagent/global_context/global_context.h"
 #include "xavagent/scan/yara_static_heuristic_engine.h"
 
 namespace http = beast::http;

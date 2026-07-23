@@ -9,7 +9,7 @@
 #include "malware_info.pb.h"
 #include "msg.pb.h"
 #include "scan_status.pb.h"
-#include "xavagent/global_context.h"
+#include "xavagent/global_context/global_context.h"
 
 #define MAX_FILES_IN_QUEUE 8192
 
