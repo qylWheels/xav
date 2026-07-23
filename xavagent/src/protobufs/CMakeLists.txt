@@ -1,6 +1,6 @@
 add_library(
     protobufs
-    OBJECT
+    SHARED
     "${CMAKE_SOURCE_DIR}/../xavcommon/malware_info.proto"
     "${CMAKE_SOURCE_DIR}/../xavcommon/msg.proto"
     "${CMAKE_SOURCE_DIR}/../xavcommon/scan_status.proto"
