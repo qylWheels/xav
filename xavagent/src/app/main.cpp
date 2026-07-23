@@ -95,6 +95,8 @@ void init() {
             return;
         }
 
+        xavagent::GlobalContext::get_global_context().logger()->info(
+            "Quick scan started");
         std::jthread t([&scanner]() {
             // std::vector<std::string> critical_paths{
             //     "/home", "/tmp",     "/var/tmp", "/bin",
