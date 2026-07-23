@@ -52,8 +52,8 @@ SEC("tp/raw_syscalls/sys_exit")
 int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
     u32 pid = bpf_get_current_pid_tgid() >> 32;
     u32 tid = bpf_get_current_pid_tgid() & 0xFFFFFFFF;
-    struct RawSyscallEvent* e =
-        bpf_map_lookup_elem(&raw_syscall_event_map, &tid);
+    struct RawSyscallEvent* e = (struct RawSyscallEvent*)bpf_map_lookup_elem(
+        &raw_syscall_event_map, &tid);
     if (!e) {
         struct RawSyscallEvent e2;
         e2.enter_captured = 0;
