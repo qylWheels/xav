@@ -7,11 +7,14 @@
 #include <stdexcept>
 
 #include "syscall_monitor.skel.h"
+#include "xavagent/global_context/global_context.h"
 #include "xavagent/protection/event_collection/syscall_monitor/raw_syscall_event.h"
 
 namespace xavagent {
 SyscallMonitor::SyscallMonitor() : rb_(nullptr) {
     this->skel_ = syscall_monitor_bpf::open_and_load();
+    xavagent::GlobalContext::get_global_context().logger()->info(
+        "Syscall monitor ebpf loaded");
     if (!this->skel_) {
         throw std::runtime_error("Failed to open and load BPF skeleton");
     }
