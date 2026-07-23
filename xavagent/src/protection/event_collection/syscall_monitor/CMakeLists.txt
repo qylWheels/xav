@@ -22,10 +22,10 @@ add_custom_command(
         -target bpf
         -O2
         -g
-        -c syscall_monitor.bpf.c
+        -c ${CMAKE_CURRENT_SOURCE_DIR}/syscall_monitor.bpf.c
         -o ${EBPF_OUTPUT}
 
-    DEPENDS syscall_monitor.bpf.c
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/syscall_monitor.bpf.c
 )
 add_custom_target(
     syscall_monitor_ebpf
