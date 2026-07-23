@@ -8,6 +8,7 @@
 #include <thread>
 
 #include "xavagent/global_context/global_context.h"
+#include "xavagent/protection/event_collection/syscall_monitor/syscall_monitor.h"
 #include "xavagent/scan/yara_static_heuristic_engine.h"
 
 namespace http = beast::http;
@@ -68,6 +69,11 @@ void init() {
     xavagent::GlobalContext::get_global_context()
         .static_heur_engine_manager()
         .add_engine(std::make_shared<xavagent::YaraStaticHeuristicEngine>());
+
+    // Configure protection.
+    xavagent::GlobalContext::get_global_context()
+        .behavior_monitor()
+        .add_behavior_monitor(std::make_shared<xavagent::SyscallMonitor>());
 
     // Start protection.
     std::jthread on_access_scanner_thread([]() {
