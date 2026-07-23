@@ -7,5 +7,6 @@ target_link_libraries(
     leveldb::leveldb
     spdlog::spdlog
     Boost::beast
+    httplib::httplib
 )
 target_link_libraries(global_context PUBLIC xavagent_includes)
