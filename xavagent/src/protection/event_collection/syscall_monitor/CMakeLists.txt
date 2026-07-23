@@ -15,6 +15,11 @@ set(
     EBPF_OUTPUT
     ${CMAKE_CURRENT_BINARY_DIR}/syscall_monitor.bpf.o
 )
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|amd64|X86_64|AMD64")
+    set(EBPF_TARGET_ARCH __TARGET_ARCH_x86_64)
+else()
+    message(FATAL_ERROR "Target not supported")
+endif()
 add_custom_command(
     OUTPUT ${EBPF_OUTPUT}
 
@@ -24,6 +29,7 @@ add_custom_command(
         -g
         -c ${CMAKE_CURRENT_SOURCE_DIR}/syscall_monitor.bpf.c
         -o ${EBPF_OUTPUT}
+        -D ${EBPF_TARGET_ARCH}
         -I${CMAKE_CURRENT_BINARY_DIR}
         -I${CMAKE_SOURCE_DIR}/src/include
 
