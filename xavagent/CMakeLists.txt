@@ -10,7 +10,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Packages from vcpkg.
 find_package(leveldb CONFIG REQUIRED)
-find_package(oatpp CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(outcome CONFIG REQUIRED)
 find_package(rapidfuzz CONFIG REQUIRED)
