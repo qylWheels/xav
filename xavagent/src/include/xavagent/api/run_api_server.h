@@ -2,8 +2,8 @@
 
 #include <oatpp/network/Server.hpp>
 
-#include "api/app_component.h"
-#include "api/controller.h"
+#include "xavagent/api/app_component.h"
+#include "xavagent/api/controller.h"
 
 namespace xavagent {
 void run() {

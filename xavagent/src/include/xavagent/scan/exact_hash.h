@@ -8,7 +8,7 @@
 #include <optional>
 #include <string>
 
-#include "protobufs/malware_info.pb.h"
+#include "xavagent/protobufs/malware_info.pb.h"
 
 namespace xavagent {
 class ExactHashEngine {

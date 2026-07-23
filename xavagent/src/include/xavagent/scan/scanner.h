@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-#include "protobufs/malware_info.pb.h"
+#include "xavagent/protobufs/malware_info.pb.h"
 
 namespace xavagent {
 struct MalwareInfo {

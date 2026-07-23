@@ -5,7 +5,7 @@
 #include <format>
 #include <iostream>
 
-#include "edr/heuristic_engine/static_heuristic.h"
+#include "xavagent/scan/static_heuristic.h"
 
 namespace xavagent {
 class YaraStaticHeuristicEngine : public IStaticHeuristicEngine {

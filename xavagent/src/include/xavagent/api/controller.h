@@ -7,9 +7,9 @@
 #include <oatpp/web/server/api/ApiController.hpp>
 #include <thread>
 
-#include "api/DTOs.h"
-#include "edr/scanner/scanner.h"
-#include "global_context.h"
+#include "xavagent/api/DTOs.h"
+#include "xavagent/global_context.h"
+#include "xavagent/scan/scanner.h"
 
 #include OATPP_CODEGEN_BEGIN(ApiController)
 

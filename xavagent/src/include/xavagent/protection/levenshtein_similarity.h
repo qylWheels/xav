@@ -2,8 +2,8 @@
 
 #include <deque>
 
-#include "edr/behavioral_protection/event.h"
-#include "edr/behavioral_protection/event_seq_similarity.h"
+#include "xavagent/protection/event.h"
+#include "xavagent/protection/event_seq_similarity.h"
 
 namespace xavagent {
 class LevenshteinSimilarity : public IEventSequenceSimilarity {

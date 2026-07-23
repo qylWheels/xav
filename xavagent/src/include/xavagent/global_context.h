@@ -9,11 +9,11 @@
 #include <boost/beast/websocket.hpp>
 #include <memory>
 
-#include "edr/behavioral_protection/behavior_monitor.h"
-#include "edr/hash_engine/exact_hash.h"
-#include "edr/heuristic_engine/static_heuristic.h"
-#include "edr/on_access_protection/on_access_scanner.h"
-#include "edr/scanner/scanner.h"
+#include "xavagent/protection/behavior_monitor.h"
+#include "xavagent/protection/on_access_scanner.h"
+#include "xavagent/scan/exact_hash.h"
+#include "xavagent/scan/scanner.h"
+#include "xavagent/scan/static_heuristic.h"
 
 namespace beast = boost::beast;
 namespace websocket = beast::websocket;

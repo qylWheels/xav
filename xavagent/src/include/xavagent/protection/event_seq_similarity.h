@@ -2,7 +2,7 @@
 
 #include <deque>
 
-#include "edr/behavioral_protection/event.h"
+#include "xavagent/protection/event.h"
 
 namespace xavagent {
 class IEventSequenceSimilarity {
