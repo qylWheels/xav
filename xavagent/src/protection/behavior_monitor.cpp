@@ -11,6 +11,7 @@ void BehaviorMonitorManager::add_behavior_monitor(
     this->behavior_monitors_.push_back(monitor);
 }
 
+// FIXME: monitor->start_monitoring() might block the caller.
 void BehaviorMonitorManager::start_monitoring() {
     for (auto& monitor : this->behavior_monitors_) {
         monitor->start_monitoring();
