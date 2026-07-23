@@ -1,5 +1,6 @@
 add_executable(xavagent)
 target_sources(xavagent PRIVATE main.cpp)
+target_link_libraries(xavagent PRIVATE cpptrace::cpptrace)
 target_link_libraries(xavagent PRIVATE oatpp::oatpp)
 target_link_libraries(xavagent PRIVATE protobufs)
 target_link_libraries(xavagent PRIVATE scan)
