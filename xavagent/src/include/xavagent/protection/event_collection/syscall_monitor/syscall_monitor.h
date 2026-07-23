@@ -1,7 +1,7 @@
 #pragma once
 
-#include "edr/behavioral_protection/behavior_monitor.h"
 #include "syscall_monitor.skel.h"
+#include "xavagent/protection/behavior_monitor.h"
 
 namespace xavagent {
 class SyscallMonitor : public IBehaviorMonitor {
