@@ -5,6 +5,7 @@
 #include <optional>
 #include <string>
 #include <variant>
+#include <vector>
 
 namespace xavagent {
 struct Process {
@@ -48,7 +49,17 @@ struct FileEvent {
     std::optional<std::filesystem::file_status> stat2;
 };
 
-using Event = std::variant<FileEvent>;
+struct ReadSyscallEvent {
+    int fd;
+    std::optional<std::filesystem::path> path;
+    char* buf;
+    std::optional<std::vector<char>> buf_content;
+    std::size_t count;
+};
+
+using SyscallEvent = std::variant<ReadSyscallEvent>;
+
+using Event = std::variant<FileEvent, SyscallEvent>;
 }  // namespace xavagent
 
 namespace std {
