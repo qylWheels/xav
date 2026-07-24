@@ -1,15 +1,16 @@
 {
   "dependencies": [
     "boost-beast",
+    "cpp-httplib",
     "cpptrace",
     "cryptopp",
     "leveldb",
+    "nlohmann-json",
     "outcome",
     "protobuf",
     "rapidfuzz",
     "spdlog",
     "yara",
-    "nlohmann-json",
-    "cpp-httplib"
+    "fmt"
   ]
 }

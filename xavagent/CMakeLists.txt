@@ -18,6 +18,7 @@ find_package(Boost CONFIG REQUIRED COMPONENTS beast)
 find_package(protobuf CONFIG REQUIRED)
 find_package(cryptopp CONFIG REQUIRED)
 find_package(httplib CONFIG REQUIRED)
+find_package(fmt CONFIG REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(YARA REQUIRED IMPORTED_TARGET yara)
 
