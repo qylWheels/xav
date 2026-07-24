@@ -4,6 +4,7 @@
 #include <sys/resource.h>
 #include <unistd.h>
 
+#include <format>
 #include <stdexcept>
 
 #include "syscall_monitor.skel.h"
@@ -54,6 +55,11 @@ std::span<Event> SyscallMonitor::all_events() const {}
 
 std::size_t SyscallMonitor::event_count() const {}
 
-int SyscallMonitor::event_handler(void* ctx, void* data, std::size_t size) {}
-
+int SyscallMonitor::event_handler(void* ctx, void* data, std::size_t size) {
+    SyscallMonitor* self = static_cast<SyscallMonitor*>(ctx);
+    struct RawSyscallEvent* e = static_cast<struct RawSyscallEvent*>(data);
+    xavagent::GlobalContext::get_global_context().logger()->info(
+        std::format("Pid {}, Syscall {}", e->pid, e->syscall_id));
+    return 0;
+}
 }  // namespace xavagent
