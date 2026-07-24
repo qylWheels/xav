@@ -10,7 +10,6 @@
     "protobuf",
     "rapidfuzz",
     "spdlog",
-    "yara",
-    "fmt"
+    "yara"
   ]
 }
