@@ -1,5 +1,8 @@
 #include "xavagent/scan/scanner.h"
 
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/spdlog.h>
+
 #include <outcome/outcome.hpp>
 #include <outcome/try.hpp>
 #include <ranges>
@@ -18,7 +21,10 @@ Scanner::Scanner()
     : traverse_finished_(false),
       scan_status_(ScanStatus::Stopped),
       total_file_count_{0},
-      scanned_file_count_{0} {}
+      scanned_file_count_{0} {
+    this->logger_ = spdlog::stdout_color_mt("scanner");
+    this->logger_->set_level(spdlog::level::info);
+}
 
 Scanner::~Scanner() {}
 
@@ -113,7 +119,7 @@ void Scanner::scan(const std::filesystem::path& path, int nthreads) {
             try {
                 this->ws_send_scan_status();
             } catch (const std::exception& e) {
-                GlobalContext::get_global_context().logger()->warn(std::format(
+                this->logger_->warn(std::format(
                     "Failed to send scan status message: {}", e.what()));
             }
 

@@ -1,7 +1,10 @@
 #pragma once
 
+#include <spdlog/spdlog.h>
+
 #include <cstdint>
 #include <filesystem>
+#include <memory>
 #include <mutex>
 #include <queue>
 #include <string>
@@ -75,6 +78,7 @@ private:
     void ws_send_scan_status();
 
 private:
+    std::shared_ptr<spdlog::logger> logger_;
     std::mutex mutex_;
     std::queue<std::filesystem::path> files_to_scan_;
     bool traverse_finished_;
