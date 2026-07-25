@@ -13,10 +13,6 @@
 
 namespace http = beast::http;
 
-// FIXME: Only for tests.
-#define XAV_EXACT_HASH_DB \
-    "/home/qyl/projects/xav/xavdb/db/malware-bazaar-sha256.db"
-
 void sigsegv_handler(int signum) {
     std::cerr << "SIGSEGV signal received" << std::endl;
     cpptrace::generate_trace().print();
@@ -24,9 +20,7 @@ void sigsegv_handler(int signum) {
 }
 
 void init() {
-    // Set up logger.
-    auto& logger = xavagent::GlobalContext::get_global_context().logger();
-    logger = spdlog::stdout_color_mt("global_context");
+    auto logger = spdlog::stdout_color_mt("init");
     logger->set_level(spdlog::level::info);
 
     // Websocket configs.
@@ -56,15 +50,6 @@ void init() {
     });
     ws_read_thread.detach();
 
-    // Initialize db.
-    auto& db = xavagent::GlobalContext::get_global_context().db();
-    leveldb::Status status =
-        leveldb::DB::Open(leveldb::Options{}, XAV_EXACT_HASH_DB, &db);
-    if (!status.ok()) {
-        perror("leveldb::DB::Open");
-        exit(1);
-    }
-
     // Add Yara static heuristic engine to the manager.
     xavagent::GlobalContext::get_global_context()
         .static_heur_engine_manager()
@@ -91,19 +76,17 @@ void init() {
 
     // Configure API server.
     auto& server = xavagent::GlobalContext::get_global_context().httpserver();
-    server.Get("/scan/quick/start", [](const httplib::Request& req,
-                                       httplib::Response& res) {
+    server.Get("/scan/quick/start", [logger](const httplib::Request& req,
+                                             httplib::Response& res) {
         auto& scanner = xavagent::GlobalContext::get_global_context().scanner();
         if (scanner.scan_status() != xavagent::ScanStatus::Stopped) {
-            xavagent::GlobalContext::get_global_context().logger()->info(
-                "Quick scan is already running!");
+            logger->warn("Quick scan is already running!");
             res.status = 403;
             return;
         }
 
-        xavagent::GlobalContext::get_global_context().logger()->info(
-            "Quick scan started");
-        std::jthread t([&scanner]() {
+        logger->info("Quick scan started");
+        std::jthread t([&scanner, logger]() {
             // std::vector<std::string> critical_paths{
             //     "/home", "/tmp",     "/var/tmp", "/bin",
             //     "/sbin", "/usr/bin", "/usr/sbin"};
@@ -112,8 +95,7 @@ void init() {
             for (const auto& path : critical_paths) {
                 scanner.scan(path, 4);
             }
-            xavagent::GlobalContext::get_global_context().logger()->info(
-                "Quick scan completed");
+            logger->info("Quick scan completed");
         });
         t.detach();
 
@@ -124,15 +106,17 @@ void init() {
 
 int main(int argc, const char* argv[]) {
     std::signal(SIGSEGV, sigsegv_handler);
+    auto logger = spdlog::stdout_color_mt("main");
+    logger->set_level(spdlog::level::info);
     try {
         init();
-        xavagent::GlobalContext::get_global_context().logger()->info(
+        logger->info(
             std::format("XAV agent started at {}:{}", "0.0.0.0", "8000"));
         return xavagent::GlobalContext::get_global_context()
             .httpserver()
             .listen("0.0.0.0", 8000);
     } catch (std::exception& e) {
-        std::cerr << "Fatal error: " << e.what() << std::endl;
+        logger->error("Fatal error: {}", e.what());
         cpptrace::generate_trace().print();
         exit(EXIT_FAILURE);
     }
