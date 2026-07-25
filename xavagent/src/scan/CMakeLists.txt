@@ -6,6 +6,5 @@ target_sources(scan PRIVATE
 target_link_libraries(scan PUBLIC cryptopp::cryptopp)
 target_link_libraries(scan PUBLIC outcome::hl)
 target_link_libraries(scan PUBLIC protobufs)
-target_link_libraries(scan PUBLIC global_context)
 target_link_libraries(scan PUBLIC PkgConfig::YARA)
 target_link_libraries(scan PUBLIC xavagent_includes)
