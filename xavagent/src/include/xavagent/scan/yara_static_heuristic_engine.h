@@ -1,9 +1,11 @@
 #pragma once
 
+#include <spdlog/spdlog.h>
 #include <yara.h>
 
 #include <format>
 #include <iostream>
+#include <memory>
 
 #include "xavagent/scan/static_heuristic.h"
 
@@ -33,6 +35,7 @@ private:
                                   void* message_data, void* user_data);
 
 private:
+    std::shared_ptr<spdlog::logger> logger_;
     YR_COMPILER* yara_compiler_;
     YR_RULES* yara_rules_;
 };

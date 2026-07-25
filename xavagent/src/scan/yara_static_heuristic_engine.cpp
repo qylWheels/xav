@@ -1,6 +1,8 @@
 #include "xavagent/scan/yara_static_heuristic_engine.h"
 
 #include <fcntl.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/spdlog.h>
 #include <unistd.h>
 #include <yara.h>
 
@@ -17,6 +19,10 @@ namespace xavagent {
 
 YaraStaticHeuristicEngine::YaraStaticHeuristicEngine()
     : yara_compiler_(nullptr), yara_rules_(nullptr) {
+    this->logger_ =
+        spdlog::stderr_color_mt("yara static heuristic engine logger");
+    this->logger_->set_level(spdlog::level::info);
+
     int ret;
 
     yr_initialize();
