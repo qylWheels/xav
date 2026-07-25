@@ -11,6 +11,7 @@
 namespace xavagent {
 ExactHashEngine::ExactHashEngine() {
     this->logger_ = spdlog::stdout_color_mt("exact_hash_engine");
+    this->logger_->set_level(spdlog::level::info);
 }
 
 ExactHashEngine::~ExactHashEngine() {}
