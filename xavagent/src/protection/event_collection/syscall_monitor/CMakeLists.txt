@@ -66,5 +66,7 @@ target_sources(syscall_monitor PRIVATE syscall_monitor.cpp)
 add_dependencies(syscall_monitor syscall_monitor_skeleton_header)
 target_include_directories(syscall_monitor PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(syscall_monitor
-    PUBLIC xavagent_includes global_context elf bpf z httplib::httplib
+    PUBLIC
+    xavagent_includes elf bpf z httplib::httplib
+    spdlog::spdlog
 )
