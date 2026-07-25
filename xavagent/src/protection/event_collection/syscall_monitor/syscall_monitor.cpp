@@ -56,7 +56,7 @@ void SyscallMonitor::stop_monitoring() {
 
 std::span<Event> SyscallMonitor::all_events() const {}
 
-std::size_t SyscallMonitor::event_count() const {}
+std::size_t SyscallMonitor::event_count() const { return this->events_.size(); }
 
 int SyscallMonitor::event_handler(void* ctx, void* data, std::size_t size) {
     SyscallMonitor* self = static_cast<SyscallMonitor*>(ctx);
