@@ -8,5 +8,7 @@ target_link_libraries(
     spdlog::spdlog
     Boost::beast
     httplib::httplib
+    scan
+    protection
 )
 target_link_libraries(global_context PUBLIC xavagent_includes)
