@@ -3,6 +3,7 @@
 #include <cryptopp/files.h>
 #include <cryptopp/sha.h>
 #include <leveldb/db.h>
+#include <spdlog/spdlog.h>
 
 #include <filesystem>
 #include <optional>
@@ -56,5 +57,8 @@ public:
 
 private:
     std::string calc_sha256_of_file(const char* path) const;
+
+private:
+    std::shared_ptr<spdlog::logger> logger_;
 };
 }  // namespace xavagent

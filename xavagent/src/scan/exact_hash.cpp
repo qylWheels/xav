@@ -2,13 +2,16 @@
 
 #include <cryptopp/filters.h>
 #include <cryptopp/hex.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
 
 #include <format>
 
 #include "malware_info.pb.h"
 
 namespace xavagent {
-ExactHashEngine::ExactHashEngine() {}
+ExactHashEngine::ExactHashEngine() {
+    this->logger_ = spdlog::stdout_color_mt("exact_hash_engine");
+}
 
 ExactHashEngine::~ExactHashEngine() {}
 
@@ -23,7 +26,8 @@ std::optional<malware_info::MalwareInfo> ExactHashEngine::scan(
     try {
         sha256 = this->calc_sha256_of_file(path.c_str());
     } catch (const CryptoPP::Exception&) {
-        std::cerr << std::format("Error: failed to scan {}.\n", path.string());
+        this->logger_->error(
+            std::format("Error: failed to scan {}", path.string()));
         return std::nullopt;
     }
     std::string raw_malware_info;
