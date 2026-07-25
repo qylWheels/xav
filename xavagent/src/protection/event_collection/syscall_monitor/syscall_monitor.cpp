@@ -61,8 +61,7 @@ std::size_t SyscallMonitor::event_count() const {}
 int SyscallMonitor::event_handler(void* ctx, void* data, std::size_t size) {
     SyscallMonitor* self = static_cast<SyscallMonitor*>(ctx);
     struct RawSyscallEvent* e = static_cast<struct RawSyscallEvent*>(data);
-    self->logger_->info(
-        std::format("Pid {}, Syscall {}", e->pid, e->syscall_id));
+    self->events_.push_back(*e);
     return 0;
 }
 }  // namespace xavagent
