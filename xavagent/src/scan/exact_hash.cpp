@@ -5,10 +5,27 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 
 #include <format>
+#include <stdexcept>
 
 #include "malware_info.pb.h"
 
 namespace xavagent {
+ExactHashEngineDatabase::~ExactHashEngineDatabase() { delete this->db; }
+
+leveldb::DB* ExactHashEngineDatabase::get_db() {
+    static ExactHashEngineDatabase db;
+    return db.db;
+}
+
+ExactHashEngineDatabase::ExactHashEngineDatabase() {
+    // Initialize db.
+    leveldb::Status status =
+        leveldb::DB::Open(leveldb::Options{}, XAV_EXACT_HASH_DB, &this->db);
+    if (!status.ok()) {
+        throw std::runtime_error("leveldb::DB::Open failed");
+    }
+}
+
 ExactHashEngine::ExactHashEngine() {
     this->logger_ = spdlog::stdout_color_mt("exact_hash_engine");
     this->logger_->set_level(spdlog::level::info);

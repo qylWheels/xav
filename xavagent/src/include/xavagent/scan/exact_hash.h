@@ -7,7 +7,6 @@
 
 #include <filesystem>
 #include <optional>
-#include <stdexcept>
 #include <string>
 
 #include "malware_info.pb.h"
@@ -19,23 +18,13 @@
 namespace xavagent {
 class ExactHashEngineDatabase {
 public:
-    ~ExactHashEngineDatabase() { delete this->db; }
+    ~ExactHashEngineDatabase();
 
 public:
-    static leveldb::DB* get_db() {
-        static ExactHashEngineDatabase db;
-        return db.db;
-    }
+    static leveldb::DB* get_db();
 
 private:
-    ExactHashEngineDatabase() {
-        // Initialize db.
-        leveldb::Status status =
-            leveldb::DB::Open(leveldb::Options{}, XAV_EXACT_HASH_DB, &this->db);
-        if (!status.ok()) {
-            throw std::runtime_error("leveldb::DB::Open failed");
-        }
-    }
+    ExactHashEngineDatabase();
 
 private:
     leveldb::DB* db;
