@@ -6,7 +6,6 @@
 #include <format>
 
 #include "malware_info.pb.h"
-#include "xavagent/global_context/global_context.h"
 
 namespace xavagent {
 ExactHashEngine::ExactHashEngine() {}
@@ -28,7 +27,7 @@ std::optional<malware_info::MalwareInfo> ExactHashEngine::scan(
         return std::nullopt;
     }
     std::string raw_malware_info;
-    leveldb::Status status = GlobalContext::get_global_context().db()->Get(
+    leveldb::Status status = ExactHashEngineDatabase::get_db()->Get(
         leveldb::ReadOptions{}, sha256, &raw_malware_info);
     if (!status.ok()) {
         return std::nullopt;

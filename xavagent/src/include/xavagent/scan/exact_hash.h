@@ -6,11 +6,40 @@
 
 #include <filesystem>
 #include <optional>
+#include <stdexcept>
 #include <string>
 
 #include "malware_info.pb.h"
 
+// FIXME: Only for tests.
+#define XAV_EXACT_HASH_DB \
+    "/home/qyl/projects/xav/xavdb/db/malware-bazaar-sha256.db"
+
 namespace xavagent {
+class ExactHashEngineDatabase {
+public:
+    ~ExactHashEngineDatabase() { delete this->db; }
+
+public:
+    static leveldb::DB* get_db() {
+        static ExactHashEngineDatabase db;
+        return db.db;
+    }
+
+private:
+    ExactHashEngineDatabase() {
+        // Initialize db.
+        leveldb::Status status =
+            leveldb::DB::Open(leveldb::Options{}, XAV_EXACT_HASH_DB, &this->db);
+        if (!status.ok()) {
+            throw std::runtime_error("leveldb::DB::Open failed");
+        }
+    }
+
+private:
+    leveldb::DB* db;
+};
+
 class ExactHashEngine {
 public:
     ExactHashEngine();
