@@ -10,5 +10,6 @@ target_link_libraries(
     protection PUBLIC
     rapidfuzz::rapidfuzz
     protobufs
+    spdlog::spdlog
 )
 target_link_libraries(protection PUBLIC xavagent_includes)
