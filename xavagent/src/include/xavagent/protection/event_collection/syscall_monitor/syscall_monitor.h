@@ -1,5 +1,9 @@
 #pragma once
 
+#include <spdlog/spdlog.h>
+
+#include <memory>
+
 #include "syscall_monitor.skel.h"
 #include "xavagent/protection/behavior_monitor.h"
 
@@ -23,6 +27,7 @@ private:
     static int event_handler(void* ctx, void* data, std::size_t size);
 
 private:
+    std::shared_ptr<spdlog::logger> logger_;
     syscall_monitor_bpf* skel_;
     ring_buffer* rb_;
 };
