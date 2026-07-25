@@ -41,7 +41,7 @@ std::optional<malware_info::MalwareInfo> ExactHashEngine::scan(
 std::string ExactHashEngine::calc_sha256_of_file(const char* path) const {
     std::string digest;
     CryptoPP::SHA256 sha256;
-    CryptoPP::FileSource{
+    CryptoPP::FileSource file_source{
         path, true,
         new CryptoPP::HashFilter(
             sha256,
