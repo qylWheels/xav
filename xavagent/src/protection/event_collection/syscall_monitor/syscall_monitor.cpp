@@ -6,7 +6,6 @@
 #include <sys/resource.h>
 #include <unistd.h>
 
-#include <format>
 #include <stdexcept>
 
 #include "syscall_monitor.skel.h"
