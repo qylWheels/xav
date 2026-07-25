@@ -1,13 +1,11 @@
 #pragma once
 
 #include <httplib.h>
-#include <spdlog/spdlog.h>
 
 #include <boost/asio/connect.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
-#include <memory>
 
 #include "xavagent/protection/behavior_monitor.h"
 #include "xavagent/protection/on_access_scanner.h"
@@ -45,8 +43,6 @@ public:
 
     websocket::stream<tcp::socket>& ws() { return this->ws_; }
 
-    std::shared_ptr<spdlog::logger>& logger() { return this->logger_; }
-
     httplib::Server& httpserver() { return this->httpserver_; }
 
 private:
@@ -64,7 +60,6 @@ private:
     ExactHashEngine exact_hash_engine_;
     StaticHeuristicEngineManager static_heur_engine_manager_;
     websocket::stream<tcp::socket> ws_;
-    std::shared_ptr<spdlog::logger> logger_;
     httplib::Server httpserver_;
 };
 }  // namespace xavagent
