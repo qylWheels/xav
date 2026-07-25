@@ -8,3 +8,7 @@ target_link_libraries(scan PUBLIC outcome::hl)
 target_link_libraries(scan PUBLIC protobufs)
 target_link_libraries(scan PUBLIC PkgConfig::YARA)
 target_link_libraries(scan PUBLIC xavagent_includes)
+target_link_libraries(scan
+    PUBLIC
+    spdlog::spdlog leveldb::leveldb
+)
