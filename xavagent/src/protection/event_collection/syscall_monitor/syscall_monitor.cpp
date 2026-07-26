@@ -6,6 +6,10 @@
 #include <sys/resource.h>
 #include <unistd.h>
 
+#include <algorithm>
+#include <numeric>
+#include <optional>
+#include <pfs/procfs.hpp>
 #include <stdexcept>
 
 #include "syscall_monitor.skel.h"
@@ -53,14 +57,44 @@ void SyscallMonitor::stop_monitoring() {
     syscall_monitor_bpf::detach(this->skel_);
 }
 
-std::span<Event> SyscallMonitor::all_events() const {}
+std::span<Event> SyscallMonitor::all_events() const { return {}; }
+
+const std::unordered_map<Process, std::deque<Event>>&
+SyscallMonitor::all_events_of_procs() const {
+    return this->events_;
+}
 
 std::size_t SyscallMonitor::event_count() const { return this->events_.size(); }
 
 int SyscallMonitor::event_handler(void* ctx, void* data, std::size_t size) {
     SyscallMonitor* self = static_cast<SyscallMonitor*>(ctx);
-    struct RawSyscallEvent* e = static_cast<struct RawSyscallEvent*>(data);
-    self->events_.push_back(*e);
+    RawSyscallEvent* e = static_cast<RawSyscallEvent*>(data);
+    Process proc{.pid = e->pid};
+    try {
+        proc.ppid = pfs::procfs().get_task(e->pid).get_stat().ppid;
+    } catch (...) {
+        proc.ppid = std::nullopt;
+    }
+    try {
+        proc.start_time_tick =
+            pfs::procfs().get_task(e->pid).get_stat().starttime;
+    } catch (...) {
+        proc.start_time_tick = std::nullopt;
+    }
+    try {
+        proc.exe_path = pfs::procfs().get_task(e->pid).get_exe();
+    } catch (...) {
+        proc.exe_path = std::nullopt;
+    }
+    try {
+        const auto cmd_args = pfs::procfs().get_task(e->pid).get_cmdline();
+        proc.cmdline = std::accumulate(
+            cmd_args.begin(), cmd_args.end(), std::string(),
+            [](std::string acc, std::string arg) { return acc + " " + arg; });
+    } catch (...) {
+        proc.cmdline = std::nullopt;
+    }
+    self->events_[proc].push_back(*e);
     return 0;
 }
 }  // namespace xavagent
