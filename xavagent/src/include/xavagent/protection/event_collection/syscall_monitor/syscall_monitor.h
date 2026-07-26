@@ -22,10 +22,10 @@ public:
     SyscallMonitor& operator=(SyscallMonitor&&) = delete;
 
 public:
-    virtual void start_monitoring();
-    virtual void stop_monitoring();
-    virtual std::span<Event> all_events() const;
-    virtual std::size_t event_count() const;
+    virtual void start_monitoring() override;
+    virtual void stop_monitoring() override;
+    virtual std::span<Event> all_events() const override;
+    virtual std::size_t event_count() const override;
     virtual const std::unordered_map<Process, std::deque<Event>>&
     all_events_of_procs() const override;
 
