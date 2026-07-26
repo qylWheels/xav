@@ -35,6 +35,6 @@ private:
     std::shared_ptr<spdlog::logger> logger_;
     syscall_monitor_bpf* skel_;
     ring_buffer* rb_;
-    std::unordered_map<Process, std::deque<RawSyscallEvent>> events_;
+    std::unordered_map<Process, std::deque<Event>> events_;
 };
 }  // namespace xavagent
