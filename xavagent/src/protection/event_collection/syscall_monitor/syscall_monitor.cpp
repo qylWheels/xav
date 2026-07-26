@@ -110,11 +110,13 @@ int SyscallMonitor::event_handler(void* ctx, void* data, std::size_t size) {
     read_event.count = e->args[2];
     read_event.ret = e->ret;
     try {
-        read_event.path = pfs::procfs()
-                              .get_task(e->pid)
-                              .get_fds()
-                              .find(read_event.fd)
-                              ->second.get_target();
+        auto fds = pfs::procfs().get_task(e->pid).get_fds();
+        auto it = fds.find(read_event.fd);
+        if (it != fds.end()) {
+            read_event.path = it->second.get_target();
+        } else {
+            read_event.path = std::nullopt;
+        }
     } catch (...) {
         read_event.path = std::nullopt;
     }
