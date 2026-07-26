@@ -21,6 +21,16 @@ find_package(httplib CONFIG REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(YARA REQUIRED IMPORTED_TARGET yara)
 
+# Packages from cmake.
+include(FetchContent)
+set(pfs_BUILD_SHARED_LIBS ON) # Build shared library for pfs.
+FetchContent_Declare(
+  pfs
+  GIT_REPOSITORY https://github.com/dtrugman/pfs.git
+  GIT_TAG        v0.15.0
+)
+FetchContent_MakeAvailable(pfs)
+
 # Subdirectories.
 add_subdirectory(src)
 
