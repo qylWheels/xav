@@ -69,4 +69,5 @@ target_link_libraries(syscall_monitor
     PUBLIC
     xavagent_includes elf bpf z httplib::httplib
     spdlog::spdlog
+    pfs
 )
