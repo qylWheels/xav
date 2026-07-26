@@ -1,4 +1,4 @@
-add_library(levenshtein levenshtein.cpp)
+add_library(levenshtein SHARED levenshtein.cpp)
 target_link_libraries(levenshtein
     PUBLIC
     xavagent_includes
