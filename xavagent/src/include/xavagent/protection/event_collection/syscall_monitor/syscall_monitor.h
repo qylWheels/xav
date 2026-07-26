@@ -9,7 +9,6 @@
 #include "syscall_monitor.skel.h"
 #include "xavagent/protection/behavior_monitor.h"
 #include "xavagent/protection/event.h"
-#include "xavagent/protection/event_collection/syscall_monitor/raw_syscall_event.h"
 
 namespace xavagent {
 class SyscallMonitor : public IBehaviorMonitor {
