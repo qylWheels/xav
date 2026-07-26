@@ -27,7 +27,7 @@ public:
     static GlobalContext& get_global_context();
     Scanner& scanner();
     OnAccessScanner& on_access_scanner();
-    BehaviorMonitorManager& behavior_monitor();
+    Levenshtein& behavior_monitor();
     ExactHashEngine& exact_hash_engine();
     StaticHeuristicEngineManager& static_heur_engine_manager();
     websocket::stream<tcp::socket>& ws();
@@ -43,7 +43,7 @@ private:
 private:
     Scanner scanner_;
     OnAccessScanner on_access_scanner_;
-    BehaviorMonitorManager behavior_monitor_;
+    Levenshtein behavior_monitor_;
     ExactHashEngine exact_hash_engine_;
     StaticHeuristicEngineManager static_heur_engine_manager_;
     websocket::stream<tcp::socket> ws_;

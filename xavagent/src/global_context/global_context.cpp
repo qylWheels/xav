@@ -21,7 +21,7 @@ OnAccessScanner& GlobalContext::on_access_scanner() {
     return this->on_access_scanner_;
 }
 
-BehaviorMonitorManager& GlobalContext::behavior_monitor() {
+Levenshtein& GlobalContext::behavior_monitor() {
     return this->behavior_monitor_;
 }
 
