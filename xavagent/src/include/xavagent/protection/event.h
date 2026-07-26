@@ -1,6 +1,7 @@
 #pragma once
 
 #include <bitset>
+#include <cstdint>
 #include <filesystem>
 #include <optional>
 #include <string>
@@ -9,9 +10,9 @@
 
 namespace xavagent {
 struct Process {
-    int pid;
-    std::optional<int> ppid;
-    std::optional<unsigned long long> start_time_tick;
+    std::optional<std::int64_t> pid;
+    std::optional<std::int64_t> ppid;
+    std::optional<std::uint64_t> start_time_tick;
     std::optional<std::string> exe_path;
     std::optional<std::string> cmdline;
 
@@ -66,9 +67,9 @@ namespace std {
 template <>
 struct hash<xavagent::Process> {
     std::size_t operator()(const xavagent::Process& p) const {
-        std::size_t seed = std::hash<int>()(p.pid);
+        std::size_t seed = std::hash<std::optional<std::int64_t>>{}(p.pid);
         if (p.start_time_tick.has_value()) {
-            seed ^= std::hash<unsigned long long>()(p.start_time_tick.value());
+            seed ^= std::hash<std::uint64_t>()(p.start_time_tick.value());
         }
         return seed;
     }
