@@ -1,8 +1,11 @@
 #pragma once
 
+#include <unistd.h>
+
 #include <bitset>
 #include <cstdint>
 #include <filesystem>
+#include <iterator>
 #include <optional>
 #include <string>
 #include <variant>
@@ -51,9 +54,10 @@ struct FileEvent {
 struct ReadSyscallEvent {
     int fd;
     std::optional<std::filesystem::path> path;
-    char* buf;
+    void* buf;
     std::optional<std::vector<char>> buf_content;
     std::size_t count;
+    ::ssize_t ret;
 };
 
 using SyscallEvent = std::variant<ReadSyscallEvent>;
