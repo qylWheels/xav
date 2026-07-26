@@ -17,9 +17,7 @@ struct Process {
     std::optional<std::string> cmdline;
 
     bool operator==(const Process& other) const {
-        return pid == other.pid && ppid == other.ppid &&
-               start_time_tick == other.start_time_tick &&
-               exe_path == other.exe_path && cmdline == other.cmdline;
+        return pid == other.pid && start_time_tick == other.start_time_tick;
     }
 };
 
