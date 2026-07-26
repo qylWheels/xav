@@ -20,8 +20,10 @@ public:
 public:
     virtual void start_monitoring() = 0;
     virtual void stop_monitoring() = 0;
+    [[deprecated("Use all_procs_events() instead")]]
     virtual std::span<Event> all_events() const = 0;
-    virtual std::size_t event_count() const = 0;
+    virtual const std::unordered_map<Process, std::deque<Event>>&
+    all_events_of_procs() const = 0;
 };
 
 class BehaviorMonitorManager {
