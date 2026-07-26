@@ -112,8 +112,9 @@ int SyscallMonitor::event_handler(void* ctx, void* data, std::size_t size) {
     try {
         read_event.path = pfs::procfs()
                               .get_task(e->pid)
-                              .get_fds()[read_event.fd]
-                              .get_target();
+                              .get_fds()
+                              .find(read_event.fd)
+                              ->second.get_target();
     } catch (...) {
         read_event.path = std::nullopt;
     }
