@@ -64,8 +64,6 @@ SyscallMonitor::all_events_of_procs() const {
     return this->events_;
 }
 
-std::size_t SyscallMonitor::event_count() const { return this->events_.size(); }
-
 int SyscallMonitor::event_handler(void* ctx, void* data, std::size_t size) {
     SyscallMonitor* self = static_cast<SyscallMonitor*>(ctx);
     RawSyscallEvent* e = static_cast<RawSyscallEvent*>(data);
