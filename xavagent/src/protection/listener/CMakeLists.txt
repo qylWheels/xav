@@ -5,3 +5,6 @@ target_link_libraries(levenshtein
     protection
     outcome::hl
 )
+
+add_library(listener SHARED)
+target_link_libraries(listener PUBLIC levenshtein)
