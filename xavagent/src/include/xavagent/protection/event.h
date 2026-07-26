@@ -5,7 +5,6 @@
 #include <bitset>
 #include <cstdint>
 #include <filesystem>
-#include <iterator>
 #include <optional>
 #include <string>
 #include <variant>
