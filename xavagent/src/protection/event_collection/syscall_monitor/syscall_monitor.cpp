@@ -11,15 +11,18 @@
 
 #include <numeric>
 #include <optional>
+#include <outcome/success_failure.hpp>
 #include <pfs/procfs.hpp>
 #include <stdexcept>
+#include <stop_token>
+#include <system_error>
 
 #include "syscall_monitor.skel.h"
 #include "xavagent/protection/event.h"
 #include "xavagent/protection/event_collection/syscall_monitor/raw_syscall_event.h"
 
 namespace xavagent {
-SyscallMonitor::SyscallMonitor() : rb_(nullptr) {
+SyscallMonitor::SyscallMonitor() : rb_(nullptr), status_(Status::Stopped) {
     this->logger_ = spdlog::stderr_color_mt("syscall_monitor");
     this->logger_->set_level(spdlog::level::info);
 
@@ -37,34 +40,78 @@ SyscallMonitor::~SyscallMonitor() {
     syscall_monitor_bpf::destroy(this->skel_);
 }
 
-void SyscallMonitor::start_monitoring() {
+outcome::result<void> SyscallMonitor::start() {
+    if (this->status_ != Status::Stopped) {
+        return outcome::failure(
+            std::make_error_code(std::errc::device_or_resource_busy));
+    }
+
     int ret = syscall_monitor_bpf::attach(this->skel_);
     if (ret) {
-        throw std::runtime_error("Failed to attach BPF skeleton");
+        return outcome::failure(std::make_error_code(std::errc::io_error));
     }
     this->rb_ = ring_buffer__new(bpf_map__fd(this->skel_->maps.rb),
                                  SyscallMonitor::event_handler, this, nullptr);
-    while (true) {
-        int err = ring_buffer__poll(this->rb_, 1000);
-        if (err < 0) {
-            throw std::runtime_error("Failed to poll ring buffer");
-        }
+    if (!this->rb_) {
+        return outcome::failure(std::make_error_code(std::errc::io_error));
     }
+
+    // Start monitoring in a separate thread.
+    this->monitor_thread_ = std::jthread([this](std::stop_token stop) {
+        while (!stop.stop_requested()) {
+            int err = ring_buffer__poll(this->rb_, 1000);
+            if (err < 0) {
+                this->logger_->warn("Failed to poll ring buffer");
+            }
+        }
+    });
+
+    this->status_ = Status::Started;
+
+    return outcome::success();
 }
 
-void SyscallMonitor::stop_monitoring() {
+outcome::result<void> SyscallMonitor::stop() {
+    if (this->status_ != Status::Started) {
+        return outcome::failure(
+            std::make_error_code(std::errc::no_such_device_or_address));
+    }
+
+    this->monitor_thread_.request_stop();
+
     if (this->rb_) {
         ring_buffer__free(this->rb_);
         this->rb_ = nullptr;
     }
+
     syscall_monitor_bpf::detach(this->skel_);
+
+    this->status_ = Status::Stopped;
+
+    return outcome::success();
 }
 
-std::span<Event> SyscallMonitor::all_events() const { return {}; }
+std::uint64_t SyscallMonitor::lost_event_count() {
+    return this->lost_event_count_;
+}
 
-const std::unordered_map<Process, std::deque<Event>>&
-SyscallMonitor::all_events_of_procs() const {
-    return this->events_;
+outcome::result<void> SyscallMonitor::listener_register(
+    std::shared_ptr<IEventListener> listener) {
+    if (this->listeners_.find(listener) != this->listeners_.end()) {
+        return outcome::failure(std::make_error_code(std::errc::file_exists));
+    }
+    this->listeners_.insert(listener);
+    return outcome::success();
+}
+
+outcome::result<void> SyscallMonitor::listener_unregister(
+    std::shared_ptr<IEventListener> listener) {
+    if (this->listeners_.find(listener) == this->listeners_.end()) {
+        return outcome::failure(
+            std::make_error_code(std::errc::no_such_file_or_directory));
+    }
+    this->listeners_.erase(listener);
+    return outcome::success();
 }
 
 int SyscallMonitor::event_handler(void* ctx, void* data, std::size_t size) {
@@ -136,8 +183,15 @@ int SyscallMonitor::event_handler(void* ctx, void* data, std::size_t size) {
         read_event.buf_content = std::nullopt;
     }
 
-    // Store event.
-    self->events_[proc].push_back(read_event);
+    // Send event.
+    for (auto listener : self->listeners_) {
+        if (listener->is_accept(read_event)) {
+            auto ret = listener->accept(read_event);
+            if (!ret) {
+                ++self->lost_event_count_;
+            }
+        }
+    }
 
     return 0;
 }
