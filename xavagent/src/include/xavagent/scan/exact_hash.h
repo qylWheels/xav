@@ -10,6 +10,7 @@
 #include <string>
 
 #include "malware_info.pb.h"
+#include "xavagent/scan/scan_interfaces.h"
 
 // FIXME: Only for tests.
 #define XAV_EXACT_HASH_DB \
@@ -30,7 +31,7 @@ private:
     leveldb::DB* db;
 };
 
-class ExactHashEngine {
+class ExactHashEngine : public IScanEngine {
 public:
     ExactHashEngine();
     ~ExactHashEngine();
@@ -40,9 +41,10 @@ public:
     ExactHashEngine& operator=(ExactHashEngine&&) = delete;
 
 public:
-    std::optional<malware_info::MalwareInfo> scan(const std::string& path);
-    std::optional<malware_info::MalwareInfo> scan(
-        const std::filesystem::path& path);
+    outcome::result<std::optional<malware_info::MalwareInfo>> scan(
+        const std::string& path);
+    outcome::result<std::optional<malware_info::MalwareInfo>> scan(
+        const std::filesystem::path& path) override;
 
 private:
     std::string calc_sha256_of_file(const char* path) const;

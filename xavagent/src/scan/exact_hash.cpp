@@ -5,6 +5,7 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 
 #include <format>
+#include <outcome/success_failure.hpp>
 #include <stdexcept>
 
 #include "malware_info.pb.h"
@@ -33,12 +34,12 @@ ExactHashEngine::ExactHashEngine() {
 
 ExactHashEngine::~ExactHashEngine() {}
 
-std::optional<malware_info::MalwareInfo> ExactHashEngine::scan(
+outcome::result<std::optional<malware_info::MalwareInfo>> ExactHashEngine::scan(
     const std::string& path) {
     return this->scan(std::filesystem::path{path});
 }
 
-std::optional<malware_info::MalwareInfo> ExactHashEngine::scan(
+outcome::result<std::optional<malware_info::MalwareInfo>> ExactHashEngine::scan(
     const std::filesystem::path& path) {
     std::string sha256;
     try {
@@ -46,17 +47,22 @@ std::optional<malware_info::MalwareInfo> ExactHashEngine::scan(
     } catch (const CryptoPP::Exception&) {
         this->logger_->error(
             std::format("Error: failed to scan {}", path.string()));
-        return std::nullopt;
+        return outcome::failure(std::make_error_code(std::errc::io_error));
     }
     std::string raw_malware_info;
     leveldb::Status status = ExactHashEngineDatabase::get_db()->Get(
         leveldb::ReadOptions{}, sha256, &raw_malware_info);
     if (!status.ok()) {
-        return std::nullopt;
+        return outcome::failure(std::make_error_code(std::errc::io_error));
     } else {
         malware_info::MalwareInfo malware_info;
-        (void)malware_info.ParseFromString(raw_malware_info);
-        return malware_info;
+        auto result = malware_info.ParseFromString(raw_malware_info);
+        if (!result) {
+            return outcome::failure(
+                std::make_error_code(std::errc::invalid_argument));
+        } else {
+            return outcome::success(malware_info);
+        }
     }
 }
 
