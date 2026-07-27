@@ -1,6 +1,6 @@
 # Subdirectories.
-add_subdirectory(provider)
-add_subdirectory(listener)
+add_subdirectory(event_provider)
+add_subdirectory(event_listener)
 
 add_library(protection SHARED)
 target_sources(protection PRIVATE
@@ -10,8 +10,8 @@ target_link_libraries(
     protection PUBLIC
     rapidfuzz::rapidfuzz
     protobufs
-    provider
-    listener
+    event_provider
+    event_listener
     spdlog::spdlog
     outcome::hl
 )

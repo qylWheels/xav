@@ -6,5 +6,5 @@ target_link_libraries(levenshtein
     outcome::hl
 )
 
-add_library(listener SHARED)
-target_link_libraries(listener PUBLIC levenshtein)
+add_library(event_listener SHARED)
+target_link_libraries(event_listener PUBLIC levenshtein)
