@@ -34,8 +34,8 @@ SyscallMonitor::SyscallMonitor() : rb_(nullptr), status_(Status::Stopped) {
 }
 
 SyscallMonitor::~SyscallMonitor() {
-    if (this->rb_) {
-        ring_buffer__free(this->rb_);
+    if (this->status_ == Status::Started) {
+        (void)this->stop();
     }
     syscall_monitor_bpf::destroy(this->skel_);
 }
@@ -80,10 +80,8 @@ outcome::result<void> SyscallMonitor::stop() {
     this->monitor_thread_.request_stop();
     this->monitor_thread_.join();
 
-    if (this->rb_) {
-        ring_buffer__free(this->rb_);
-        this->rb_ = nullptr;
-    }
+    ring_buffer__free(this->rb_);
+    this->rb_ = nullptr;
 
     syscall_monitor_bpf::detach(this->skel_);
 
