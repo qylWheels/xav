@@ -5,9 +5,13 @@
 #include <csignal>
 #include <exception>
 #include <iostream>
+#include <memory>
 #include <thread>
 
 #include "xavagent/global_context/global_context.h"
+#include "xavagent/protection/behavior_monitor.h"
+#include "xavagent/protection/event_listener/levenshtein.h"
+#include "xavagent/protection/event_provider/syscall_monitor/syscall_monitor.h"
 #include "xavagent/scan/yara_static_heuristic_engine.h"
 
 namespace http = beast::http;
@@ -53,6 +57,19 @@ void init() {
     xavagent::GlobalContext::get_global_context()
         .static_heur_engine_manager()
         .add_engine(std::make_shared<xavagent::YaraStaticHeuristicEngine>());
+
+    // Event providers.
+    std::shared_ptr<xavagent::IEventProvider> syscall_monitor =
+        std::make_shared<xavagent::SyscallMonitor>();
+
+    // Event listeners.
+    std::shared_ptr<xavagent::IEventListener> levenshtein_listener =
+        std::make_shared<xavagent::Levenshtein>();
+    auto ret = syscall_monitor->listener_register(levenshtein_listener);
+    if (!ret) {
+        logger->error("Failed to register listener: {}", ret.error().message());
+        return;
+    }
 
     // Start protection.
     std::jthread on_access_scanner_thread([]() {
