@@ -19,4 +19,16 @@ public:
     virtual outcome::result<std::optional<malware_info::MalwareInfo>> scan(
         const std::filesystem::path& path) = 0;
 };
+
+class IScanStrategy {
+public:
+    virtual ~IScanStrategy() = default;
+
+public:
+    // Might return multiple result if strategy is constructed by multiple
+    // scan engines.
+    virtual outcome::result<
+        std::vector<outcome::result<std::optional<malware_info::MalwareInfo>>>>
+    scan(const std::filesystem::path& path) = 0;
+};
 }  // namespace xavagent
