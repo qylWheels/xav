@@ -72,6 +72,12 @@ void init() {
     }
 
     // Start protection.
+    ret = syscall_monitor->start();
+    if (!ret) {
+        logger->error("Failed to start syscall monitor: {}",
+                      ret.error().message());
+        return;
+    }
     std::jthread on_access_scanner_thread([]() {
         xavagent::GlobalContext::get_global_context()
             .on_access_scanner()
