@@ -78,6 +78,7 @@ outcome::result<void> SyscallMonitor::stop() {
     }
 
     this->monitor_thread_.request_stop();
+    this->monitor_thread_.join();
 
     if (this->rb_) {
         ring_buffer__free(this->rb_);
