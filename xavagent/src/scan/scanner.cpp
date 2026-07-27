@@ -17,11 +17,12 @@
 #define MAX_FILES_IN_QUEUE 8192
 
 namespace xavagent {
-Scanner::Scanner()
+Scanner::Scanner(IScanStrategy& scan_strategy)
     : traverse_finished_(false),
       scan_status_(ScanStatus::Stopped),
       total_file_count_{0},
-      scanned_file_count_{0} {
+      scanned_file_count_{0},
+      scan_strategy_(&scan_strategy) {
     this->logger_ = spdlog::stdout_color_mt("scanner");
     this->logger_->set_level(spdlog::level::info);
 }
@@ -166,6 +167,12 @@ void Scanner::scan(const std::filesystem::path& path, int nthreads) {
     this->curr_scanning_file_.clear();
     lock.unlock();
 }
+
+void Scanner::set_scan_strategy(IScanStrategy& scan_strategy) {
+    this->scan_strategy_ = &scan_strategy;
+}
+
+IScanStrategy* Scanner::get_scan_strategy() { return this->scan_strategy_; }
 
 void Scanner::ws_send_scan_status() {
     // Construct ScanStatus.

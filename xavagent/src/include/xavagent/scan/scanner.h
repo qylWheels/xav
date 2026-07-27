@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "malware_info.pb.h"
+#include "xavagent/scan/scan_interfaces.h"
 
 namespace xavagent {
 struct MalwareInfo {
@@ -26,7 +27,7 @@ enum class ScanStatus {
 
 class Scanner {
 public:
-    Scanner();
+    Scanner(IScanStrategy& scan_strategy);
     ~Scanner();
     Scanner(const Scanner&) = delete;
     Scanner& operator=(const Scanner&) = delete;
@@ -39,6 +40,10 @@ public:
     void scan(const std::filesystem::path& path, int nthreads);
 
 public:
+    void set_scan_strategy(IScanStrategy& scan_strategy);
+    IScanStrategy* get_scan_strategy();
+
+public:  // Scan information getters.
     std::uint32_t total_file_count() {
         std::unique_lock<std::mutex> lock(this->mutex_);
         auto total_file_count = this->total_file_count_;
@@ -82,6 +87,7 @@ private:
     std::mutex mutex_;
     std::queue<std::filesystem::path> files_to_scan_;
     bool traverse_finished_;
+    IScanStrategy* scan_strategy_;
 
     // information of scan.
     ScanStatus scan_status_;
