@@ -22,8 +22,8 @@ void sigsegv_handler(int signum) {
     std::exit(signum);
 }
 
-void init() {
-    auto logger = spdlog::stdout_color_mt("init");
+void startup() {
+    auto logger = spdlog::stdout_color_mt(__FUNCTION__);
     logger->set_level(spdlog::level::info);
 
     // Websocket configs.
@@ -113,19 +113,20 @@ void init() {
         res.status = 200;
         return;
     });
+
+    logger->info(std::format("XAV agent started at {}:{}", "0.0.0.0", "8000"));
+    xavagent::GlobalContext::get_global_context().httpserver().listen("0.0.0.0",
+                                                                      8000);
+
+    return;
 }
 
 int main(int argc, const char* argv[]) {
     std::signal(SIGSEGV, sigsegv_handler);
-    auto logger = spdlog::stdout_color_mt("main");
+    auto logger = spdlog::stdout_color_mt(__FUNCTION__);
     logger->set_level(spdlog::level::info);
     try {
-        init();
-        logger->info(
-            std::format("XAV agent started at {}:{}", "0.0.0.0", "8000"));
-        return xavagent::GlobalContext::get_global_context()
-            .httpserver()
-            .listen("0.0.0.0", 8000);
+        startup();
     } catch (std::exception& e) {
         logger->error("Fatal error: {}", e.what());
         cpptrace::generate_trace().print();
