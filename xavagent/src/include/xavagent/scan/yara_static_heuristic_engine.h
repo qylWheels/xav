@@ -7,10 +7,10 @@
 #include <iostream>
 #include <memory>
 
-#include "xavagent/scan/static_heuristic.h"
+#include "xavagent/scan/scan_interfaces.h"
 
 namespace xavagent {
-class YaraStaticHeuristicEngine : public IStaticHeuristicEngine {
+class YaraStaticHeuristicEngine : public IScanEngine {
 public:
     YaraStaticHeuristicEngine();
     ~YaraStaticHeuristicEngine();
