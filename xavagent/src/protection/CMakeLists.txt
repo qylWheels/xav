@@ -10,8 +10,6 @@ target_link_libraries(
     protection PUBLIC
     rapidfuzz::rapidfuzz
     protobufs
-    event_provider
-    event_listener
     spdlog::spdlog
     outcome::hl
 )
