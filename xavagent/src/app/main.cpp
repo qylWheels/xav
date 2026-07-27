@@ -1,6 +1,13 @@
+#include <httplib.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
+#include <boost/asio.hpp>
+#include <boost/asio/connect.hpp>
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/beast/core.hpp>
+#include <boost/beast/websocket.hpp>
 #include <cpptrace/cpptrace.hpp>
 #include <csignal>
 #include <exception>
@@ -8,12 +15,18 @@
 #include <memory>
 #include <thread>
 
-#include "xavagent/global_context/global_context.h"
 #include "xavagent/protection/behavior_monitor.h"
 #include "xavagent/protection/event_listener/levenshtein.h"
 #include "xavagent/protection/event_provider/syscall_monitor/syscall_monitor.h"
+#include "xavagent/protection/on_access_scanner.h"
+#include "xavagent/scan/scanner.h"
+#include "xavagent/scan/static_heuristic.h"
 #include "xavagent/scan/yara_static_heuristic_engine.h"
 
+namespace beast = boost::beast;
+namespace websocket = beast::websocket;
+using tcp = boost::asio::ip::tcp;
+namespace net = boost::asio;
 namespace http = beast::http;
 
 void sigsegv_handler(int signum) {
@@ -27,8 +40,8 @@ void startup() {
     logger->set_level(spdlog::level::info);
 
     // Websocket configs.
-    auto& ws = xavagent::GlobalContext::get_global_context().ws();
-    auto& ioc = static_cast<net::io_context&>(ws.get_executor().context());
+    auto ioc = net::io_context{};
+    websocket::stream<tcp::socket> ws{net::make_strand(ioc)};
     std::string host = "0.0.0.0";
     std::string port = "8001";
     tcp::resolver resolver{ioc};
@@ -53,10 +66,10 @@ void startup() {
     });
     ws_read_thread.detach();
 
-    // Add Yara static heuristic engine to the manager.
-    xavagent::GlobalContext::get_global_context()
-        .static_heur_engine_manager()
-        .add_engine(std::make_shared<xavagent::YaraStaticHeuristicEngine>());
+    // Setup static heuristic engine manager.
+    xavagent::StaticHeuristicEngineManager static_heur_engine_manager;
+    static_heur_engine_manager.add_engine(
+        std::make_shared<xavagent::YaraStaticHeuristicEngine>());
 
     // Event providers.
     std::shared_ptr<xavagent::IEventProvider> syscall_monitor =
@@ -78,18 +91,16 @@ void startup() {
                       ret.error().message());
         return;
     }
-    std::jthread on_access_scanner_thread([]() {
-        xavagent::GlobalContext::get_global_context()
-            .on_access_scanner()
-            .start_monitoring();
-    });
-    on_access_scanner_thread.detach();
+    xavagent::OnAccessScanner on_access_scanner;
+    std::jthread on_access_scanner_thread(
+        [&on_access_scanner]() { on_access_scanner.start_monitoring(); });
 
     // Configure API server.
-    auto& server = xavagent::GlobalContext::get_global_context().httpserver();
-    server.Get("/scan/quick/start", [logger](const httplib::Request& req,
+    httplib::Server http_server;
+    xavagent::Scanner scanner;
+    http_server.Get("/scan/quick/start", [&logger, &scanner](
+                                             const httplib::Request& req,
                                              httplib::Response& res) {
-        auto& scanner = xavagent::GlobalContext::get_global_context().scanner();
         if (scanner.scan_status() != xavagent::ScanStatus::Stopped) {
             logger->warn("Quick scan is already running!");
             res.status = 403;
@@ -115,8 +126,7 @@ void startup() {
     });
 
     logger->info(std::format("XAV agent started at {}:{}", "0.0.0.0", "8000"));
-    xavagent::GlobalContext::get_global_context().httpserver().listen("0.0.0.0",
-                                                                      8000);
+    http_server.listen("0.0.0.0", 8000);
 
     return;
 }
