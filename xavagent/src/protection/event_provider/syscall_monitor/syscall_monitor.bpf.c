@@ -5,7 +5,7 @@
 #include <bpf/bpf_helpers.h>
 #include <bpf/bpf_tracing.h>
 
-#include "xavagent/protection/event_collection/syscall_monitor/raw_syscall_event.h"
+#include "xavagent/protection/event_provider/syscall_monitor/raw_syscall_event.h"
 
 #define PREFIX "xavagent syscall monitor: "
 

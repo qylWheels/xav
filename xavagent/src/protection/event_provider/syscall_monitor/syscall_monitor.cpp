@@ -1,4 +1,4 @@
-#include "xavagent/protection/event_collection/syscall_monitor/syscall_monitor.h"
+#include "xavagent/protection/event_provider/syscall_monitor/syscall_monitor.h"
 
 #include <bits/types/struct_iovec.h>
 #include <bpf/libbpf.h>
@@ -19,7 +19,7 @@
 
 #include "syscall_monitor.skel.h"
 #include "xavagent/protection/event.h"
-#include "xavagent/protection/event_collection/syscall_monitor/raw_syscall_event.h"
+#include "xavagent/protection/event_provider/syscall_monitor/raw_syscall_event.h"
 
 namespace xavagent {
 SyscallMonitor::SyscallMonitor() : rb_(nullptr), status_(Status::Stopped) {
