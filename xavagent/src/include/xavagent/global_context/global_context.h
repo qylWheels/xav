@@ -7,7 +7,6 @@
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
 
-#include "xavagent/protection/behavior_monitor.h"
 #include "xavagent/protection/on_access_scanner.h"
 #include "xavagent/scan/exact_hash.h"
 #include "xavagent/scan/scanner.h"
@@ -27,7 +26,6 @@ public:
     static GlobalContext& get_global_context();
     Scanner& scanner();
     OnAccessScanner& on_access_scanner();
-    Levenshtein& behavior_monitor();
     ExactHashEngine& exact_hash_engine();
     StaticHeuristicEngineManager& static_heur_engine_manager();
     websocket::stream<tcp::socket>& ws();
@@ -43,7 +41,6 @@ private:
 private:
     Scanner scanner_;
     OnAccessScanner on_access_scanner_;
-    Levenshtein behavior_monitor_;
     ExactHashEngine exact_hash_engine_;
     StaticHeuristicEngineManager static_heur_engine_manager_;
     websocket::stream<tcp::socket> ws_;

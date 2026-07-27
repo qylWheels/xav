@@ -21,10 +21,6 @@ OnAccessScanner& GlobalContext::on_access_scanner() {
     return this->on_access_scanner_;
 }
 
-Levenshtein& GlobalContext::behavior_monitor() {
-    return this->behavior_monitor_;
-}
-
 ExactHashEngine& GlobalContext::exact_hash_engine() {
     return this->exact_hash_engine_;
 }
