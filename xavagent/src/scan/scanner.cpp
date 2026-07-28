@@ -58,46 +58,23 @@ void Scanner::scan(const std::filesystem::path& path, int nthreads) {
             this->files_to_scan_.pop();
             this->curr_scanning_file_ = file;
 
-            // Use exact hash engine first.
-            auto result_from_exact_hash_engine =
-                GlobalContext::get_global_context().exact_hash_engine().scan(
-                    file);
-            if (result_from_exact_hash_engine.has_value()) {
+            auto scan_result = this->scan_strategy_->scan(file);
+            if (scan_result.has_value()) {
+                auto engine_detections = scan_result.value();
+                auto engine_alarms =
+                    engine_detections | std::views::filter([](auto& detection) {
+                        return detection.has_value() &&
+                               detection.value().has_value();
+                    });
+                auto highest_score_alarm =
+                    std::ranges::max(engine_alarms, [](auto& a, auto& b) {
+                        return a.value().value().score() >
+                               b.value().value().score();
+                    });
                 this->malware_infos_.push_back(
-                    {file, result_from_exact_hash_engine.value()});
-            } else {
-                // If exact hash engine not detect any malware,
-                // use static heuristic engine.
-                auto result_from_heur_engine =
-                    GlobalContext::get_global_context()
-                        .static_heur_engine_manager()
-                        .scan(file);
-
-                // TODO: Handle failure. We just ignore it for now.
-                auto result_from_heur_engine_noerr_nonull =
-                    result_from_heur_engine |
-                    std::views::filter(
-                        [](const auto& r) { return r.has_value(); }) |
-                    std::views::transform(
-                        [](const auto& r) { return r.value(); }) |
-                    std::views::filter(
-                        [](const auto& r) { return r.has_value(); }) |
-                    std::views::transform(
-                        [](const auto& r) { return r.value(); });
-
-                // We just take the result that has the highest score for now.
-                auto result_from_heur_engine_noerr_vec =
-                    std::vector(result_from_heur_engine_noerr_nonull.begin(),
-                                result_from_heur_engine_noerr_nonull.end());
-                if (!result_from_heur_engine_noerr_vec.empty()) {
-                    std::ranges::sort(result_from_heur_engine_noerr_vec,
-                                      [](const auto& a, const auto& b) {
-                                          return a.score() > b.score();
-                                      });
-                    this->malware_infos_.push_back(
-                        {file, result_from_heur_engine_noerr_vec.front()});
-                }
+                    {file, highest_score_alarm.value().value()});
             }
+
             this->scanned_file_count_++;
             lock.unlock();
         }
