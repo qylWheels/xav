@@ -50,7 +50,7 @@ struct FileEvent {
     std::optional<std::filesystem::file_status> stat2;
 };
 
-struct ReadSyscallEvent {
+struct ReadSyscallEventPayload {
     int fd;
     std::optional<std::filesystem::path> path;
     void* buf;
@@ -59,9 +59,12 @@ struct ReadSyscallEvent {
     ::ssize_t ret;
 };
 
-using SyscallEvent = std::variant<ReadSyscallEvent>;
+using SyscallEventPayload = std::variant<ReadSyscallEventPayload>;
 
-using Event = std::variant<FileEvent, SyscallEvent>;
+struct Event {
+    Process process;
+    std::variant<FileEvent, SyscallEventPayload> payload;
+};
 }  // namespace xavagent
 
 namespace std {
