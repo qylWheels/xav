@@ -3,7 +3,6 @@
 #include <linux/fanotify.h>
 
 #include <cstdint>
-#include <memory>
 #include <outcome.hpp>
 #include <outcome/config.hpp>
 #include <outcome/result.hpp>
@@ -26,9 +25,9 @@ public:
 
     virtual std::uint64_t lost_event_count() = 0;
     virtual outcome::result<void> listener_register(
-        std::shared_ptr<IEventListener> listener) = 0;
+        IEventListener& listener) = 0;
     virtual outcome::result<void> listener_unregister(
-        std::shared_ptr<IEventListener> listener) = 0;
+        IEventListener& listener) = 0;
 };
 
 class IEventListener {
