@@ -100,7 +100,7 @@ void startup() {
 
     // Configure API server.
     httplib::Server http_server;
-    xavagent::Scanner scanner(*normal_scan_strategy);
+    xavagent::Scanner scanner(*normal_scan_strategy, ws);
     http_server.Get("/scan/quick/start", [&logger, &scanner](
                                              const httplib::Request& req,
                                              httplib::Response& res) {
