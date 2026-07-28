@@ -138,7 +138,7 @@ int SyscallMonitor::event_handler(void* ctx, void* data, std::size_t size) {
 
     auto payload = std::get<ReadSyscallEventPayload>(
         std::get<SyscallEventPayload>(event.payload));
-    auto exe_path = event.process.exe_path.value_or("<unknown>");
+    auto exe_path = event.process.exe_path.value_or("<unknown>").string();
     auto file_path = payload.path.value_or("<unknown>").string();
     self->logger_->info("process {} tries to read {} bytes from {}", exe_path,
                         payload.count, file_path);
