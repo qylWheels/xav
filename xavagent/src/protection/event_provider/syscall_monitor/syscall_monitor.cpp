@@ -115,77 +115,31 @@ outcome::result<void> SyscallMonitor::listener_unregister(
 
 int SyscallMonitor::event_handler(void* ctx, void* data, std::size_t size) {
     SyscallMonitor* self = static_cast<SyscallMonitor*>(ctx);
-    RawSyscallEvent* e = static_cast<RawSyscallEvent*>(data);
+    RawSyscallEvent* raw_event = static_cast<RawSyscallEvent*>(data);
 
-    // TODO: We only monitor read syscall for now.
-    if (e->syscall_id != SYS_read) {
-        return 0;
-    }
+    Event event;
 
-    // Parse process info.
-    Process proc{.pid = e->pid};
-    try {
-        proc.ppid = pfs::procfs().get_task(e->pid).get_stat().ppid;
-    } catch (...) {
-        proc.ppid = std::nullopt;
-    }
-    try {
-        proc.start_time_tick =
-            pfs::procfs().get_task(e->pid).get_stat().starttime;
-    } catch (...) {
-        proc.start_time_tick = std::nullopt;
-    }
-    try {
-        proc.exe_path = pfs::procfs().get_task(e->pid).get_exe();
-    } catch (...) {
-        proc.exe_path = std::nullopt;
-    }
-    try {
-        const auto cmd_args = pfs::procfs().get_task(e->pid).get_cmdline();
-        proc.cmdline = std::accumulate(
-            cmd_args.begin(), cmd_args.end(), std::string(),
-            [](std::string acc, std::string arg) { return acc + " " + arg; });
-    } catch (...) {
-        proc.cmdline = std::nullopt;
-    }
-
-    // Parse syscall info.
-    ReadSyscallEvent read_event;
-    read_event.fd = e->args[0];
-    read_event.buf = reinterpret_cast<void*>(e->args[1]);
-    read_event.count = e->args[2];
-    read_event.ret = e->ret;
-    try {
-        auto fds = pfs::procfs().get_task(e->pid).get_fds();
-        auto it = fds.find(read_event.fd);
-        if (it != fds.end()) {
-            read_event.path = it->second.get_target();
-        } else {
-            read_event.path = std::nullopt;
+    // Dispatch event.
+    switch (raw_event->syscall_id) {
+        case SYS_read: {
+            event.payload = self->read_event_handler(
+                raw_event->args[0], reinterpret_cast<void*>(raw_event->args[1]),
+                raw_event->args[2], raw_event->pid);
+            break;
         }
-    } catch (...) {
-        read_event.path = std::nullopt;
-    }
-    try {
-        std::vector<char> buf_content(read_event.count, 0);
-        iovec local, remote;
-        local.iov_base = buf_content.data();
-        local.iov_len = read_event.count;
-        remote.iov_base = read_event.buf;
-        remote.iov_len = read_event.count;
-        read_event.buf_content = buf_content;
-        ssize_t ret = process_vm_readv(e->pid, &local, 1, &remote, 1, 0);
-        if (ret == -1) {
-            read_event.buf_content = std::nullopt;
+        default: {
+            // Nothing to do.
+            return 0;
         }
-    } catch (...) {
-        read_event.buf_content = std::nullopt;
     }
+
+    // Get process information.
+    event.process = self->pid_to_process(raw_event->pid);
 
     // Send event.
     for (auto listener : self->listeners_) {
-        if (listener->is_accept(read_event)) {
-            auto ret = listener->accept(read_event);
+        if (listener->is_accept(event)) {
+            auto ret = listener->accept(event);
             if (!ret) {
                 ++self->lost_event_count_;
             }
@@ -193,5 +147,70 @@ int SyscallMonitor::event_handler(void* ctx, void* data, std::size_t size) {
     }
 
     return 0;
+}
+
+Process SyscallMonitor::pid_to_process(int pid) {  // Parse process info.
+    Process proc{.pid = pid};
+    try {
+        proc.ppid = pfs::procfs().get_task(pid).get_stat().ppid;
+    } catch (...) {
+        proc.ppid = std::nullopt;
+    }
+    try {
+        proc.start_time_tick = pfs::procfs().get_task(pid).get_stat().starttime;
+    } catch (...) {
+        proc.start_time_tick = std::nullopt;
+    }
+    try {
+        proc.exe_path = pfs::procfs().get_task(pid).get_exe();
+    } catch (...) {
+        proc.exe_path = std::nullopt;
+    }
+    try {
+        const auto cmd_args = pfs::procfs().get_task(pid).get_cmdline();
+        proc.cmdline = std::accumulate(
+            cmd_args.begin(), cmd_args.end(), std::string(),
+            [](std::string acc, std::string arg) { return acc + " " + arg; });
+    } catch (...) {
+        proc.cmdline = std::nullopt;
+    }
+    return proc;
+}
+
+ReadSyscallEventPayload SyscallMonitor::read_event_handler(
+    int fd, void* buf, size_t count,
+    int pid) {  // Parse syscall info.
+    ReadSyscallEventPayload payload;
+    payload.fd = fd;
+    payload.buf = buf;
+    payload.count = count;
+    payload.ret = 0;
+    try {
+        auto fds = pfs::procfs().get_task(pid).get_fds();
+        auto it = fds.find(payload.fd);
+        if (it != fds.end()) {
+            payload.path = it->second.get_target();
+        } else {
+            payload.path = std::nullopt;
+        }
+    } catch (...) {
+        payload.path = std::nullopt;
+    }
+    try {
+        std::vector<char> buf_content(payload.count, 0);
+        iovec local, remote;
+        local.iov_base = buf_content.data();
+        local.iov_len = payload.count;
+        remote.iov_base = payload.buf;
+        remote.iov_len = payload.count;
+        payload.buf_content = buf_content;
+        ssize_t ret = process_vm_readv(pid, &local, 1, &remote, 1, 0);
+        if (ret == -1) {
+            payload.buf_content = std::nullopt;
+        }
+    } catch (...) {
+        payload.buf_content = std::nullopt;
+    }
+    return payload;
 }
 }  // namespace xavagent
