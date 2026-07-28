@@ -94,7 +94,7 @@ void startup() {
                       ret.error().message());
         return;
     }
-    xavagent::OnAccessScanner on_access_scanner;
+    xavagent::OnAccessScanner on_access_scanner(*normal_scan_strategy);
     std::jthread on_access_scanner_thread(
         [&on_access_scanner]() { on_access_scanner.start_monitoring(); });
 
