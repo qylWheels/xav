@@ -33,6 +33,9 @@ public:
 private:
     static int event_handler(void* ctx, void* data, std::size_t size);
 
+private:
+    Process pid_to_process(int pid);
+
 private:  // Basic file syscall handlers.
     int read_event_handler(int fd, void* buf, size_t count);
     int write_event_handler(int fd, const void* buf, size_t count);
