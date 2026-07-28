@@ -37,39 +37,41 @@ private:
     Process pid_to_process(int pid);
 
 private:  // Basic file syscall handlers.
-    int read_event_handler(int fd, void* buf, size_t count);
-    int write_event_handler(int fd, const void* buf, size_t count);
+    Event read_event_handler(int fd, void* buf, size_t count);
+    Event write_event_handler(int fd, const void* buf, size_t count);
 
 private:  // Directory and filesystem syscall handlers.
-    int unlink_event_handler(const char* pathname);
-    int unlinkat_event_handler(int dirfd, const char* pathname, int flags);
-    int rename_event_handler(const char* oldpath, const char* newpath);
-    int renameat_event_handler(int olddirfd, const char* oldpath, int newdirfd,
-                               const char* newpath);
-    int renameat2_event_handler(int olddirfd, const char* oldpath, int newdirfd,
-                                const char* newpath, int flags);
+    Event unlink_event_handler(const char* pathname);
+    Event unlinkat_event_handler(int dirfd, const char* pathname, int flags);
+    Event rename_event_handler(const char* oldpath, const char* newpath);
+    Event renameat_event_handler(int olddirfd, const char* oldpath,
+                                 int newdirfd, const char* newpath);
+    Event renameat2_event_handler(int olddirfd, const char* oldpath,
+                                  int newdirfd, const char* newpath, int flags);
 
 private:  // File metadata syscall handlers.
-    int chmod_event_handler(const char* pathname, mode_t mode);
-    int fchmod_event_handler(int fd, mode_t mode);
-    int fchmodat_event_handler(int dirfd, const char* pathname, mode_t mode,
-                               int flags);
-    int chown_event_handler(const char* pathname, uid_t owner, gid_t group);
-    int fchown_event_handler(int fd, uid_t owner, gid_t group);
-    int lchown_event_handler(const char* pathname, uid_t owner, gid_t group);
-    int fchownat_event_handler(int dirfd, const char* pathname, uid_t owner,
-                               gid_t group, int flags);
-    int utime_event_handler(const char* filename, const struct utimbuf* times);
-    int utimes_event_handler(const char* filename, const struct timeval* times);
+    Event chmod_event_handler(const char* pathname, mode_t mode);
+    Event fchmod_event_handler(int fd, mode_t mode);
+    Event fchmodat_event_handler(int dirfd, const char* pathname, mode_t mode,
+                                 int flags);
+    Event chown_event_handler(const char* pathname, uid_t owner, gid_t group);
+    Event fchown_event_handler(int fd, uid_t owner, gid_t group);
+    Event lchown_event_handler(const char* pathname, uid_t owner, gid_t group);
+    Event fchownat_event_handler(int dirfd, const char* pathname, uid_t owner,
+                                 gid_t group, int flags);
+    Event utime_event_handler(const char* filename,
+                              const struct utimbuf* times);
+    Event utimes_event_handler(const char* filename,
+                               const struct timeval* times);
 
 private:  // Links syscall handlers.
-    ssize_t readlink_event_handler(const char* pathname, char* buf,
+    Event readlink_event_handler(const char* pathname, char* buf,
+                                 size_t bufsiz);
+    Event readlinkat_event_handler(int dirfd, const char* pathname, char* buf,
                                    size_t bufsiz);
-    ssize_t readlinkat_event_handler(int dirfd, const char* pathname, char* buf,
-                                     size_t bufsiz);
 
 private:  // High-level I/O syscall handlers.
-    void* mmap_event_handler(void* addr, size_t length, int prot, int flags,
+    Event mmap_event_handler(void* addr, size_t length, int prot, int flags,
                              int fd, off_t offset);
 
 private:
