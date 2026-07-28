@@ -2,6 +2,8 @@
 
 #include <spdlog/spdlog.h>
 
+#include <boost/beast/core.hpp>
+#include <boost/beast/websocket.hpp>
 #include <cstdint>
 #include <filesystem>
 #include <memory>
@@ -12,6 +14,10 @@
 
 #include "malware_info.pb.h"
 #include "xavagent/scan/scan_interfaces.h"
+
+namespace beast = boost::beast;
+namespace websocket = beast::websocket;
+using tcp = boost::asio::ip::tcp;
 
 namespace xavagent {
 struct MalwareInfo {
@@ -27,7 +33,7 @@ enum class ScanStatus {
 
 class Scanner {
 public:
-    Scanner(IScanStrategy& scan_strategy);
+    Scanner(IScanStrategy& scan_strategy, websocket::stream<tcp::socket>& ws);
     ~Scanner();
     Scanner(const Scanner&) = delete;
     Scanner& operator=(const Scanner&) = delete;
@@ -42,6 +48,8 @@ public:
 public:
     void set_scan_strategy(IScanStrategy& scan_strategy);
     IScanStrategy* get_scan_strategy();
+    void set_ws(websocket::stream<tcp::socket>& ws);
+    websocket::stream<tcp::socket>* get_ws();
 
 public:  // Scan information getters.
     std::uint32_t total_file_count() {
@@ -88,6 +96,7 @@ private:
     std::queue<std::filesystem::path> files_to_scan_;
     bool traverse_finished_;
     IScanStrategy* scan_strategy_;
+    websocket::stream<tcp::socket>* ws_;
 
     // information of scan.
     ScanStatus scan_status_;

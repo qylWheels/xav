@@ -3,6 +3,7 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
+#include <boost/asio.hpp>
 #include <outcome/outcome.hpp>
 #include <outcome/try.hpp>
 #include <ranges>
@@ -12,17 +13,20 @@
 #include "malware_info.pb.h"
 #include "msg.pb.h"
 #include "scan_status.pb.h"
-#include "xavagent/global_context/global_context.h"
 
 #define MAX_FILES_IN_QUEUE 8192
 
+namespace net = boost::asio;
+
 namespace xavagent {
-Scanner::Scanner(IScanStrategy& scan_strategy)
+Scanner::Scanner(IScanStrategy& scan_strategy,
+                 websocket::stream<tcp::socket>& ws)
     : traverse_finished_(false),
       scan_status_(ScanStatus::Stopped),
       total_file_count_{0},
       scanned_file_count_{0},
-      scan_strategy_(&scan_strategy) {
+      scan_strategy_(&scan_strategy),
+      ws_(&ws) {
     this->logger_ = spdlog::stdout_color_mt("scanner");
     this->logger_->set_level(spdlog::level::info);
 }
@@ -151,6 +155,10 @@ void Scanner::set_scan_strategy(IScanStrategy& scan_strategy) {
 
 IScanStrategy* Scanner::get_scan_strategy() { return this->scan_strategy_; }
 
+void Scanner::set_ws(websocket::stream<tcp::socket>& ws) { this->ws_ = &ws; }
+
+websocket::stream<tcp::socket>* Scanner::get_ws() { return this->ws_; }
+
 void Scanner::ws_send_scan_status() {
     // Construct ScanStatus.
     scan_status::ScanStatus scan_status;
@@ -170,6 +178,6 @@ void Scanner::ws_send_scan_status() {
 
     // Send Message.
     std::string bytes = msg.SerializeAsString();
-    GlobalContext::get_global_context().ws().write(net::buffer(bytes));
+    this->ws_->write(net::buffer(bytes));
 }
 }  // namespace xavagent
