@@ -81,7 +81,7 @@ void startup() {
     // Event listeners.
     std::shared_ptr<xavagent::IEventListener> levenshtein_listener =
         std::make_shared<xavagent::Levenshtein>();
-    auto ret = syscall_monitor->listener_register(levenshtein_listener);
+    auto ret = syscall_monitor->listener_register(*levenshtein_listener);
     if (!ret) {
         logger->error("Failed to register listener: {}", ret.error().message());
         return;
