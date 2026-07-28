@@ -24,9 +24,9 @@ public:
     virtual outcome::result<void> stop() override;
     virtual std::uint64_t lost_event_count() override;
     virtual outcome::result<void> listener_register(
-        std::shared_ptr<IEventListener> listener) override;
+        IEventListener& listener) override;
     virtual outcome::result<void> listener_unregister(
-        std::shared_ptr<IEventListener> listener) override;
+        IEventListener& listener) override;
 
 private:
     static int event_handler(void* ctx, void* data, std::size_t size);
@@ -39,7 +39,7 @@ private:
     std::shared_ptr<spdlog::logger> logger_;
     syscall_monitor_bpf* skel_;
     ring_buffer* rb_;
-    std::unordered_set<std::shared_ptr<IEventListener>> listeners_;
+    std::unordered_set<IEventListener*> listeners_;
     std::uint64_t lost_event_count_;
     std::jthread monitor_thread_;
 };

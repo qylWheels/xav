@@ -95,21 +95,21 @@ std::uint64_t SyscallMonitor::lost_event_count() {
 }
 
 outcome::result<void> SyscallMonitor::listener_register(
-    std::shared_ptr<IEventListener> listener) {
-    if (this->listeners_.find(listener) != this->listeners_.end()) {
+    IEventListener& listener) {
+    if (this->listeners_.find(&listener) != this->listeners_.end()) {
         return outcome::failure(std::make_error_code(std::errc::file_exists));
     }
-    this->listeners_.insert(listener);
+    this->listeners_.insert(&listener);
     return outcome::success();
 }
 
 outcome::result<void> SyscallMonitor::listener_unregister(
-    std::shared_ptr<IEventListener> listener) {
-    if (this->listeners_.find(listener) == this->listeners_.end()) {
+    IEventListener& listener) {
+    if (this->listeners_.find(&listener) == this->listeners_.end()) {
         return outcome::failure(
             std::make_error_code(std::errc::no_such_file_or_directory));
     }
-    this->listeners_.erase(listener);
+    this->listeners_.erase(&listener);
     return outcome::success();
 }
 
