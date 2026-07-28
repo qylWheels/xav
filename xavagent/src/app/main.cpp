@@ -19,8 +19,9 @@
 #include "xavagent/protection/event_listener/levenshtein.h"
 #include "xavagent/protection/event_provider/syscall_monitor/syscall_monitor.h"
 #include "xavagent/protection/on_access_scanner.h"
+#include "xavagent/scan/exact_hash.h"
+#include "xavagent/scan/normal_scan_strategy.h"
 #include "xavagent/scan/scanner.h"
-#include "xavagent/scan/static_heuristic.h"
 #include "xavagent/scan/yara_static_heuristic_engine.h"
 
 namespace beast = boost::beast;
@@ -66,10 +67,12 @@ void startup() {
     });
     ws_read_thread.detach();
 
-    // Setup static heuristic engine manager.
-    xavagent::StaticHeuristicEngineManager static_heur_engine_manager;
-    static_heur_engine_manager.add_engine(
-        std::make_shared<xavagent::YaraStaticHeuristicEngine>());
+    // Setup scan engines and scan strategy.
+    xavagent::ExactHashEngine exact_hash_engine;
+    xavagent::YaraStaticHeuristicEngine yara_static_heuristic_engine;
+    std::unique_ptr<xavagent::IScanStrategy> normal_scan_strategy =
+        std::make_unique<xavagent::NormalScanStrategy>(
+            exact_hash_engine, yara_static_heuristic_engine);
 
     // Event providers.
     std::shared_ptr<xavagent::IEventProvider> syscall_monitor =
@@ -97,7 +100,7 @@ void startup() {
 
     // Configure API server.
     httplib::Server http_server;
-    xavagent::Scanner scanner;
+    xavagent::Scanner scanner(*normal_scan_strategy);
     http_server.Get("/scan/quick/start", [&logger, &scanner](
                                              const httplib::Request& req,
                                              httplib::Response& res) {
