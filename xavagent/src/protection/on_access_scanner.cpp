@@ -8,13 +8,15 @@
 #include <ranges>
 #include <stdexcept>
 
-#include "xavagent/global_context/global_context.h"
+#include "xavagent/scan/scan_interfaces.h"
 
 #define BUFSIZE (8 * 1024)  // 8KB
 
 namespace xavagent {
-OnAccessScanner::OnAccessScanner()
-    : scanned_object_count_(0), blocked_object_count_(0) {
+OnAccessScanner::OnAccessScanner(IScanStrategy& scan_strategy)
+    : scan_strategy_(&scan_strategy),
+      scanned_object_count_(0),
+      blocked_object_count_(0) {
     // Initialize the fanotify descriptor.
     this->fanfd_ =
         fanotify_init(FAN_CLASS_CONTENT | FAN_CLOEXEC | FAN_UNLIMITED_QUEUE,
@@ -123,5 +125,12 @@ void OnAccessScanner::stop_monitoring() {
     if (ret < 0) {
         throw std::runtime_error("Remove fanotify mark failed");
     }
+}
+
+void OnAccessScanner::set_scan_strategy(IScanStrategy& scan_strategy) {
+    this->scan_strategy_ = &scan_strategy;
+}
+IScanStrategy* OnAccessScanner::get_scan_strategy() const {
+    return this->scan_strategy_;
 }
 }  // namespace xavagent

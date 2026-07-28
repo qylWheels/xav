@@ -3,10 +3,12 @@
 #include <atomic>
 #include <cstdint>
 
+#include "xavagent/scan/scan_interfaces.h"
+
 namespace xavagent {
 class OnAccessScanner {
 public:
-    OnAccessScanner();
+    OnAccessScanner(IScanStrategy& scan_strategy);
     ~OnAccessScanner();
     OnAccessScanner(const OnAccessScanner&) = delete;
     OnAccessScanner& operator=(const OnAccessScanner&) = delete;
@@ -16,6 +18,8 @@ public:
 public:
     void start_monitoring();
     void stop_monitoring();
+    void set_scan_strategy(IScanStrategy& scan_strategy);
+    IScanStrategy* get_scan_strategy() const;
 
 public:
     std::uint64_t scanned_object_count() const {
@@ -28,6 +32,7 @@ public:
 private:
     int fanfd_;
     char* buf_;
+    IScanStrategy* scan_strategy_;
 
     // Statistics.
     std::atomic_uint64_t scanned_object_count_;
