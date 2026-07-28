@@ -11,6 +11,7 @@
 
 #include "syscall_monitor.skel.h"
 #include "xavagent/protection/behavior_monitor.h"
+#include "xavagent/protection/event.h"
 
 namespace xavagent {
 class SyscallMonitor : public IEventProvider {
@@ -38,7 +39,8 @@ private:
     Process pid_to_process(int pid);
 
 private:  // Basic file syscall handlers.
-    Event read_event_handler(int fd, void* buf, size_t count, int pid);
+    ReadSyscallEventPayload read_event_handler(int fd, void* buf, size_t count,
+                                               int pid);
     Event write_event_handler(int fd, const void* buf, size_t count, int pid);
 
 private:  // Directory and filesystem syscall handlers.
