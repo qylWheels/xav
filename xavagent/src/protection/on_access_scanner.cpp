@@ -5,7 +5,7 @@
 #include <sys/fanotify.h>
 #include <unistd.h>
 
-#include <ranges>
+#include <algorithm>
 #include <stdexcept>
 
 #include "xavagent/scan/scan_interfaces.h"
@@ -72,36 +72,20 @@ void OnAccessScanner::start_monitoring() {
                     struct fanotify_response resp = {.fd = metadata->fd};
 
                     // TODO: Report when detected malware.
-                    // Use the exact hash engine first.
-                    const auto result = GlobalContext::get_global_context()
-                                            .exact_hash_engine()
-                                            .scan(std::string{path});
+                    auto result = this->scan_strategy_->scan(path);
                     if (result.has_value()) {
-                        const auto result_value = result.value();
-                        resp.response = FAN_DENY;
-                        this->blocked_object_count_++;
-                    } else {
-                        // If the exact hash engine does not detect any malware,
-                        // use the static heuristic engine.
-                        auto result_from_heur_engine_noerr_nonull =
-                            GlobalContext::get_global_context()
-                                .static_heur_engine_manager()
-                                .scan(path) |
-                            std::views::filter(
-                                [](const auto& r) { return r.has_value(); }) |
-                            std::views::transform(
-                                [](const auto& r) { return r.value(); }) |
-                            std::views::filter(
-                                [](const auto& r) { return r.has_value(); }) |
-                            std::views::transform(
-                                [](const auto& r) { return r.value(); });
-                        if (std::ranges::empty(
-                                result_from_heur_engine_noerr_nonull)) {
-                            resp.response = FAN_ALLOW;
-                        } else {
+                        auto alarm = std::ranges::any_of(
+                            result.value(), [](const auto& r) {
+                                return r.has_value() && r.value().has_value();
+                            });
+                        if (alarm) {
                             resp.response = FAN_DENY;
                             this->blocked_object_count_++;
+                        } else {
+                            resp.response = FAN_ALLOW;
                         }
+                    } else {
+                        resp.response = FAN_ALLOW;
                     }
 
                     this->scanned_object_count_++;
