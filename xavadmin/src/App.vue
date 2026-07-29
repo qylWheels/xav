@@ -3,30 +3,30 @@
 
 <template>
     <el-container>
-        <el-aside>
+        <el-aside width="15%">
             <el-menu :default-active="$route.path" router>
                 <el-menu-item index="/dashboard">
                     <el-icon>
-                        <Monitor />
+                        <Aim />
                     </el-icon>
                     <template #title>
                         Dashboard
                     </template>
                 </el-menu-item>
-                <el-menu-item index="/scan">
+                <el-menu-item index="/devices">
                     <el-icon>
-                        <Search />
+                        <Monitor />
                     </el-icon>
                     <template #title>
-                        Scan
+                        Devices
                     </template>
                 </el-menu-item>
-                <el-menu-item index="/procmon">
+                <el-menu-item index="/notifications">
                     <el-icon>
-                        <View />
+                        <Bell />
                     </el-icon>
                     <template #title>
-                        Process Monitor
+                        Notifications
                     </template>
                 </el-menu-item>
                 <el-menu-item index="/settings">
@@ -41,7 +41,9 @@
         </el-aside>
         <el-container>
             <el-header>
-                <h3>Xav Admin Management Platform</h3>
+                <el-row>
+                    <h4>Xav Admin Management Platform</h4>
+                </el-row>
             </el-header>
             <el-main>
                 <router-view />
@@ -50,5 +52,3 @@
     </el-container>
 
 </template>
-
-<style scoped></style>
