@@ -1,179 +1,122 @@
 <template>
-    <div class="layout">
-        <el-card>
-            <template #header>
-                <el-icon>
-                    <PieChart />
-                </el-icon>
-                <span>&nbsp;&nbsp;Dashboard</span>
-            </template>
-            <template #default>
-                <el-row>
-                    <el-col :span="1"></el-col>
-                    <el-col :span="4">
-                        <el-icon class="monitor-icon" size="128" :color="successColor">
-                            <Monitor />
-                        </el-icon>
-                    </el-col>
-                    <el-col :span="6">
-                        <el-row class="basic-info">
-                            <el-text>Name: {{ machineName }}</el-text>
-                        </el-row>
-                        <el-row class="basic-info">
-                            <el-text>Connection Status: </el-text>
-                            <el-tag type="success" class="basic-info-tag">Online</el-tag>
-                        </el-row>
-                        <el-row class="basic-info">
-                            <el-text>Security Status: </el-text>
-                            <el-tag type="success" class="basic-info-tag">Safe</el-tag>
-                        </el-row>
-                        <el-button type="danger" plain disabled>Disconnect</el-button>
-                    </el-col>
-                    <el-col :span="6">
-                        <el-statistic title="On Access Scanner Scanned Object(s)"
-                            :value="onAccessScannerScanObjectCount" />
-                        <div class="statistic-margin" />
-                        <el-statistic title="On Access Scanner Blocked Threat(s)"
-                            :value="onAccessScannerBlockedThreatsCount" :value-style="{ color: dangerColor }" />
-                    </el-col>
-                    <el-col :span="3">
-                        <el-statistic title="Behavior(s) Detected" :value="totalBehavCount" />
-                        <div class="statistic-margin" />
-                        <el-statistic title="Suspicious Behavior(s)" :value="suspiciousBehavCount"
-                            :value-style="{ color: warningColor }" />
-                    </el-col>
-                </el-row>
-                <el-row>
-                    <el-divider></el-divider>
-                </el-row>
-                <el-row>
-                    <el-text type="large" tag="b">Recent Security Event(s)</el-text>
-                </el-row>
-                <el-row>
-                    <el-table :data="recentSecurityEvents" height="310">
-                        <el-table-column prop="time" label="Time" width="180" />
-                        <el-table-column prop="category" label="Category" width="180" />
-                        <el-table-column prop="severity" label="Severity" width="100">
-                            <template #default="scope">
-                                <el-tag :type="severityOfEvent(scope.row)">{{ scope.row.severity }}</el-tag>
-                            </template>
-                        </el-table-column>
-                        <el-table-column prop="desc" label="Description" />
-                    </el-table>
-                </el-row>
-            </template>
-        </el-card>
-    </div>
+    <el-card shadow="hover">
+        <template #header>
+            <div>Overview</div>
+        </template>
+        <el-row>
+            <el-col :span="1"></el-col>
+            <el-col :span="3">
+                <el-statistic class="devices-at-risk" title="Device(s) At Risk" :value="devicesAtRisk">
+                    <template #suffix>/{{ totalDeviceCount }}</template>
+                </el-statistic>
+            </el-col>
+            <el-col :span="1"></el-col>
+            <el-col :span="3">
+                <el-statistic title="Online Device Count" :value="onlineDeviceCount">
+                    <template #suffix>/{{ totalDeviceCount }}</template>
+                </el-statistic>
+            </el-col>
+            <el-col :span="1"></el-col>
+            <el-col :span="3">
+                <VueUiSparkline :dataset="deviceDataset" :config="deviceConfig"></VueUiSparkline>
+            </el-col>
+        </el-row>
+        <el-divider />
+        <el-row>
+            <el-col :span="1"></el-col>
+            <el-col :span="3">
+                <el-statistic class="severe-event-count" title="Severe Event Count" :value="severeEventCount">
+                </el-statistic>
+            </el-col>
+            <el-col :span="1"></el-col>
+            <el-col :span="3">
+                <el-statistic class="suspicious-event-count" title="Suspicious Event Count"
+                    :value="suspiciousEventCount">
+                </el-statistic>
+            </el-col>
+            <el-col :span="1"></el-col>
+            <el-col :span="3">
+                <el-statistic class="total-event-count" title="Total Event Count" :value="totalEventCount">
+                </el-statistic>
+            </el-col>
+            <el-col :span="1"></el-col>
+            <el-col :span="3">
+
+            </el-col>
+        </el-row>
+    </el-card>
 </template>
 
-<style scoped>
-.basic-info {
-    margin-bottom: 10px;
+<style lang="scss" scoped>
+.severe-event-count :deep(.el-statistic__content) {
+    color: var(--el-color-danger);
 }
 
-.basic-info-tag {
-    margin-left: 5px;
+.suspicious-event-count :deep(.el-statistic__content) {
+    color: var(--el-color-warning);
 }
 
-.statistic-margin {
-    height: 15px;
+.total-event-count :deep(.el-statistic__content) {
+    color: var(--el-color-info);
 }
 
-.scan-margin {
-    height: 15px;
-}
-
-.card-margin {
-    height: 15px;
-}
-
-.percentage-value {
-    display: block;
-    margin-top: 10px;
-    font-size: 24px;
-}
-
-.percentage-label {
-    display: block;
-    margin-top: 10px;
-    font-size: 12px;
+.devices-at-risk :deep(.el-statistic__content) {
+    color: var(--el-color-danger);
 }
 </style>
 
 <script setup lang="ts">
-import axios from 'axios'
-import { ref, computed } from 'vue'
-import { useIntervalFn, useCssVar } from '@vueuse/core'
+import { ref } from "vue";
+import { useCssVar } from '@vueuse/core'
+import {
+    VueUiSparkline,
+    type VueUiSparklineDatasetItem,
+    type VueUiSparklineConfig
+} from "vue-data-ui/vue-ui-sparkline";
 
 // Colors.
 const primaryColor = useCssVar('--el-color-primary')
-const successColor = useCssVar('--el-color-success')
-const warningColor = useCssVar('--el-color-warning')
-const infoColor = useCssVar('--el-color-info')
-const dangerColor = useCssVar('--el-color-danger')
 
-const machineName = ref("Comma")
-const color = ref("green")
-const system = ref("Linux")
-const cpuUsage = ref(80)
-const memoryUsage = ref(60)
-
-const recentSecurityEvents = ref([
+const devicesAtRisk = ref(3);
+const onlineDeviceCount = ref(36);
+const deviceDataset = ref<VueUiSparklineDatasetItem[]>([
     {
-        time: '2016-05-03 10:00:00',
-        category: 'Suspicious Behavior',
-        severity: 'Medium',
-        desc: '/bin/bash tries to inject malicious code into /sbin/systemd',
+        "period": "period 1",
+        "value": 0
     },
     {
-        time: '2016-05-03 10:00:02',
-        category: 'Malware Blocked',
-        severity: 'High',
-        desc: 'On access scanner blocked /bin/bash2, because it is Ransom.Petya.d',
+        "period": "period 2",
+        "value": -1
+    },
+    {
+        "period": "period 3",
+        "value": 2
+    },
+    {
+        "period": "period 4",
+        "value": -3
+    },
+    {
+        "period": "period 5",
+        "value": 4
+    },
+    {
+        "period": "period 6",
+        "value": -5
+    },
+]);
+const deviceConfig = ref<VueUiSparklineConfig>({
+    style: {
+        line: { smooth: true },
+        area: {
+            color: primaryColor.value?.toString(),
+        }
     }
-])
-recentSecurityEvents.value = recentSecurityEvents.value.flatMap((item) => [item, item, item, item, item, item])
+});
 
-const severityOfEvent = (event: any) => {
-    if (event.severity === 'Medium') {
-        return 'warning'
-    } else if (event.severity === 'High') {
-        return 'danger'
-    } else if (event.severity === 'Low') {
-        return 'info'
-    }
-    return 'primary'
-}
+const totalDeviceCount = ref(52);
+const severeEventCount = ref(10);
+const suspiciousEventCount = ref(125);
+const totalEventCount = ref(376221);
 
-// Real-time protection status.
-const onAccessScannerScanObjectCount = ref(0)
-const onAccessScannerBlockedThreatsCount = ref(0)
-const {
-    pause: pauseQueryRealTimeProtectionStatus,
-    resume: resumeQueryRealTimeProtectionStatus,
-    isActive: isQueryRealTimeProtectionStatusActive
-} = useIntervalFn(() => {
-    axios.get('/api/on-access-scanner/status')
-        .then((res) => {
-            const data = res.data
-            onAccessScannerScanObjectCount.value = data.scanned_object_count
-            onAccessScannerBlockedThreatsCount.value = data.blocked_object_count
-        })
-}, 3000, { immediate: true })
-
-// Behavior monitor status.
-const totalBehavCount = ref(0)
-const suspiciousBehavCount = ref(0)
-const {
-    pause: pauseQueryBehaviorMonitorStatus,
-    resume: resumeQueryBehaviorMonitorStatus,
-    isActive: isQueryBehaviorMonitorStatusActive
-} = useIntervalFn(() => {
-    axios.get('/api/behavior-monitor/status')
-        .then((res) => {
-            const data = res.data
-            totalBehavCount.value = data.total_event_count
-            suspiciousBehavCount.value = data.suspicious_event_count
-        })
-}, 3000, { immediate: true })
 </script>
