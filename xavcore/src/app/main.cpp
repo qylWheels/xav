@@ -2,12 +2,6 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
-#include <boost/asio.hpp>
-#include <boost/asio/connect.hpp>
-#include <boost/asio/io_context.hpp>
-#include <boost/asio/ip/tcp.hpp>
-#include <boost/beast/core.hpp>
-#include <boost/beast/websocket.hpp>
 #include <cpptrace/cpptrace.hpp>
 #include <csignal>
 #include <exception>
@@ -24,12 +18,6 @@
 #include "xavcore/scan/scanner.h"
 #include "xavcore/scan/yara_static_heuristic_engine.h"
 
-namespace beast = boost::beast;
-namespace websocket = beast::websocket;
-using tcp = boost::asio::ip::tcp;
-namespace net = boost::asio;
-namespace http = beast::http;
-
 void sigsegv_handler(int signum) {
     std::cerr << "SIGSEGV signal received" << std::endl;
     cpptrace::generate_trace().print();
@@ -39,33 +27,6 @@ void sigsegv_handler(int signum) {
 void startup() {
     auto logger = spdlog::stdout_color_mt(__FUNCTION__);
     logger->set_level(spdlog::level::info);
-
-    // Websocket configs.
-    auto ioc = net::io_context{};
-    websocket::stream<tcp::socket> ws{net::make_strand(ioc)};
-    std::string host = "0.0.0.0";
-    std::string port = "8001";
-    tcp::resolver resolver{ioc};
-    auto const results = resolver.resolve(host, port);
-    auto ep = net::connect(ws.next_layer(), results);
-    host += ':' + std::to_string(ep.port());
-    ws.set_option(
-        websocket::stream_base::decorator([](websocket::request_type& req) {
-            req.set(http::field::user_agent,
-                    std::string(BOOST_BEAST_VERSION_STRING) +
-                        " websocket-client-coro");
-        }));
-    ws.binary(true);
-    ws.handshake(host, "/ws");
-
-    // Start a thread to read from websocket to handle ping frame.
-    std::jthread ws_read_thread([&ws]() {
-        while (true) {
-            beast::flat_buffer buffer;
-            ws.read(buffer);
-        }
-    });
-    ws_read_thread.detach();
 
     // Setup scan engines and scan strategy.
     xavcore::ExactHashEngine exact_hash_engine;
@@ -100,7 +61,7 @@ void startup() {
 
     // Configure API server.
     httplib::Server http_server;
-    xavcore::Scanner scanner(*normal_scan_strategy, ws);
+    xavcore::Scanner scanner(*normal_scan_strategy);
     http_server.Get("/scan/quick/start", [&logger, &scanner](
                                              const httplib::Request& req,
                                              httplib::Response& res) {
