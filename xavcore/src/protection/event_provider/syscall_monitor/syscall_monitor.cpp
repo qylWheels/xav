@@ -227,32 +227,9 @@ ReadSyscallEventPayload SyscallMonitor::read_event_handler(
     payload.buf = buf;
     payload.count = count;
     payload.ret = 0;
-    try {
-        auto fds = pfs::procfs().get_task(pid).get_fds();
-        auto it = fds.find(payload.fd);
-        if (it != fds.end()) {
-            payload.path = it->second.get_target();
-        } else {
-            payload.path = std::nullopt;
-        }
-    } catch (...) {
-        payload.path = std::nullopt;
-    }
-    try {
-        std::vector<char> buf_content(payload.count, 0);
-        iovec local, remote;
-        local.iov_base = buf_content.data();
-        local.iov_len = payload.count;
-        remote.iov_base = payload.buf;
-        remote.iov_len = payload.count;
-        payload.buf_content = buf_content;
-        ssize_t ret = process_vm_readv(pid, &local, 1, &remote, 1, 0);
-        if (ret == -1) {
-            payload.buf_content = std::nullopt;
-        }
-    } catch (...) {
-        payload.buf_content = std::nullopt;
-    }
+    payload.path = this->fd_to_path(pid, fd);
+    payload.buf_content = this->read_process_memory(pid, buf, count);
+
     return payload;
 }
 
