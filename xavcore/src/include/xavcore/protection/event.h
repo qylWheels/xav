@@ -74,9 +74,17 @@ struct UnlinkSyscallEventPayload {
     int ret;
 };
 
+struct UnlinkatSyscallEventPayload {
+    int dirfd;
+    const char* pathname;
+    std::optional<std::filesystem::path> path;
+    int flags;
+    int ret;
+};
+
 using SyscallEventPayload =
     std::variant<ReadSyscallEventPayload, WriteSyscallEventPayload,
-                 UnlinkSyscallEventPayload>;
+                 UnlinkSyscallEventPayload, UnlinkatSyscallEventPayload>;
 
 struct Event {
     Process process;
