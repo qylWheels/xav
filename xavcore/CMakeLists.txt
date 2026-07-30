@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(xavagent)
+project(xavcore)
 
 # Common settings.
 set(CMAKE_CXX_STANDARD 20)
@@ -35,7 +35,7 @@ FetchContent_MakeAvailable(pfs)
 add_subdirectory(src)
 
 # Include directories.
-add_library(xavagent_includes INTERFACE)
-target_include_directories(xavagent_includes INTERFACE
+add_library(xavcore_includes INTERFACE)
+target_include_directories(xavcore_includes INTERFACE
     ${PROJECT_SOURCE_DIR}/src/include
 )

@@ -11,9 +11,9 @@
 #include <optional>
 #include <unordered_map>
 
-#include "xavagent/protection/event.h"
+#include "xavcore/protection/event.h"
 
-namespace xavagent {
+namespace xavcore {
 class FanotifyMonitor {
 public:
     FanotifyMonitor();
@@ -54,4 +54,4 @@ private:
     std::atomic_uint64_t suspicious_event_count_;
     std::shared_ptr<spdlog::logger> logger_;
 };
-}  // namespace xavagent
+}  // namespace xavcore

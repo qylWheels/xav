@@ -7,9 +7,9 @@
 #include <iostream>
 #include <memory>
 
-#include "xavagent/scan/scan_interfaces.h"
+#include "xavcore/scan/scan_interfaces.h"
 
-namespace xavagent {
+namespace xavcore {
 class YaraStaticHeuristicEngine : public IScanEngine {
 public:
     YaraStaticHeuristicEngine();
@@ -39,4 +39,4 @@ private:
     YR_COMPILER* yara_compiler_;
     YR_RULES* yara_rules_;
 };
-}  // namespace xavagent
+}  // namespace xavcore

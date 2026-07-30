@@ -1,4 +1,4 @@
-#include "xavagent/protection/on_access_scanner.h"
+#include "xavcore/protection/on_access_scanner.h"
 
 #include <fcntl.h>
 #include <limits.h>
@@ -8,11 +8,11 @@
 #include <algorithm>
 #include <stdexcept>
 
-#include "xavagent/scan/scan_interfaces.h"
+#include "xavcore/scan/scan_interfaces.h"
 
 #define BUFSIZE (8 * 1024)  // 8KB
 
-namespace xavagent {
+namespace xavcore {
 OnAccessScanner::OnAccessScanner(IScanStrategy& scan_strategy)
     : scan_strategy_(&scan_strategy),
       scanned_object_count_(0),
@@ -117,4 +117,4 @@ void OnAccessScanner::set_scan_strategy(IScanStrategy& scan_strategy) {
 IScanStrategy* OnAccessScanner::get_scan_strategy() const {
     return this->scan_strategy_;
 }
-}  // namespace xavagent
+}  // namespace xavcore

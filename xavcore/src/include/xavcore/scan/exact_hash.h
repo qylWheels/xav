@@ -10,13 +10,13 @@
 #include <string>
 
 #include "malware_info.pb.h"
-#include "xavagent/scan/scan_interfaces.h"
+#include "xavcore/scan/scan_interfaces.h"
 
 // FIXME: Only for tests.
 #define XAV_EXACT_HASH_DB \
     "/home/qyl/projects/xav/xavdb/db/malware-bazaar-sha256.db"
 
-namespace xavagent {
+namespace xavcore {
 class ExactHashEngineDatabase {
 public:
     ~ExactHashEngineDatabase();
@@ -52,4 +52,4 @@ private:
 private:
     std::shared_ptr<spdlog::logger> logger_;
 };
-}  // namespace xavagent
+}  // namespace xavcore

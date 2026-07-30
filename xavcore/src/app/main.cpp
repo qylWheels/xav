@@ -15,14 +15,14 @@
 #include <memory>
 #include <thread>
 
-#include "xavagent/protection/behavior_monitor.h"
-#include "xavagent/protection/event_listener/levenshtein.h"
-#include "xavagent/protection/event_provider/syscall_monitor/syscall_monitor.h"
-#include "xavagent/protection/on_access_scanner.h"
-#include "xavagent/scan/exact_hash.h"
-#include "xavagent/scan/normal_scan_strategy.h"
-#include "xavagent/scan/scanner.h"
-#include "xavagent/scan/yara_static_heuristic_engine.h"
+#include "xavcore/protection/behavior_monitor.h"
+#include "xavcore/protection/event_listener/levenshtein.h"
+#include "xavcore/protection/event_provider/syscall_monitor/syscall_monitor.h"
+#include "xavcore/protection/on_access_scanner.h"
+#include "xavcore/scan/exact_hash.h"
+#include "xavcore/scan/normal_scan_strategy.h"
+#include "xavcore/scan/scanner.h"
+#include "xavcore/scan/yara_static_heuristic_engine.h"
 
 namespace beast = boost::beast;
 namespace websocket = beast::websocket;
@@ -68,19 +68,19 @@ void startup() {
     ws_read_thread.detach();
 
     // Setup scan engines and scan strategy.
-    xavagent::ExactHashEngine exact_hash_engine;
-    xavagent::YaraStaticHeuristicEngine yara_static_heuristic_engine;
-    std::unique_ptr<xavagent::IScanStrategy> normal_scan_strategy =
-        std::make_unique<xavagent::NormalScanStrategy>(
+    xavcore::ExactHashEngine exact_hash_engine;
+    xavcore::YaraStaticHeuristicEngine yara_static_heuristic_engine;
+    std::unique_ptr<xavcore::IScanStrategy> normal_scan_strategy =
+        std::make_unique<xavcore::NormalScanStrategy>(
             exact_hash_engine, yara_static_heuristic_engine);
 
     // Event providers.
-    std::shared_ptr<xavagent::IEventProvider> syscall_monitor =
-        std::make_shared<xavagent::SyscallMonitor>();
+    std::shared_ptr<xavcore::IEventProvider> syscall_monitor =
+        std::make_shared<xavcore::SyscallMonitor>();
 
     // Event listeners.
-    std::shared_ptr<xavagent::IEventListener> levenshtein_listener =
-        std::make_shared<xavagent::Levenshtein>();
+    std::shared_ptr<xavcore::IEventListener> levenshtein_listener =
+        std::make_shared<xavcore::Levenshtein>();
     auto ret = syscall_monitor->listener_register(*levenshtein_listener);
     if (!ret) {
         logger->error("Failed to register listener: {}", ret.error().message());
@@ -94,17 +94,17 @@ void startup() {
                       ret.error().message());
         return;
     }
-    xavagent::OnAccessScanner on_access_scanner(*normal_scan_strategy);
+    xavcore::OnAccessScanner on_access_scanner(*normal_scan_strategy);
     std::jthread on_access_scanner_thread(
         [&on_access_scanner]() { on_access_scanner.start_monitoring(); });
 
     // Configure API server.
     httplib::Server http_server;
-    xavagent::Scanner scanner(*normal_scan_strategy, ws);
+    xavcore::Scanner scanner(*normal_scan_strategy, ws);
     http_server.Get("/scan/quick/start", [&logger, &scanner](
                                              const httplib::Request& req,
                                              httplib::Response& res) {
-        if (scanner.scan_status() != xavagent::ScanStatus::Stopped) {
+        if (scanner.scan_status() != xavcore::ScanStatus::Stopped) {
             logger->warn("Quick scan is already running!");
             res.status = 403;
             return;

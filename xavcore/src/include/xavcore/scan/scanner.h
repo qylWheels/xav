@@ -13,13 +13,13 @@
 #include <vector>
 
 #include "malware_info.pb.h"
-#include "xavagent/scan/scan_interfaces.h"
+#include "xavcore/scan/scan_interfaces.h"
 
 namespace beast = boost::beast;
 namespace websocket = beast::websocket;
 using tcp = boost::asio::ip::tcp;
 
-namespace xavagent {
+namespace xavcore {
 struct MalwareInfo {
     std::filesystem::path file_path;
     malware_info::MalwareInfo malware_info;
@@ -105,4 +105,4 @@ private:
     std::vector<MalwareInfo> malware_infos_;
     std::filesystem::path curr_scanning_file_;
 };
-}  // namespace xavagent
+}  // namespace xavcore

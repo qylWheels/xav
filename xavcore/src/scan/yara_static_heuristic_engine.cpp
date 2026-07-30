@@ -1,4 +1,4 @@
-#include "xavagent/scan/yara_static_heuristic_engine.h"
+#include "xavcore/scan/yara_static_heuristic_engine.h"
 
 #include <fcntl.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
@@ -12,7 +12,7 @@
 
 #include "malware_info.pb.h"
 
-namespace xavagent {
+namespace xavcore {
 #define YARA_RULES_FILE \
     "/home/qyl/projects/xav/xavdb/db/yara-rules-extended.yar"
 #define YARA_FORGE_NAMESPACE "yara_forge"
@@ -119,4 +119,4 @@ int YaraStaticHeuristicEngine::yara_scan_callback(YR_SCAN_CONTEXT* context,
     }
     return CALLBACK_CONTINUE;
 }
-}  // namespace xavagent
+}  // namespace xavcore

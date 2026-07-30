@@ -10,7 +10,7 @@
 
 namespace outcome = OUTCOME_V2_NAMESPACE;
 
-namespace xavagent {
+namespace xavcore {
 class IScanEngine {
 public:
     virtual ~IScanEngine() = default;
@@ -31,4 +31,4 @@ public:
         std::vector<outcome::result<std::optional<malware_info::MalwareInfo>>>>
     scan(const std::filesystem::path& path) = 0;
 };
-}  // namespace xavagent
+}  // namespace xavcore

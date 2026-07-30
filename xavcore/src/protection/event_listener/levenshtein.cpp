@@ -1,6 +1,6 @@
-#include "xavagent/protection/event_listener/levenshtein.h"
+#include "xavcore/protection/event_listener/levenshtein.h"
 
-namespace xavagent {
+namespace xavcore {
 Levenshtein::Levenshtein() = default;
 
 Levenshtein::~Levenshtein() = default;
@@ -15,4 +15,4 @@ outcome::result<void> Levenshtein::accept(const Event& event) {
     return outcome::success();
 }
 
-}  // namespace xavagent
+}  // namespace xavcore

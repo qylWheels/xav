@@ -10,7 +10,7 @@
 
 namespace outcome = OUTCOME_V2_NAMESPACE;
 
-namespace xavagent {
+namespace xavcore {
 class IStaticHeuristicEngine {
 public:
     virtual ~IStaticHeuristicEngine() = default;
@@ -39,4 +39,4 @@ public:
 private:
     std::vector<std::shared_ptr<IStaticHeuristicEngine>> heur_engines_;
 };
-}  // namespace xavagent
+}  // namespace xavcore

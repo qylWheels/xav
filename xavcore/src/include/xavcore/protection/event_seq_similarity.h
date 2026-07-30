@@ -2,13 +2,13 @@
 
 #include <deque>
 
-#include "xavagent/protection/event.h"
+#include "xavcore/protection/event.h"
 
-namespace xavagent {
+namespace xavcore {
 class IEventSequenceSimilarity {
 public:
     virtual ~IEventSequenceSimilarity() = default;
     virtual double calc_similarity(const std::deque<Event>& a,
                                    const std::deque<Event>& b) = 0;
 };
-}  // namespace xavagent
+}  // namespace xavcore

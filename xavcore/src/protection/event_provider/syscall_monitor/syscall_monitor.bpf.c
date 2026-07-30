@@ -5,9 +5,9 @@
 #include <bpf/bpf_helpers.h>
 #include <bpf/bpf_tracing.h>
 
-#include "xavagent/protection/event_provider/syscall_monitor/raw_syscall_event.h"
+#include "xavcore/protection/event_provider/syscall_monitor/raw_syscall_event.h"
 
-#define PREFIX "xavagent syscall monitor: "
+#define PREFIX "xavcore syscall monitor: "
 
 struct {
     __uint(type, BPF_MAP_TYPE_HASH);

@@ -1,11 +1,11 @@
-#include "xavagent/scan/static_heuristic.h"
+#include "xavcore/scan/static_heuristic.h"
 
 #include <optional>
 #include <outcome/outcome.hpp>
 #include <outcome/try.hpp>
 #include <vector>
 
-namespace xavagent {
+namespace xavcore {
 StaticHeuristicEngineManager::StaticHeuristicEngineManager() {}
 
 StaticHeuristicEngineManager::~StaticHeuristicEngineManager() {}
@@ -28,4 +28,4 @@ void StaticHeuristicEngineManager::add_engine(
     this->heur_engines_.push_back(engine);
 }
 
-}  // namespace xavagent
+}  // namespace xavcore

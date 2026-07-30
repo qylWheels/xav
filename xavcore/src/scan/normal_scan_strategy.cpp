@@ -1,8 +1,8 @@
-#include "xavagent/scan/normal_scan_strategy.h"
+#include "xavcore/scan/normal_scan_strategy.h"
 
 #include <vector>
 
-namespace xavagent {
+namespace xavcore {
 NormalScanStrategy::NormalScanStrategy(
     IScanEngine& exact_hash_engine, IScanEngine& yara_static_heuristic_engine)
     : exact_hash_engine_(&exact_hash_engine),
@@ -22,4 +22,4 @@ NormalScanStrategy::scan(const std::filesystem::path& path) {
 
     return results;
 }
-}  // namespace xavagent
+}  // namespace xavcore

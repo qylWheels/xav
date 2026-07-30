@@ -7,11 +7,11 @@
 #include <outcome/config.hpp>
 #include <outcome/result.hpp>
 
-#include "xavagent/protection/event.h"
+#include "xavcore/protection/event.h"
 
 namespace outcome = OUTCOME_V2_NAMESPACE;
 
-namespace xavagent {
+namespace xavcore {
 class IEventListener;
 
 class IEventProvider {
@@ -40,4 +40,4 @@ public:
     virtual outcome::result<void> accept(const Event& event) = 0;
 };
 
-}  // namespace xavagent
+}  // namespace xavcore

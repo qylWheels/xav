@@ -1,4 +1,4 @@
-#include "xavagent/scan/exact_hash.h"
+#include "xavcore/scan/exact_hash.h"
 
 #include <cryptopp/filters.h>
 #include <cryptopp/hex.h>
@@ -10,7 +10,7 @@
 
 #include "malware_info.pb.h"
 
-namespace xavagent {
+namespace xavcore {
 ExactHashEngineDatabase::~ExactHashEngineDatabase() { delete this->db; }
 
 leveldb::DB* ExactHashEngineDatabase::get_db() {
@@ -76,4 +76,4 @@ std::string ExactHashEngine::calc_sha256_of_file(const char* path) const {
             new CryptoPP::HexEncoder(new CryptoPP::StringSink(digest), false))};
     return digest;
 }
-}  // namespace xavagent
+}  // namespace xavcore

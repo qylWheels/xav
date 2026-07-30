@@ -1,4 +1,4 @@
-#include "xavagent/scan/scanner.h"
+#include "xavcore/scan/scanner.h"
 
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
@@ -18,7 +18,7 @@
 
 namespace net = boost::asio;
 
-namespace xavagent {
+namespace xavcore {
 Scanner::Scanner(IScanStrategy& scan_strategy,
                  websocket::stream<tcp::socket>& ws)
     : traverse_finished_(false),
@@ -180,4 +180,4 @@ void Scanner::ws_send_scan_status() {
     std::string bytes = msg.SerializeAsString();
     this->ws_->write(net::buffer(bytes));
 }
-}  // namespace xavagent
+}  // namespace xavcore

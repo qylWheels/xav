@@ -2,10 +2,10 @@
 
 #include <outcome.hpp>
 
-#include "xavagent/protection/behavior_monitor.h"
-#include "xavagent/protection/event.h"
+#include "xavcore/protection/behavior_monitor.h"
+#include "xavcore/protection/event.h"
 
-namespace xavagent {
+namespace xavcore {
 class Levenshtein : public IEventListener {
 public:
     Levenshtein();
@@ -19,4 +19,4 @@ public:
     virtual bool is_accept(const Event& event) override;
     virtual outcome::result<void> accept(const Event& event) override;
 };
-}  // namespace xavagent
+}  // namespace xavcore

@@ -13,4 +13,4 @@ target_link_libraries(
     spdlog::spdlog
     outcome::hl
 )
-target_link_libraries(protection PUBLIC xavagent_includes)
+target_link_libraries(protection PUBLIC xavcore_includes)

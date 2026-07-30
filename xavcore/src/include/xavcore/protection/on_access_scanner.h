@@ -3,9 +3,9 @@
 #include <atomic>
 #include <cstdint>
 
-#include "xavagent/scan/scan_interfaces.h"
+#include "xavcore/scan/scan_interfaces.h"
 
-namespace xavagent {
+namespace xavcore {
 class OnAccessScanner {
 public:
     OnAccessScanner(IScanStrategy& scan_strategy);
@@ -38,4 +38,4 @@ private:
     std::atomic_uint64_t scanned_object_count_;
     std::atomic_uint64_t blocked_object_count_;
 };
-}  // namespace xavagent
+}  // namespace xavcore

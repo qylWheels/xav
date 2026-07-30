@@ -10,10 +10,10 @@
 #include <unordered_set>
 
 #include "syscall_monitor.skel.h"
-#include "xavagent/protection/behavior_monitor.h"
-#include "xavagent/protection/event.h"
+#include "xavcore/protection/behavior_monitor.h"
+#include "xavcore/protection/event.h"
 
-namespace xavagent {
+namespace xavcore {
 class SyscallMonitor : public IEventProvider {
 public:
     SyscallMonitor();
@@ -97,4 +97,4 @@ private:
     std::uint64_t lost_event_count_;
     std::jthread monitor_thread_;
 };
-}  // namespace xavagent
+}  // namespace xavcore

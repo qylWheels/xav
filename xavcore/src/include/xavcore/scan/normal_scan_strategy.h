@@ -1,8 +1,8 @@
 #pragma once
 
-#include "xavagent/scan/scan_interfaces.h"
+#include "xavcore/scan/scan_interfaces.h"
 
-namespace xavagent {
+namespace xavcore {
 class NormalScanStrategy : public IScanStrategy {
 public:
     NormalScanStrategy(IScanEngine &exact_hash_engine,
@@ -18,4 +18,4 @@ private:
     IScanEngine *exact_hash_engine_;
     IScanEngine *yara_static_heuristic_engine_;
 };
-}  // namespace xavagent
+}  // namespace xavcore

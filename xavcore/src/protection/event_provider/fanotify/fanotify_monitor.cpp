@@ -1,4 +1,4 @@
-#include "xavagent/protection/event_collection/fanotify/fanotify_monitor.h"
+#include "xavcore/protection/event_collection/fanotify/fanotify_monitor.h"
 
 #include <fcntl.h>
 #include <limits.h>
@@ -22,11 +22,11 @@
 #include <ranges>
 #include <stdexcept>
 
-#include "xavagent/protection/event.h"
+#include "xavcore/protection/event.h"
 
 #define BUFSIZE (4 * 1024)  // 4KB
 
-namespace xavagent {
+namespace xavcore {
 FanotifyMonitor::FanotifyMonitor()
     : total_event_count_(0), suspicious_event_count_(0) {
     // Initialize logger.
@@ -373,4 +373,4 @@ std::optional<std::string> FanotifyMonitor::get_proc_raw_stat(int pid, int n) {
         return std::nullopt;
     }
 }
-}  // namespace xavagent
+}  // namespace xavcore

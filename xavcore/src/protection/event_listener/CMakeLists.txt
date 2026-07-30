@@ -1,7 +1,7 @@
 add_library(levenshtein SHARED levenshtein.cpp)
 target_link_libraries(levenshtein
     PUBLIC
-    xavagent_includes
+    xavcore_includes
     protection
     outcome::hl
 )

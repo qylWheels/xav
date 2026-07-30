@@ -10,7 +10,7 @@
 #include <variant>
 #include <vector>
 
-namespace xavagent {
+namespace xavcore {
 struct Process {
     std::optional<std::int64_t> pid;
     std::optional<std::int64_t> ppid;
@@ -65,12 +65,12 @@ struct Event {
     Process process;
     std::variant<FileEvent, SyscallEventPayload> payload;
 };
-}  // namespace xavagent
+}  // namespace xavcore
 
 namespace std {
 template <>
-struct hash<xavagent::Process> {
-    std::size_t operator()(const xavagent::Process& p) const {
+struct hash<xavcore::Process> {
+    std::size_t operator()(const xavcore::Process& p) const {
         std::size_t seed = std::hash<std::optional<std::int64_t>>{}(p.pid);
         if (p.start_time_tick.has_value()) {
             seed ^= std::hash<std::uint64_t>()(p.start_time_tick.value());

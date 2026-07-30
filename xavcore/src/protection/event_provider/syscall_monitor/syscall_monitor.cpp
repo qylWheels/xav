@@ -1,4 +1,4 @@
-#include "xavagent/protection/event_provider/syscall_monitor/syscall_monitor.h"
+#include "xavcore/protection/event_provider/syscall_monitor/syscall_monitor.h"
 
 #include <bits/types/struct_iovec.h>
 #include <bpf/libbpf.h>
@@ -18,10 +18,10 @@
 #include <system_error>
 
 #include "syscall_monitor.skel.h"
-#include "xavagent/protection/event.h"
-#include "xavagent/protection/event_provider/syscall_monitor/raw_syscall_event.h"
+#include "xavcore/protection/event.h"
+#include "xavcore/protection/event_provider/syscall_monitor/raw_syscall_event.h"
 
-namespace xavagent {
+namespace xavcore {
 SyscallMonitor::SyscallMonitor() : rb_(nullptr), status_(Status::Stopped) {
     this->logger_ = spdlog::stderr_color_mt("syscall_monitor");
     this->logger_->set_level(spdlog::level::info);
@@ -220,4 +220,4 @@ ReadSyscallEventPayload SyscallMonitor::read_event_handler(
     }
     return payload;
 }
-}  // namespace xavagent
+}  // namespace xavcore

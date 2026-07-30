@@ -1,4 +1,4 @@
-#include "xavagent/protection/levenshtein_similarity.h"
+#include "xavcore/protection/levenshtein_similarity.h"
 
 #include <algorithm>
 #include <cstddef>
@@ -6,7 +6,7 @@
 #include <rapidfuzz/rapidfuzz_all.hpp>
 #include <vector>
 
-namespace xavagent {
+namespace xavcore {
 double LevenshteinSimilarity::calc_similarity(const std::deque<Event>& a,
                                               const std::deque<Event>& b) {
     std::size_t n = a.size();
@@ -142,4 +142,4 @@ double LevenshteinSimilarity::process_struct_similarity(const Process& a,
     return exe_path_similarity * exe_path_weight +
            cmdline_similarity * cmdline_weight;
 }
-}  // namespace xavagent
+}  // namespace xavcore
