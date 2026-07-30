@@ -68,8 +68,15 @@ struct WriteSyscallEventPayload {
     ::ssize_t ret;
 };
 
+struct UnlinkSyscallEventPayload {
+    const char* pathname;
+    std::optional<std::filesystem::path> path;
+    int ret;
+};
+
 using SyscallEventPayload =
-    std::variant<ReadSyscallEventPayload, WriteSyscallEventPayload>;
+    std::variant<ReadSyscallEventPayload, WriteSyscallEventPayload,
+                 UnlinkSyscallEventPayload>;
 
 struct Event {
     Process process;
