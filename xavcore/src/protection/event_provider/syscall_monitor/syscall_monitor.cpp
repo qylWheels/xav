@@ -9,6 +9,7 @@
 #include <sys/uio.h>
 #include <unistd.h>
 
+#include <cstdint>
 #include <numeric>
 #include <optional>
 #include <outcome/success_failure.hpp>
@@ -124,20 +125,20 @@ int SyscallMonitor::event_handler(void* ctx, void* data, std::size_t size) {
         case SYS_read: {
             event.payload = self->read_event_handler(
                 raw_event->args[0], reinterpret_cast<void*>(raw_event->args[1]),
-                raw_event->args[2], raw_event->pid);
+                raw_event->args[2], raw_event->ret, raw_event->pid);
             break;
         }
         case SYS_write: {
             event.payload = self->write_event_handler(
                 raw_event->args[0],
                 reinterpret_cast<const void*>(raw_event->args[1]),
-                raw_event->args[2], raw_event->pid);
+                raw_event->args[2], raw_event->ret, raw_event->pid);
             break;
         }
         case SYS_unlink: {
             event.payload = self->unlink_event_handler(
                 reinterpret_cast<const char*>(raw_event->args[0]),
-                raw_event->pid);
+                raw_event->ret, raw_event->pid);
             break;
         }
         default: {
@@ -250,28 +251,26 @@ std::optional<std::vector<char>> SyscallMonitor::read_process_memory(
 }
 
 ReadSyscallEventPayload SyscallMonitor::read_event_handler(
-    int fd, void* buf, size_t count,
+    int fd, void* buf, size_t count, ::ssize_t ret,
     int pid) {  // Parse syscall info.
     ReadSyscallEventPayload payload;
     payload.fd = fd;
     payload.buf = buf;
     payload.count = count;
-    payload.ret = 0;
+    payload.ret = ret;
     payload.path = this->fd_to_path(pid, fd);
     payload.buf_content = this->read_process_memory(pid, buf, count);
 
     return payload;
 }
 
-WriteSyscallEventPayload SyscallMonitor::write_event_handler(int fd,
-                                                             const void* buf,
-                                                             size_t count,
-                                                             int pid) {
+WriteSyscallEventPayload SyscallMonitor::write_event_handler(
+    int fd, const void* buf, size_t count, ::ssize_t ret, int pid) {
     WriteSyscallEventPayload payload;
     payload.fd = fd;
     payload.buf = buf;
     payload.count = count;
-    payload.ret = 0;
+    payload.ret = ret;
     payload.path = this->fd_to_path(pid, fd);
     payload.buf_content = this->read_process_memory(pid, buf, count);
 
@@ -279,10 +278,10 @@ WriteSyscallEventPayload SyscallMonitor::write_event_handler(int fd,
 }
 
 UnlinkSyscallEventPayload SyscallMonitor::unlink_event_handler(
-    const char* pathname, std::int64_t pid) {
+    const char* pathname, int ret, std::int64_t pid) {
     UnlinkSyscallEventPayload payload;
     payload.pathname = pathname;
-    payload.ret = 0;
+    payload.ret = ret;
     payload.path = this->ptr_to_path(pid, pathname);
 
     return payload;

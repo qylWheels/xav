@@ -2,6 +2,7 @@
 
 #include <spdlog/spdlog.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 #include <cstddef>
 #include <cstdint>
@@ -54,13 +55,14 @@ private:
 
 private:  // Basic file syscall handlers.
     ReadSyscallEventPayload read_event_handler(int fd, void* buf, size_t count,
-                                               int pid);
+                                               ::ssize_t ret, int pid);
     WriteSyscallEventPayload write_event_handler(int fd, const void* buf,
-                                                 size_t count, int pid);
+                                                 size_t count, ::ssize_t ret,
+                                                 int pid);
 
 private:  // Directory and filesystem syscall handlers.
     UnlinkSyscallEventPayload unlink_event_handler(const char* pathname,
-                                                   std::int64_t pid);
+                                                   int ret, std::int64_t pid);
     Event unlinkat_event_handler(int dirfd, const char* pathname, int flags,
                                  std::int64_t pid);
     Event rename_event_handler(const char* oldpath, const char* newpath,
