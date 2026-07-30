@@ -43,6 +43,10 @@ private:
     // Get file path from file descriptor, return nullopt if failed.
     std::optional<std::filesystem::path> fd_to_path(int pid, int fd) noexcept;
 
+    // Get file path from pointer, return nullopt if failed.
+    std::optional<std::filesystem::path> ptr_to_path(int pid,
+                                                     const void* addr) noexcept;
+
     // Read memory of process.
     std::optional<std::vector<char>> read_process_memory(int pid,
                                                          const void* addr,
@@ -55,7 +59,8 @@ private:  // Basic file syscall handlers.
                                                  size_t count, int pid);
 
 private:  // Directory and filesystem syscall handlers.
-    Event unlink_event_handler(const char* pathname, std::int64_t pid);
+    UnlinkSyscallEventPayload unlink_event_handler(const char* pathname,
+                                                   std::int64_t pid);
     Event unlinkat_event_handler(int dirfd, const char* pathname, int flags,
                                  std::int64_t pid);
     Event rename_event_handler(const char* oldpath, const char* newpath,

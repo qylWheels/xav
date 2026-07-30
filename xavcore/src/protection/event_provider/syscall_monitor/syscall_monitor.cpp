@@ -134,6 +134,12 @@ int SyscallMonitor::event_handler(void* ctx, void* data, std::size_t size) {
                 raw_event->args[2], raw_event->pid);
             break;
         }
+        case SYS_unlink: {
+            event.payload = self->unlink_event_handler(
+                reinterpret_cast<const char*>(raw_event->args[0]),
+                raw_event->pid);
+            break;
+        }
         default: {
             // Nothing to do.
             return 0;
@@ -199,6 +205,30 @@ std::optional<std::filesystem::path> SyscallMonitor::fd_to_path(
     }
 }
 
+std::optional<std::filesystem::path> SyscallMonitor::ptr_to_path(
+    int pid, const void* addr) noexcept {
+    try {
+        char buf[1];
+        std::string path_str;
+        iovec local, remote;
+        local.iov_base = buf;
+        local.iov_len = 1;
+        remote.iov_base = const_cast<void*>(addr);
+        remote.iov_len = 1;
+        do {
+            ssize_t ret = process_vm_readv(pid, &local, 1, &remote, 1, 0);
+            if (ret == -1) {
+                return std::nullopt;
+            } else {
+                path_str += buf;
+            }
+        } while (buf[0] != '\0');
+        return path_str;
+    } catch (...) {
+        return std::nullopt;
+    }
+}
+
 std::optional<std::vector<char>> SyscallMonitor::read_process_memory(
     int pid, const void* addr, size_t size) noexcept {
     try {
@@ -244,6 +274,16 @@ WriteSyscallEventPayload SyscallMonitor::write_event_handler(int fd,
     payload.ret = 0;
     payload.path = this->fd_to_path(pid, fd);
     payload.buf_content = this->read_process_memory(pid, buf, count);
+
+    return payload;
+}
+
+UnlinkSyscallEventPayload SyscallMonitor::unlink_event_handler(
+    const char* pathname, std::int64_t pid) {
+    UnlinkSyscallEventPayload payload;
+    payload.pathname = pathname;
+    payload.ret = 0;
+    payload.path = this->ptr_to_path(pid, pathname);
 
     return payload;
 }
