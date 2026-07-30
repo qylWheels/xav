@@ -23,7 +23,7 @@ pkg_check_modules(YARA REQUIRED IMPORTED_TARGET yara)
 
 # Packages from cmake.
 include(FetchContent)
-set(pfs_BUILD_SHARED_LIBS ON) # Build shared library for pfs.
+set(pfs_BUILD_SHARED_LIBS ON CACHE BOOL "Build shared library for pfs" FORCE)
 FetchContent_Declare(
   pfs
   GIT_REPOSITORY https://github.com/dtrugman/pfs.git
