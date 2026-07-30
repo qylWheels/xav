@@ -252,7 +252,7 @@ std::optional<std::vector<char>> SyscallMonitor::read_process_memory(
 
 ReadSyscallEventPayload SyscallMonitor::read_event_handler(
     int fd, void* buf, size_t count, ::ssize_t ret,
-    int pid) {  // Parse syscall info.
+    std::int64_t pid) {  // Parse syscall info.
     ReadSyscallEventPayload payload;
     payload.fd = fd;
     payload.buf = buf;
@@ -265,7 +265,7 @@ ReadSyscallEventPayload SyscallMonitor::read_event_handler(
 }
 
 WriteSyscallEventPayload SyscallMonitor::write_event_handler(
-    int fd, const void* buf, size_t count, ::ssize_t ret, int pid) {
+    int fd, const void* buf, size_t count, ::ssize_t ret, std::int64_t pid) {
     WriteSyscallEventPayload payload;
     payload.fd = fd;
     payload.buf = buf;

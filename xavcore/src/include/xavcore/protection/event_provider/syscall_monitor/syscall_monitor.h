@@ -55,10 +55,10 @@ private:
 
 private:  // Basic file syscall handlers.
     ReadSyscallEventPayload read_event_handler(int fd, void* buf, size_t count,
-                                               ::ssize_t ret, int pid);
+                                               ::ssize_t ret, std::int64_t pid);
     WriteSyscallEventPayload write_event_handler(int fd, const void* buf,
                                                  size_t count, ::ssize_t ret,
-                                                 int pid);
+                                                 std::int64_t pid);
 
 private:  // Directory and filesystem syscall handlers.
     UnlinkSyscallEventPayload unlink_event_handler(const char* pathname,
