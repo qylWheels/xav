@@ -59,7 +59,17 @@ struct ReadSyscallEventPayload {
     ::ssize_t ret;
 };
 
-using SyscallEventPayload = std::variant<ReadSyscallEventPayload>;
+struct WriteSyscallEventPayload {
+    int fd;
+    std::optional<std::filesystem::path> path;
+    const void* buf;
+    std::optional<std::vector<char>> buf_content;
+    std::size_t count;
+    ::ssize_t ret;
+};
+
+using SyscallEventPayload =
+    std::variant<ReadSyscallEventPayload, WriteSyscallEventPayload>;
 
 struct Event {
     Process process;
