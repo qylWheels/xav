@@ -1,6 +1,5 @@
 {
   "dependencies": [
-    "boost-beast",
     "cpp-httplib",
     "cpptrace",
     "cryptopp",
