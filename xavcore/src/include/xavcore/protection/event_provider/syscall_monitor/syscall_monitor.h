@@ -63,8 +63,10 @@ private:  // Basic file syscall handlers.
 private:  // Directory and filesystem syscall handlers.
     UnlinkSyscallEventPayload unlink_event_handler(const char* pathname,
                                                    int ret, std::int64_t pid);
-    Event unlinkat_event_handler(int dirfd, const char* pathname, int flags,
-                                 std::int64_t pid);
+    UnlinkatSyscallEventPayload unlinkat_event_handler(int dirfd,
+                                                       const char* pathname,
+                                                       int flags, int ret,
+                                                       std::int64_t pid);
     Event rename_event_handler(const char* oldpath, const char* newpath,
                                std::int64_t pid);
     Event renameat_event_handler(int olddirfd, const char* oldpath,

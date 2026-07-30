@@ -141,6 +141,13 @@ int SyscallMonitor::event_handler(void* ctx, void* data, std::size_t size) {
                 raw_event->ret, raw_event->pid);
             break;
         }
+        case SYS_unlinkat: {
+            event.payload = self->unlinkat_event_handler(
+                raw_event->args[0],
+                reinterpret_cast<const char*>(raw_event->args[1]),
+                raw_event->args[2], raw_event->ret, raw_event->pid);
+            break;
+        }
         default: {
             // Nothing to do.
             return 0;
@@ -283,6 +290,28 @@ UnlinkSyscallEventPayload SyscallMonitor::unlink_event_handler(
     payload.pathname = pathname;
     payload.ret = ret;
     payload.path = this->ptr_to_path(pid, pathname);
+
+    return payload;
+}
+
+UnlinkatSyscallEventPayload SyscallMonitor::unlinkat_event_handler(
+    int dirfd, const char* pathname, int flags, int ret, std::int64_t pid) {
+    UnlinkatSyscallEventPayload payload;
+    payload.dirfd = dirfd;
+    payload.pathname = pathname;
+    payload.flags = flags;
+    payload.ret = ret;
+    auto dirpath = this->fd_to_path(pid, dirfd);
+    auto filepath = this->ptr_to_path(pid, pathname);
+    try {
+        if (dirpath.has_value() && filepath.has_value()) {
+            payload.path = dirpath.value() / filepath.value();
+        } else {
+            payload.path = std::nullopt;
+        }
+    } catch (...) {
+        payload.path = std::nullopt;
+    }
 
     return payload;
 }
