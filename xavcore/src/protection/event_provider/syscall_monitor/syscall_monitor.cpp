@@ -127,6 +127,13 @@ int SyscallMonitor::event_handler(void* ctx, void* data, std::size_t size) {
                 raw_event->args[2], raw_event->pid);
             break;
         }
+        case SYS_write: {
+            event.payload = self->write_event_handler(
+                raw_event->args[0],
+                reinterpret_cast<const void*>(raw_event->args[1]),
+                raw_event->args[2], raw_event->pid);
+            break;
+        }
         default: {
             // Nothing to do.
             return 0;
@@ -136,12 +143,13 @@ int SyscallMonitor::event_handler(void* ctx, void* data, std::size_t size) {
     // Get process information.
     event.process = self->pid_to_process(raw_event->pid);
 
-    auto payload = std::get<ReadSyscallEventPayload>(
-        std::get<SyscallEventPayload>(event.payload));
-    auto exe_path = event.process.exe_path.value_or("<unknown>").string();
-    auto file_path = payload.path.value_or("<unknown>").string();
-    self->logger_->info("process {} tries to read {} bytes from {}", exe_path,
-                        payload.count, file_path);
+    // auto payload = std::get<ReadSyscallEventPayload>(
+    //     std::get<SyscallEventPayload>(event.payload));
+    // auto exe_path = event.process.exe_path.value_or("<unknown>").string();
+    // auto file_path = payload.path.value_or("<unknown>").string();
+    // self->logger_->info("process {} tries to read {} bytes from {}",
+    // exe_path,
+    //                     payload.count, file_path);
 
     // Send event.
     for (auto listener : self->listeners_) {
@@ -184,6 +192,41 @@ Process SyscallMonitor::pid_to_process(int pid) {  // Parse process info.
     return proc;
 }
 
+std::optional<std::filesystem::path> SyscallMonitor::fd_to_path(
+    int pid, int fd) noexcept {
+    try {
+        auto fds = pfs::procfs().get_task(pid).get_fds();
+        auto it = fds.find(fd);
+        if (it != fds.end()) {
+            return it->second.get_target();
+        } else {
+            return std::nullopt;
+        }
+    } catch (...) {
+        return std::nullopt;
+    }
+}
+
+std::optional<std::vector<char>> SyscallMonitor::read_process_memory(
+    int pid, const void* addr, size_t size) noexcept {
+    try {
+        std::vector<char> memory(size, 0);
+        iovec local, remote;
+        local.iov_base = memory.data();
+        local.iov_len = size;
+        remote.iov_base = const_cast<void*>(addr);
+        remote.iov_len = size;
+        ssize_t ret = process_vm_readv(pid, &local, 1, &remote, 1, 0);
+        if (ret == -1) {
+            return std::nullopt;
+        } else {
+            return memory;
+        }
+    } catch (...) {
+        return std::nullopt;
+    }
+}
+
 ReadSyscallEventPayload SyscallMonitor::read_event_handler(
     int fd, void* buf, size_t count,
     int pid) {  // Parse syscall info.
@@ -218,6 +261,21 @@ ReadSyscallEventPayload SyscallMonitor::read_event_handler(
     } catch (...) {
         payload.buf_content = std::nullopt;
     }
+    return payload;
+}
+
+WriteSyscallEventPayload SyscallMonitor::write_event_handler(int fd,
+                                                             const void* buf,
+                                                             size_t count,
+                                                             int pid) {
+    WriteSyscallEventPayload payload;
+    payload.fd = fd;
+    payload.buf = buf;
+    payload.count = count;
+    payload.ret = 0;
+    payload.path = this->fd_to_path(pid, fd);
+    payload.buf_content = this->read_process_memory(pid, buf, count);
+
     return payload;
 }
 }  // namespace xavcore

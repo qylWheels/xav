@@ -5,7 +5,9 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <filesystem>
 #include <memory>
+#include <optional>
 #include <thread>
 #include <unordered_set>
 
@@ -38,10 +40,19 @@ private:
 private:
     Process pid_to_process(int pid);
 
+    // Get file path from file descriptor, return nullopt if failed.
+    std::optional<std::filesystem::path> fd_to_path(int pid, int fd) noexcept;
+
+    // Read memory of process.
+    std::optional<std::vector<char>> read_process_memory(int pid,
+                                                         const void* addr,
+                                                         size_t size) noexcept;
+
 private:  // Basic file syscall handlers.
     ReadSyscallEventPayload read_event_handler(int fd, void* buf, size_t count,
                                                int pid);
-    Event write_event_handler(int fd, const void* buf, size_t count, int pid);
+    WriteSyscallEventPayload write_event_handler(int fd, const void* buf,
+                                                 size_t count, int pid);
 
 private:  // Directory and filesystem syscall handlers.
     Event unlink_event_handler(const char* pathname, std::int64_t pid);
