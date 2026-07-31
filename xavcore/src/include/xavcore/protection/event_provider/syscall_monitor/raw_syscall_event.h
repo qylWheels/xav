@@ -10,7 +10,7 @@ typedef __u64 u64;
 typedef std::uint8_t u8;
 typedef std::uint32_t u32;
 typedef std::uint64_t u64;
-#endif  // __BPF__
+#endif  // __BPF__, __bpf__
 
 struct __attribute__((packed)) RawSyscallEvent {
     u8 enter_captured;
@@ -21,3 +21,11 @@ struct __attribute__((packed)) RawSyscallEvent {
     u64 args[6];
     u64 ret;
 };
+
+#ifdef __cplusplus
+static_assert(sizeof(RawSyscallEvent) == 66,
+              "RawSyscallEvent size is not 66 bytes");
+#else
+_Static_assert(sizeof(RawSyscallEvent) == 66,
+               "RawSyscallEvent size is not 66 bytes");
+#endif  // __cplusplus
