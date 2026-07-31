@@ -302,10 +302,7 @@ void SyscallMonitor::handle_raw_event(const RawSyscallEvent& raw_event) {
     // Send event.
     for (auto listener : this->listeners_) {
         if (listener->is_accept(event)) {
-            auto ret = listener->accept(event);
-            if (!ret) {
-                ++this->lost_event_count_;
-            }
+            (void)listener->accept(event);
         }
     }
 }
