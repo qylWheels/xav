@@ -67,8 +67,9 @@ private:  // Directory and filesystem syscall handlers.
                                                        const char* pathname,
                                                        int flags, int ret,
                                                        std::int64_t pid);
-    Event rename_event_handler(const char* oldpath, const char* newpath,
-                               std::int64_t pid);
+    RenameSyscallEventPayload rename_event_handler(const char* oldpath,
+                                                   const char* newpath, int ret,
+                                                   std::int64_t pid);
     Event renameat_event_handler(int olddirfd, const char* oldpath,
                                  int newdirfd, const char* newpath,
                                  std::int64_t pid);

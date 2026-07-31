@@ -148,6 +148,13 @@ int SyscallMonitor::event_handler(void* ctx, void* data, std::size_t size) {
                 raw_event->args[2], raw_event->ret, raw_event->pid);
             break;
         }
+        case SYS_rename: {
+            event.payload = self->rename_event_handler(
+                reinterpret_cast<const char*>(raw_event->args[0]),
+                reinterpret_cast<const char*>(raw_event->args[1]),
+                raw_event->ret, raw_event->pid);
+            break;
+        }
         default: {
             // Nothing to do.
             return 0;
@@ -312,6 +319,18 @@ UnlinkatSyscallEventPayload SyscallMonitor::unlinkat_event_handler(
     } catch (...) {
         payload.path = std::nullopt;
     }
+
+    return payload;
+}
+
+RenameSyscallEventPayload SyscallMonitor::rename_event_handler(
+    const char* oldpath, const char* newpath, int ret, std::int64_t pid) {
+    RenameSyscallEventPayload payload;
+    payload.oldpath = oldpath;
+    payload.newpath = newpath;
+    payload.ret = ret;
+    payload.oldpath_class = this->ptr_to_path(pid, oldpath);
+    payload.newpath_class = this->ptr_to_path(pid, newpath);
 
     return payload;
 }
