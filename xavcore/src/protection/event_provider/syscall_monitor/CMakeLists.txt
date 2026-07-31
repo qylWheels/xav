@@ -70,4 +70,5 @@ target_link_libraries(syscall_monitor
     xavcore_includes elf bpf z httplib::httplib
     spdlog::spdlog
     pfs
+    concurrentqueue::concurrentqueue
 )
