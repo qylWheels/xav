@@ -75,9 +75,10 @@ private:  // Directory and filesystem syscall handlers.
     RenameatSyscallEventPayload renameat_event_handler(
         int olddirfd, const char* oldpath, int newdirfd, const char* newpath,
         int ret, std::uint32_t pid);
-    Event renameat2_event_handler(int olddirfd, const char* oldpath,
-                                  int newdirfd, const char* newpath, int flags,
-                                  std::uint32_t pid);
+
+    Renameat2SyscallEventPayload renameat2_event_handler(
+        int olddirfd, const char* oldpath, int newdirfd, const char* newpath,
+        unsigned int flags, int ret, std::uint32_t pid);
 
 private:  // File metadata syscall handlers.
     Event chmod_event_handler(const char* pathname, mode_t mode,

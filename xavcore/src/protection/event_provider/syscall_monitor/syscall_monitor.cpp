@@ -164,6 +164,15 @@ int SyscallMonitor::event_handler(void* ctx, void* data, std::size_t size) {
                 raw_event->ret, raw_event->pid);
             break;
         }
+        case SYS_renameat2: {
+            event.payload = self->renameat2_event_handler(
+                raw_event->args[0],
+                reinterpret_cast<const char*>(raw_event->args[1]),
+                raw_event->args[2],
+                reinterpret_cast<const char*>(raw_event->args[3]),
+                raw_event->args[4], raw_event->ret, raw_event->pid);
+            break;
+        }
         default: {
             // Nothing to do.
             return 0;
@@ -353,6 +362,22 @@ RenameatSyscallEventPayload SyscallMonitor::renameat_event_handler(
     payload.newdirfd = newdirfd;
     payload.oldpath = oldpath;
     payload.newpath = newpath;
+    payload.ret = ret;
+    payload.oldpath_class = this->ptr_to_path(pid, oldpath);
+    payload.newpath_class = this->ptr_to_path(pid, newpath);
+
+    return payload;
+}
+
+Renameat2SyscallEventPayload SyscallMonitor::renameat2_event_handler(
+    int olddirfd, const char* oldpath, int newdirfd, const char* newpath,
+    unsigned int flags, int ret, std::uint32_t pid) {
+    Renameat2SyscallEventPayload payload;
+    payload.olddirfd = olddirfd;
+    payload.newdirfd = newdirfd;
+    payload.oldpath = oldpath;
+    payload.newpath = newpath;
+    payload.flags = flags;
     payload.ret = ret;
     payload.oldpath_class = this->ptr_to_path(pid, oldpath);
     payload.newpath_class = this->ptr_to_path(pid, newpath);
