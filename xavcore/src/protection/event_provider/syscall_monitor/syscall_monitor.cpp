@@ -137,6 +137,7 @@ int SyscallMonitor::event_callback(void* ctx, void* data, std::size_t size) {
 
     auto result = self->raw_events_to_handle_.enqueue(*raw_event);
     if (!result) {
+        self->logger_->warn("Failed to enqueue raw event");
         ++self->lost_event_count_;
     }
 
