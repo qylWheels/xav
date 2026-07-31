@@ -135,13 +135,6 @@ int SyscallMonitor::event_callback(void* ctx, void* data, std::size_t size) {
     SyscallMonitor* self = static_cast<SyscallMonitor*>(ctx);
     RawSyscallEvent* raw_event = static_cast<RawSyscallEvent*>(data);
 
-    // TODO: ONLY FOR TEST.
-    if (raw_event->syscall_id == SYS_chmod ||
-        raw_event->syscall_id == SYS_fchmod ||
-        raw_event->syscall_id == SYS_fchmodat) {
-        self->logger_->info("chmod!");
-    }
-
     auto result = self->raw_events_to_handle_.enqueue(*raw_event);
     if (!result) {
         ++self->lost_event_count_;
