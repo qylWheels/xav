@@ -90,10 +90,20 @@ struct RenameSyscallEventPayload {
     int ret;
 };
 
+struct RenameatSyscallEventPayload {
+    int olddirfd;
+    const char* oldpath;
+    std::optional<std::filesystem::path> oldpath_class;
+    int newdirfd;
+    const char* newpath;
+    std::optional<std::filesystem::path> newpath_class;
+    int ret;
+};
+
 using SyscallEventPayload =
     std::variant<ReadSyscallEventPayload, WriteSyscallEventPayload,
                  UnlinkSyscallEventPayload, UnlinkatSyscallEventPayload,
-                 RenameSyscallEventPayload>;
+                 RenameSyscallEventPayload, RenameatSyscallEventPayload>;
 
 struct Event {
     Process process;
