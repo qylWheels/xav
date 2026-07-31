@@ -60,6 +60,17 @@ outcome::result<void> SyscallMonitor::start() {
         return outcome::failure(std::make_error_code(std::errc::io_error));
     }
 
+    // Start handling raw events in a separate thread.
+    this->handle_raw_events_thread_ =
+        std::jthread([this](std::stop_token stop) {
+            while (!stop.stop_requested()) {
+                RawSyscallEvent raw_event;
+                if (this->raw_events_to_handle_.try_dequeue(raw_event)) {
+                    this->handle_raw_event(raw_event);
+                }
+            }
+        });
+
     // Start monitoring in a separate thread.
     this->monitor_thread_ = std::jthread([this](std::stop_token stop) {
         while (!stop.stop_requested()) {
@@ -83,6 +94,9 @@ outcome::result<void> SyscallMonitor::stop() {
 
     this->monitor_thread_.request_stop();
     this->monitor_thread_.join();
+
+    this->handle_raw_events_thread_.request_stop();
+    this->handle_raw_events_thread_.join();
 
     ring_buffer__free(this->rb_);
     this->rb_ = nullptr;

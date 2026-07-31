@@ -132,5 +132,6 @@ private:
     std::atomic_uint64_t lost_event_count_;
     std::jthread monitor_thread_;
     moodycamel::ConcurrentQueue<RawSyscallEvent> raw_events_to_handle_;
+    std::jthread handle_raw_events_thread_;
 };
 }  // namespace xavcore
