@@ -9,6 +9,7 @@
     "protobuf",
     "rapidfuzz",
     "spdlog",
-    "yara"
+    "yara",
+    "concurrentqueue"
   ]
 }
