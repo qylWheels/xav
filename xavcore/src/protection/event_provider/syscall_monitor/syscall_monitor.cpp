@@ -2,6 +2,7 @@
 
 #include <bits/types/struct_iovec.h>
 #include <bpf/libbpf.h>
+#include <limits.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 #include <sys/resource.h>
@@ -9,6 +10,7 @@
 #include <sys/uio.h>
 #include <unistd.h>
 
+#include <cstddef>
 #include <cstdint>
 #include <numeric>
 #include <optional>
@@ -118,6 +120,13 @@ int SyscallMonitor::event_handler(void* ctx, void* data, std::size_t size) {
     SyscallMonitor* self = static_cast<SyscallMonitor*>(ctx);
     RawSyscallEvent* raw_event = static_cast<RawSyscallEvent*>(data);
 
+    // TODO: ONLY FOR TEST.
+    if (raw_event->syscall_id == SYS_chmod ||
+        raw_event->syscall_id == SYS_fchmod ||
+        raw_event->syscall_id == SYS_fchmodat) {
+        self->logger_->info("chmod!");
+    }
+
     Event event;
 
     // Dispatch event.
@@ -202,13 +211,6 @@ int SyscallMonitor::event_handler(void* ctx, void* data, std::size_t size) {
     // Get process information.
     event.process = self->pid_to_process(raw_event->pid);
 
-    // TODO: ONLY FOR TEST.
-    if (raw_event->syscall_id == SYS_rename ||
-        raw_event->syscall_id == SYS_renameat ||
-        raw_event->syscall_id == SYS_renameat2) {
-        self->logger_->info("rename!");
-    }
-
     // Send event.
     for (auto listener : self->listeners_) {
         if (listener->is_accept(event)) {
@@ -268,22 +270,25 @@ std::optional<std::filesystem::path> SyscallMonitor::fd_to_path(
 
 std::optional<std::filesystem::path> SyscallMonitor::ptr_to_path(
     std::uint32_t pid, const void* addr) noexcept {
+    return std::nullopt;
     try {
         char buf[1];
         std::string path_str;
         iovec local, remote;
+        std::size_t i = 0;
         local.iov_base = buf;
         local.iov_len = 1;
-        remote.iov_base = const_cast<void*>(addr);
         remote.iov_len = 1;
         do {
+            remote.iov_base = reinterpret_cast<void*>((std::size_t)addr + i);
             ssize_t ret = process_vm_readv(pid, &local, 1, &remote, 1, 0);
             if (ret == -1) {
                 return std::nullopt;
             } else {
                 path_str += buf;
+                i += 1;
             }
-        } while (buf[0] != '\0');
+        } while (buf[0] != '\0' && i < PATH_MAX);
         return path_str;
     } catch (...) {
         return std::nullopt;
