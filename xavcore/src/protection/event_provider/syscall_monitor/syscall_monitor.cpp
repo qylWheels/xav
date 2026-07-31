@@ -25,7 +25,8 @@
 #include "xavcore/protection/event_provider/syscall_monitor/raw_syscall_event.h"
 
 namespace xavcore {
-SyscallMonitor::SyscallMonitor() : rb_(nullptr), status_(Status::Stopped) {
+SyscallMonitor::SyscallMonitor()
+    : rb_(nullptr), status_(Status::Stopped), lost_event_count_(0) {
     this->logger_ = spdlog::stderr_color_mt("syscall_monitor");
     this->logger_->set_level(spdlog::level::info);
 
@@ -54,7 +55,7 @@ outcome::result<void> SyscallMonitor::start() {
         return outcome::failure(std::make_error_code(std::errc::io_error));
     }
     this->rb_ = ring_buffer__new(bpf_map__fd(this->skel_->maps.rb),
-                                 SyscallMonitor::event_handler, this, nullptr);
+                                 SyscallMonitor::event_callback, this, nullptr);
     if (!this->rb_) {
         return outcome::failure(std::make_error_code(std::errc::io_error));
     }
@@ -116,7 +117,7 @@ outcome::result<void> SyscallMonitor::listener_unregister(
     return outcome::success();
 }
 
-int SyscallMonitor::event_handler(void* ctx, void* data, std::size_t size) {
+int SyscallMonitor::event_callback(void* ctx, void* data, std::size_t size) {
     SyscallMonitor* self = static_cast<SyscallMonitor*>(ctx);
     RawSyscallEvent* raw_event = static_cast<RawSyscallEvent*>(data);
 
@@ -127,98 +128,9 @@ int SyscallMonitor::event_handler(void* ctx, void* data, std::size_t size) {
         self->logger_->info("chmod!");
     }
 
-    Event event;
-
-    // Dispatch event.
-    switch (raw_event->syscall_id) {
-        case SYS_read: {
-            event.payload = self->read_event_handler(
-                raw_event->args[0], reinterpret_cast<void*>(raw_event->args[1]),
-                raw_event->args[2], raw_event->ret, raw_event->pid);
-            break;
-        }
-        case SYS_write: {
-            event.payload = self->write_event_handler(
-                raw_event->args[0],
-                reinterpret_cast<const void*>(raw_event->args[1]),
-                raw_event->args[2], raw_event->ret, raw_event->pid);
-            break;
-        }
-        case SYS_unlink: {
-            event.payload = self->unlink_event_handler(
-                reinterpret_cast<const char*>(raw_event->args[0]),
-                raw_event->ret, raw_event->pid);
-            break;
-        }
-        case SYS_unlinkat: {
-            event.payload = self->unlinkat_event_handler(
-                raw_event->args[0],
-                reinterpret_cast<const char*>(raw_event->args[1]),
-                raw_event->args[2], raw_event->ret, raw_event->pid);
-            break;
-        }
-        case SYS_rename: {
-            event.payload = self->rename_event_handler(
-                reinterpret_cast<const char*>(raw_event->args[0]),
-                reinterpret_cast<const char*>(raw_event->args[1]),
-                raw_event->ret, raw_event->pid);
-            break;
-        }
-        case SYS_renameat: {
-            event.payload = self->renameat_event_handler(
-                raw_event->args[0],
-                reinterpret_cast<const char*>(raw_event->args[1]),
-                raw_event->args[2],
-                reinterpret_cast<const char*>(raw_event->args[3]),
-                raw_event->ret, raw_event->pid);
-            break;
-        }
-        case SYS_renameat2: {
-            event.payload = self->renameat2_event_handler(
-                raw_event->args[0],
-                reinterpret_cast<const char*>(raw_event->args[1]),
-                raw_event->args[2],
-                reinterpret_cast<const char*>(raw_event->args[3]),
-                raw_event->args[4], raw_event->ret, raw_event->pid);
-            break;
-        }
-        case SYS_chmod: {
-            event.payload = self->chmod_event_handler(
-                reinterpret_cast<const char*>(raw_event->args[0]),
-                raw_event->args[1], raw_event->ret, raw_event->pid);
-            break;
-        }
-        case SYS_fchmod: {
-            event.payload = self->fchmod_event_handler(
-                raw_event->args[0], raw_event->args[1], raw_event->ret,
-                raw_event->pid);
-            break;
-        }
-        case SYS_fchmodat: {
-            event.payload = self->fchmodat_event_handler(
-                raw_event->args[0],
-                reinterpret_cast<const char*>(raw_event->args[1]),
-                raw_event->args[2], raw_event->args[3], raw_event->ret,
-                raw_event->pid);
-            break;
-        }
-        default: {
-            // Nothing to do.
-            return 0;
-        }
-    }
-
-    // Get process information.
-    event.process = self->pid_to_process(raw_event->pid);
-
-    // Send event.
-    for (auto listener : self->listeners_) {
-        if (listener->is_accept(event)) {
-            auto ret = listener->accept(event);
-            if (!ret) {
-                ++self->lost_event_count_;
-            }
-        }
+    auto result = self->raw_events_to_handle_.enqueue(*raw_event);
+    if (!result) {
+        ++self->lost_event_count_;
     }
 
     return 0;
@@ -292,6 +204,102 @@ std::optional<std::filesystem::path> SyscallMonitor::ptr_to_path(
         return path_str;
     } catch (...) {
         return std::nullopt;
+    }
+}
+
+void SyscallMonitor::handle_raw_event(const RawSyscallEvent& raw_event) {
+    Event event;
+
+    // Dispatch event.
+    switch (raw_event.syscall_id) {
+        case SYS_read: {
+            event.payload = this->read_event_handler(
+                raw_event.args[0], reinterpret_cast<void*>(raw_event.args[1]),
+                raw_event.args[2], raw_event.ret, raw_event.pid);
+            break;
+        }
+        case SYS_write: {
+            event.payload = this->write_event_handler(
+                raw_event.args[0],
+                reinterpret_cast<const void*>(raw_event.args[1]),
+                raw_event.args[2], raw_event.ret, raw_event.pid);
+            break;
+        }
+        case SYS_unlink: {
+            event.payload = this->unlink_event_handler(
+                reinterpret_cast<const char*>(raw_event.args[0]), raw_event.ret,
+                raw_event.pid);
+            break;
+        }
+        case SYS_unlinkat: {
+            event.payload = this->unlinkat_event_handler(
+                raw_event.args[0],
+                reinterpret_cast<const char*>(raw_event.args[1]),
+                raw_event.args[2], raw_event.ret, raw_event.pid);
+            break;
+        }
+        case SYS_rename: {
+            event.payload = this->rename_event_handler(
+                reinterpret_cast<const char*>(raw_event.args[0]),
+                reinterpret_cast<const char*>(raw_event.args[1]), raw_event.ret,
+                raw_event.pid);
+            break;
+        }
+        case SYS_renameat: {
+            event.payload = this->renameat_event_handler(
+                raw_event.args[0],
+                reinterpret_cast<const char*>(raw_event.args[1]),
+                raw_event.args[2],
+                reinterpret_cast<const char*>(raw_event.args[3]), raw_event.ret,
+                raw_event.pid);
+            break;
+        }
+        case SYS_renameat2: {
+            event.payload = this->renameat2_event_handler(
+                raw_event.args[0],
+                reinterpret_cast<const char*>(raw_event.args[1]),
+                raw_event.args[2],
+                reinterpret_cast<const char*>(raw_event.args[3]),
+                raw_event.args[4], raw_event.ret, raw_event.pid);
+            break;
+        }
+        case SYS_chmod: {
+            event.payload = this->chmod_event_handler(
+                reinterpret_cast<const char*>(raw_event.args[0]),
+                raw_event.args[1], raw_event.ret, raw_event.pid);
+            break;
+        }
+        case SYS_fchmod: {
+            event.payload =
+                this->fchmod_event_handler(raw_event.args[0], raw_event.args[1],
+                                           raw_event.ret, raw_event.pid);
+            break;
+        }
+        case SYS_fchmodat: {
+            event.payload = this->fchmodat_event_handler(
+                raw_event.args[0],
+                reinterpret_cast<const char*>(raw_event.args[1]),
+                raw_event.args[2], raw_event.args[3], raw_event.ret,
+                raw_event.pid);
+            break;
+        }
+        default: {
+            // Nothing to do.
+            return;
+        }
+    }
+
+    // Get process information.
+    event.process = this->pid_to_process(raw_event.pid);
+
+    // Send event.
+    for (auto listener : this->listeners_) {
+        if (listener->is_accept(event)) {
+            auto ret = listener->accept(event);
+            if (!ret) {
+                ++this->lost_event_count_;
+            }
+        }
     }
 }
 

@@ -1,9 +1,11 @@
 #pragma once
 
+#include <concurrentqueue/moodycamel/concurrentqueue.h>
 #include <spdlog/spdlog.h>
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
@@ -15,6 +17,7 @@
 #include "syscall_monitor.skel.h"
 #include "xavcore/protection/behavior_monitor.h"
 #include "xavcore/protection/event.h"
+#include "xavcore/protection/event_provider/syscall_monitor/raw_syscall_event.h"
 
 namespace xavcore {
 class SyscallMonitor : public IEventProvider {
@@ -36,7 +39,7 @@ public:
         IEventListener& listener) override;
 
 private:
-    static int event_handler(void* ctx, void* data, std::size_t size);
+    static int event_callback(void* ctx, void* data, std::size_t size);
 
 private:
     Process pid_to_process(std::uint32_t pid);
@@ -53,6 +56,9 @@ private:
     std::optional<std::vector<char>> read_process_memory(std::uint32_t pid,
                                                          const void* addr,
                                                          size_t size) noexcept;
+
+private:
+    void handle_raw_event(const RawSyscallEvent& raw_event);
 
 private:  // Basic file syscall handlers.
     ReadSyscallEventPayload read_event_handler(int fd, void* buf, size_t count,
@@ -123,7 +129,8 @@ private:
     syscall_monitor_bpf* skel_;
     ring_buffer* rb_;
     std::unordered_set<IEventListener*> listeners_;
-    std::uint64_t lost_event_count_;
+    std::atomic_uint64_t lost_event_count_;
     std::jthread monitor_thread_;
+    moodycamel::ConcurrentQueue<RawSyscallEvent> raw_events_to_handle_;
 };
 }  // namespace xavcore
