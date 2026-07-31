@@ -26,6 +26,6 @@ struct __attribute__((packed)) RawSyscallEvent {
 static_assert(sizeof(RawSyscallEvent) == 66,
               "RawSyscallEvent size is not 66 bytes");
 #else
-_Static_assert(sizeof(RawSyscallEvent) == 66,
+_Static_assert(sizeof(struct RawSyscallEvent) == 66,
                "RawSyscallEvent size is not 66 bytes");
 #endif  // __cplusplus
