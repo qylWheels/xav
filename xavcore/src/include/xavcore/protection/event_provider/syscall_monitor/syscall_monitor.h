@@ -81,11 +81,16 @@ private:  // Directory and filesystem syscall handlers.
         unsigned int flags, int ret, std::uint32_t pid);
 
 private:  // File metadata syscall handlers.
-    Event chmod_event_handler(const char* pathname, mode_t mode,
-                              std::uint32_t pid);
-    Event fchmod_event_handler(int fd, mode_t mode, std::uint32_t pid);
-    Event fchmodat_event_handler(int dirfd, const char* pathname, mode_t mode,
-                                 int flags, std::uint32_t pid);
+    ChmodSyscallEventPayload chmod_event_handler(const char* pathname,
+                                                 mode_t mode, int ret,
+                                                 std::uint32_t pid);
+    FchmodSyscallEventPayload fchmod_event_handler(int fd, mode_t mode, int ret,
+                                                   std::uint32_t pid);
+    FchmodatSyscallEventPayload fchmodat_event_handler(int dirfd,
+                                                       const char* pathname,
+                                                       mode_t mode, int flags,
+                                                       int ret,
+                                                       std::uint32_t pid);
     Event chown_event_handler(const char* pathname, uid_t owner, gid_t group,
                               std::uint32_t pid);
     Event fchown_event_handler(int fd, uid_t owner, gid_t group,

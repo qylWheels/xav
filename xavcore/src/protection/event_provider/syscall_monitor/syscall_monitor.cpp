@@ -173,6 +173,26 @@ int SyscallMonitor::event_handler(void* ctx, void* data, std::size_t size) {
                 raw_event->args[4], raw_event->ret, raw_event->pid);
             break;
         }
+        case SYS_chmod: {
+            event.payload = self->chmod_event_handler(
+                reinterpret_cast<const char*>(raw_event->args[0]),
+                raw_event->args[1], raw_event->ret, raw_event->pid);
+            break;
+        }
+        case SYS_fchmod: {
+            event.payload = self->fchmod_event_handler(
+                raw_event->args[0], raw_event->args[1], raw_event->ret,
+                raw_event->pid);
+            break;
+        }
+        case SYS_fchmodat: {
+            event.payload = self->fchmodat_event_handler(
+                raw_event->args[0],
+                reinterpret_cast<const char*>(raw_event->args[1]),
+                raw_event->args[2], raw_event->args[3], raw_event->ret,
+                raw_event->pid);
+            break;
+        }
         default: {
             // Nothing to do.
             return 0;
@@ -181,6 +201,13 @@ int SyscallMonitor::event_handler(void* ctx, void* data, std::size_t size) {
 
     // Get process information.
     event.process = self->pid_to_process(raw_event->pid);
+
+    // TODO: ONLY FOR TEST.
+    if (raw_event->syscall_id == SYS_rename ||
+        raw_event->syscall_id == SYS_renameat ||
+        raw_event->syscall_id == SYS_renameat2) {
+        self->logger_->info("rename!");
+    }
 
     // Send event.
     for (auto listener : self->listeners_) {
@@ -384,4 +411,51 @@ Renameat2SyscallEventPayload SyscallMonitor::renameat2_event_handler(
 
     return payload;
 }
+
+ChmodSyscallEventPayload SyscallMonitor::chmod_event_handler(
+    const char* pathname, mode_t mode, int ret, std::uint32_t pid) {
+    ChmodSyscallEventPayload payload;
+    payload.pathname = pathname;
+    payload.mode = mode;
+    payload.ret = ret;
+    payload.path = this->ptr_to_path(pid, pathname);
+
+    return payload;
+}
+
+FchmodSyscallEventPayload SyscallMonitor::fchmod_event_handler(
+    int fd, mode_t mode, int ret, std::uint32_t pid) {
+    FchmodSyscallEventPayload payload;
+    payload.fd = fd;
+    payload.mode = mode;
+    payload.ret = ret;
+    payload.path = this->fd_to_path(pid, fd);
+
+    return payload;
+}
+
+FchmodatSyscallEventPayload SyscallMonitor::fchmodat_event_handler(
+    int dirfd, const char* pathname, mode_t mode, int flags, int ret,
+    std::uint32_t pid) {
+    FchmodatSyscallEventPayload payload;
+    payload.dirfd = dirfd;
+    payload.pathname = pathname;
+    payload.mode = mode;
+    payload.flags = flags;
+    payload.ret = ret;
+    auto dirpath = this->fd_to_path(pid, dirfd);
+    auto filepath = this->ptr_to_path(pid, pathname);
+    try {
+        if (dirpath.has_value() && filepath.has_value()) {
+            payload.path = dirpath.value() / filepath.value();
+        } else {
+            payload.path = std::nullopt;
+        }
+    } catch (...) {
+        payload.path = std::nullopt;
+    }
+
+    return payload;
+}
+
 }  // namespace xavcore

@@ -111,11 +111,35 @@ struct Renameat2SyscallEventPayload {
     int ret;
 };
 
+struct ChmodSyscallEventPayload {
+    const char* pathname;
+    std::optional<std::filesystem::path> path;
+    mode_t mode;
+    int ret;
+};
+
+struct FchmodSyscallEventPayload {
+    int fd;
+    std::optional<std::filesystem::path> path;
+    mode_t mode;
+    int ret;
+};
+
+struct FchmodatSyscallEventPayload {
+    int dirfd;
+    const char* pathname;
+    std::optional<std::filesystem::path> path;
+    mode_t mode;
+    int flags;
+    int ret;
+};
+
 using SyscallEventPayload =
     std::variant<ReadSyscallEventPayload, WriteSyscallEventPayload,
                  UnlinkSyscallEventPayload, UnlinkatSyscallEventPayload,
                  RenameSyscallEventPayload, RenameatSyscallEventPayload,
-                 Renameat2SyscallEventPayload>;
+                 Renameat2SyscallEventPayload, ChmodSyscallEventPayload,
+                 FchmodSyscallEventPayload, FchmodatSyscallEventPayload>;
 
 struct Event {
     Process process;
