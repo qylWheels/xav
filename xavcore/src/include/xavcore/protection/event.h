@@ -12,8 +12,8 @@
 
 namespace xavcore {
 struct Process {
-    std::optional<std::int64_t> pid;
-    std::optional<std::int64_t> ppid;
+    std::optional<std::uint32_t> pid;
+    std::optional<std::uint32_t> ppid;
     std::optional<std::uint64_t> start_time_tick;
     std::optional<std::filesystem::path> exe_path;
     std::optional<std::string> cmdline;
