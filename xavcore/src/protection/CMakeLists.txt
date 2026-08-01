@@ -1,16 +1,9 @@
 # Subdirectories.
-add_subdirectory(event_provider)
-add_subdirectory(event_listener)
+add_subdirectory(on_access_scanning)
+add_subdirectory(proactive_protection)
 
 add_library(protection SHARED)
-target_sources(protection PRIVATE
-    on_access_scanner.cpp
-)
 target_link_libraries(
     protection PUBLIC
-    rapidfuzz::rapidfuzz
-    protobufs
-    spdlog::spdlog
-    outcome::hl
+    on_access_scanning proactive_protection
 )
-target_link_libraries(protection PUBLIC xavcore_includes)

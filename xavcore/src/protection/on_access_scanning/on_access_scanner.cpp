@@ -1,4 +1,4 @@
-#include "xavcore/protection/on_access_scanner.h"
+#include "xavcore/protection/on_access_scanning/on_access_scanner.h"
 
 #include <fcntl.h>
 #include <limits.h>
