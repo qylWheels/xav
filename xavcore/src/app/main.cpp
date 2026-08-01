@@ -9,10 +9,10 @@
 #include <memory>
 #include <thread>
 
-#include "xavcore/protection/behavior_monitor.h"
-#include "xavcore/protection/event_listener/levenshtein.h"
-#include "xavcore/protection/event_provider/ebpf/ebpf_event_provider.h"
-#include "xavcore/protection/on_access_scanner.h"
+#include "xavcore/protection/on_access_scanning/on_access_scanner.h"
+#include "xavcore/protection/proactive_protection/behavior_monitor.h"
+#include "xavcore/protection/proactive_protection/event_listener/placeholder_event_listener/placeholder_event_listener.h"
+#include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event_provider.h"
 #include "xavcore/scan/exact_hash.h"
 #include "xavcore/scan/normal_scan_strategy.h"
 #include "xavcore/scan/scanner.h"
@@ -36,20 +36,21 @@ void startup() {
             exact_hash_engine, yara_static_heuristic_engine);
 
     // Event providers.
-    std::shared_ptr<xavcore::IEventProvider> ebpf_event_provider =
-        std::make_shared<xavcore::EbpfEventProvider>();
+    std::shared_ptr<xavcore::IEventProvider> syscall_event_provider =
+        std::make_shared<xavcore::SyscallEventProvider>();
 
     // Event listeners.
-    std::shared_ptr<xavcore::IEventListener> levenshtein_listener =
-        std::make_shared<xavcore::Levenshtein>();
-    auto ret = ebpf_event_provider->listener_register(*levenshtein_listener);
+    std::shared_ptr<xavcore::IEventListener> placeholder_event_listener =
+        std::make_shared<xavcore::PlaceholderEventListener>();
+    auto ret =
+        syscall_event_provider->listener_register(*placeholder_event_listener);
     if (!ret) {
         logger->error("Failed to register listener: {}", ret.error().message());
         return;
     }
 
     // Start protection.
-    ret = ebpf_event_provider->start();
+    ret = syscall_event_provider->start();
     if (!ret) {
         logger->error("Failed to start syscall monitor: {}",
                       ret.error().message());
