@@ -5,6 +5,3 @@ target_link_libraries(levenshtein
     protection
     outcome::hl
 )
-
-add_library(event_listener SHARED)
-target_link_libraries(event_listener PUBLIC levenshtein)
