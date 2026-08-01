@@ -1,2 +1,3 @@
 # Subdirectories.
 add_subdirectory(syscall_event_provider)
+add_subdirectory(process_lifecycle_event_provider)
