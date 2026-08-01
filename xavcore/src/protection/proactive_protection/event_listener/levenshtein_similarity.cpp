@@ -1,4 +1,4 @@
-#include "xavcore/protection/levenshtein_similarity.h"
+#include "xavcore/protection/proactive_protection/event_listener/levenshtein_similarity.h"
 
 #include <algorithm>
 #include <cstddef>

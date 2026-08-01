@@ -1,4 +1,4 @@
-#include "xavcore/protection/event_listener/levenshtein.h"
+#include "xavcore/protection/proactive_protection/event_listener/levenshtein.h"
 
 namespace xavcore {
 Levenshtein::Levenshtein() = default;

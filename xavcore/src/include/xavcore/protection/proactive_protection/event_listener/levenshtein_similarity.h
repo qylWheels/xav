@@ -2,8 +2,8 @@
 
 #include <deque>
 
-#include "xavcore/protection/event.h"
-#include "xavcore/protection/event_seq_similarity.h"
+#include "xavcore/protection/proactive_protection/event.h"
+#include "xavcore/protection/proactive_protection/event_seq_similarity.h"
 
 namespace xavcore {
 class LevenshteinSimilarity : public IEventSequenceSimilarity {

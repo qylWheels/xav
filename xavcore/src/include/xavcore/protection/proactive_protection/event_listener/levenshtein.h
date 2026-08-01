@@ -2,8 +2,8 @@
 
 #include <outcome.hpp>
 
-#include "xavcore/protection/behavior_monitor.h"
-#include "xavcore/protection/event.h"
+#include "xavcore/protection/proactive_protection/behavior_monitor.h"
+#include "xavcore/protection/proactive_protection/event.h"
 
 namespace xavcore {
 class Levenshtein : public IEventListener {
