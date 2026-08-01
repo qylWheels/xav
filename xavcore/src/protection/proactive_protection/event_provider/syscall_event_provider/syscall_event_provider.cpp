@@ -109,7 +109,7 @@ outcome::result<void> SyscallEventProvider::stop() {
     return outcome::success();
 }
 
-std::uint64_t EbpfEventProvider::lost_event_count() {
+std::uint64_t SyscallEventProvider::lost_event_count() {
     return this->lost_event_count_;
 }
 
@@ -132,8 +132,9 @@ outcome::result<void> SyscallEventProvider::listener_unregister(
     return outcome::success();
 }
 
-int EbpfEventProvider::event_callback(void* ctx, void* data, std::size_t size) {
-    EbpfEventProvider* self = static_cast<EbpfEventProvider*>(ctx);
+int SyscallEventProvider::event_callback(void* ctx, void* data,
+                                         std::size_t size) {
+    SyscallEventProvider* self = static_cast<SyscallEventProvider*>(ctx);
     RawSyscallEvent* raw_event = static_cast<RawSyscallEvent*>(data);
 
     auto result = self->raw_events_to_handle_.enqueue(*raw_event);
@@ -145,7 +146,7 @@ int EbpfEventProvider::event_callback(void* ctx, void* data, std::size_t size) {
     return 0;
 }
 
-Process EbpfEventProvider::pid_to_process(
+Process SyscallEventProvider::pid_to_process(
     std::uint32_t pid) {  // Parse process info.
     Process proc{.pid = pid};
     try {
@@ -174,7 +175,7 @@ Process EbpfEventProvider::pid_to_process(
     return proc;
 }
 
-std::optional<std::filesystem::path> EbpfEventProvider::fd_to_path(
+std::optional<std::filesystem::path> SyscallEventProvider::fd_to_path(
     std::uint32_t pid, int fd) noexcept {
     try {
         auto fds = pfs::procfs().get_task(pid).get_fds();
@@ -189,7 +190,7 @@ std::optional<std::filesystem::path> EbpfEventProvider::fd_to_path(
     }
 }
 
-std::optional<std::filesystem::path> EbpfEventProvider::ptr_to_path(
+std::optional<std::filesystem::path> SyscallEventProvider::ptr_to_path(
     std::uint32_t pid, const void* addr) noexcept {
     return std::nullopt;
     try {
@@ -216,7 +217,7 @@ std::optional<std::filesystem::path> EbpfEventProvider::ptr_to_path(
     }
 }
 
-void EbpfEventProvider::handle_raw_event(const RawSyscallEvent& raw_event) {
+void SyscallEventProvider::handle_raw_event(const RawSyscallEvent& raw_event) {
     Event event;
 
     // Dispatch event.
@@ -309,7 +310,7 @@ void EbpfEventProvider::handle_raw_event(const RawSyscallEvent& raw_event) {
     }
 }
 
-std::optional<std::vector<char>> EbpfEventProvider::read_process_memory(
+std::optional<std::vector<char>> SyscallEventProvider::read_process_memory(
     std::uint32_t pid, const void* addr, size_t size) noexcept {
     try {
         std::vector<char> memory(size, 0);
@@ -329,7 +330,7 @@ std::optional<std::vector<char>> EbpfEventProvider::read_process_memory(
     }
 }
 
-ReadSyscallEventPayload EbpfEventProvider::read_event_handler(
+ReadSyscallEventPayload SyscallEventProvider::read_event_handler(
     int fd, void* buf, size_t count, ::ssize_t ret,
     std::uint32_t pid) {  // Parse syscall info.
     ReadSyscallEventPayload payload;
@@ -343,7 +344,7 @@ ReadSyscallEventPayload EbpfEventProvider::read_event_handler(
     return payload;
 }
 
-WriteSyscallEventPayload EbpfEventProvider::write_event_handler(
+WriteSyscallEventPayload SyscallEventProvider::write_event_handler(
     int fd, const void* buf, size_t count, ::ssize_t ret, std::uint32_t pid) {
     WriteSyscallEventPayload payload;
     payload.fd = fd;
@@ -356,7 +357,7 @@ WriteSyscallEventPayload EbpfEventProvider::write_event_handler(
     return payload;
 }
 
-UnlinkSyscallEventPayload EbpfEventProvider::unlink_event_handler(
+UnlinkSyscallEventPayload SyscallEventProvider::unlink_event_handler(
     const char* pathname, int ret, std::uint32_t pid) {
     UnlinkSyscallEventPayload payload;
     payload.pathname = pathname;
@@ -366,7 +367,7 @@ UnlinkSyscallEventPayload EbpfEventProvider::unlink_event_handler(
     return payload;
 }
 
-UnlinkatSyscallEventPayload EbpfEventProvider::unlinkat_event_handler(
+UnlinkatSyscallEventPayload SyscallEventProvider::unlinkat_event_handler(
     int dirfd, const char* pathname, int flags, int ret, std::uint32_t pid) {
     UnlinkatSyscallEventPayload payload;
     payload.dirfd = dirfd;
@@ -388,7 +389,7 @@ UnlinkatSyscallEventPayload EbpfEventProvider::unlinkat_event_handler(
     return payload;
 }
 
-RenameSyscallEventPayload EbpfEventProvider::rename_event_handler(
+RenameSyscallEventPayload SyscallEventProvider::rename_event_handler(
     const char* oldpath, const char* newpath, int ret, std::uint32_t pid) {
     RenameSyscallEventPayload payload;
     payload.oldpath = oldpath;
@@ -400,7 +401,7 @@ RenameSyscallEventPayload EbpfEventProvider::rename_event_handler(
     return payload;
 }
 
-RenameatSyscallEventPayload EbpfEventProvider::renameat_event_handler(
+RenameatSyscallEventPayload SyscallEventProvider::renameat_event_handler(
     int olddirfd, const char* oldpath, int newdirfd, const char* newpath,
     int ret, std::uint32_t pid) {
     RenameatSyscallEventPayload payload;
@@ -415,7 +416,7 @@ RenameatSyscallEventPayload EbpfEventProvider::renameat_event_handler(
     return payload;
 }
 
-Renameat2SyscallEventPayload EbpfEventProvider::renameat2_event_handler(
+Renameat2SyscallEventPayload SyscallEventProvider::renameat2_event_handler(
     int olddirfd, const char* oldpath, int newdirfd, const char* newpath,
     unsigned int flags, int ret, std::uint32_t pid) {
     Renameat2SyscallEventPayload payload;
@@ -431,7 +432,7 @@ Renameat2SyscallEventPayload EbpfEventProvider::renameat2_event_handler(
     return payload;
 }
 
-ChmodSyscallEventPayload EbpfEventProvider::chmod_event_handler(
+ChmodSyscallEventPayload SyscallEventProvider::chmod_event_handler(
     const char* pathname, mode_t mode, int ret, std::uint32_t pid) {
     ChmodSyscallEventPayload payload;
     payload.pathname = pathname;
@@ -442,7 +443,7 @@ ChmodSyscallEventPayload EbpfEventProvider::chmod_event_handler(
     return payload;
 }
 
-FchmodSyscallEventPayload EbpfEventProvider::fchmod_event_handler(
+FchmodSyscallEventPayload SyscallEventProvider::fchmod_event_handler(
     int fd, mode_t mode, int ret, std::uint32_t pid) {
     FchmodSyscallEventPayload payload;
     payload.fd = fd;
@@ -453,7 +454,7 @@ FchmodSyscallEventPayload EbpfEventProvider::fchmod_event_handler(
     return payload;
 }
 
-FchmodatSyscallEventPayload EbpfEventProvider::fchmodat_event_handler(
+FchmodatSyscallEventPayload SyscallEventProvider::fchmodat_event_handler(
     int dirfd, const char* pathname, mode_t mode, int flags, int ret,
     std::uint32_t pid) {
     FchmodatSyscallEventPayload payload;
