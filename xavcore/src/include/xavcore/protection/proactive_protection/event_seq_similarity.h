@@ -2,7 +2,7 @@
 
 #include <deque>
 
-#include "xavcore/protection/event.h"
+#include "xavcore/protection/proactive_protection/event.h"
 
 namespace xavcore {
 class IEventSequenceSimilarity {

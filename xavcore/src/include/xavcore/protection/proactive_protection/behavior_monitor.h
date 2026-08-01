@@ -7,7 +7,7 @@
 #include <outcome/config.hpp>
 #include <outcome/result.hpp>
 
-#include "xavcore/protection/event.h"
+#include "xavcore/protection/proactive_protection/event.h"
 
 namespace outcome = OUTCOME_V2_NAMESPACE;
 
