@@ -57,5 +57,5 @@ target_link_libraries(process_lifecycle_event_provider
     PUBLIC
     xavcore_includes elf bpf z
     spdlog::spdlog
-    pfs
+    pfs outcome::hl
 )
