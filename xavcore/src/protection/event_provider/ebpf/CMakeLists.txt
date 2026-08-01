@@ -13,7 +13,7 @@ add_custom_target(vmlinux_header DEPENDS ${VMLINUX_HEADER})
 # eBPF objects.
 set(
     EBPF_OUTPUT
-    ${CMAKE_CURRENT_BINARY_DIR}/syscall_monitor.bpf.o
+    ${CMAKE_CURRENT_BINARY_DIR}/ebpf.bpf.o
 )
 if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|amd64|X86_64|AMD64")
     set(EBPF_TARGET_ARCH __TARGET_ARCH_x86_64)
@@ -27,24 +27,24 @@ add_custom_command(
         -target bpf
         -O2
         -g
-        -c ${CMAKE_CURRENT_SOURCE_DIR}/syscall_monitor.bpf.c
+        -c ${CMAKE_CURRENT_SOURCE_DIR}/ebpf.bpf.c
         -o ${EBPF_OUTPUT}
         -D ${EBPF_TARGET_ARCH}
         -I${CMAKE_CURRENT_BINARY_DIR}
         -I${CMAKE_SOURCE_DIR}/src/include
 
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/syscall_monitor.bpf.c
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/ebpf.bpf.c
 )
 add_custom_target(
-    syscall_monitor_ebpf
+    ebpf_obj
     DEPENDS ${EBPF_OUTPUT}
 )
-add_dependencies(syscall_monitor_ebpf vmlinux_header)
+add_dependencies(ebpf_obj vmlinux_header)
 
 # Skeleton header.
 set(
     SKELETON_HEADER
-    ${CMAKE_CURRENT_BINARY_DIR}/syscall_monitor.skel.h
+    ${CMAKE_CURRENT_BINARY_DIR}/ebpf.skel.h
 )
 add_custom_command(
     OUTPUT ${SKELETON_HEADER}
@@ -56,16 +56,16 @@ add_custom_command(
     USES_TERMINAL
 )
 add_custom_target(
-    syscall_monitor_skeleton_header
+    ebpf_skeleton_header
     DEPENDS ${SKELETON_HEADER}
 )
-add_dependencies(syscall_monitor_skeleton_header syscall_monitor_ebpf)
+add_dependencies(ebpf_skeleton_header ebpf_obj)
 
-add_library(syscall_monitor SHARED)
-target_sources(syscall_monitor PRIVATE syscall_monitor.cpp)
-add_dependencies(syscall_monitor syscall_monitor_skeleton_header)
-target_include_directories(syscall_monitor PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
-target_link_libraries(syscall_monitor
+add_library(ebpf SHARED)
+target_sources(ebpf PRIVATE ebpf.cpp)
+add_dependencies(ebpf ebpf_skeleton_header)
+target_include_directories(ebpf PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
+target_link_libraries(ebpf
     PUBLIC
     xavcore_includes elf bpf z httplib::httplib
     spdlog::spdlog

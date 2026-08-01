@@ -1,4 +1,4 @@
-#include "xavcore/protection/event_provider/syscall_monitor/syscall_monitor.h"
+#include "xavcore/protection/event_provider/ebpf/ebpf.h"
 
 #include <bits/types/struct_iovec.h>
 #include <bpf/libbpf.h>
@@ -22,7 +22,7 @@
 
 #include "syscall_monitor.skel.h"
 #include "xavcore/protection/event.h"
-#include "xavcore/protection/event_provider/syscall_monitor/raw_syscall_event.h"
+#include "xavcore/protection/event_provider/ebpf/raw_syscall_event.h"
 
 namespace xavcore {
 SyscallMonitor::SyscallMonitor()

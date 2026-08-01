@@ -17,7 +17,7 @@
 #include "syscall_monitor.skel.h"
 #include "xavcore/protection/behavior_monitor.h"
 #include "xavcore/protection/event.h"
-#include "xavcore/protection/event_provider/syscall_monitor/raw_syscall_event.h"
+#include "xavcore/protection/event_provider/ebpf/raw_syscall_event.h"
 
 namespace xavcore {
 class SyscallMonitor : public IEventProvider {
