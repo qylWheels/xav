@@ -1,4 +1,4 @@
-#include "xavcore/protection/event_provider/ebpf/ebpf_event_provider.h"
+#include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event_provider.h"
 
 #include <bits/types/struct_iovec.h>
 #include <bpf/libbpf.h>
@@ -20,43 +20,43 @@
 #include <stop_token>
 #include <system_error>
 
-#include "ebpf_event_provider.skel.h"
-#include "xavcore/protection/event.h"
-#include "xavcore/protection/event_provider/ebpf/raw_syscall_event.h"
+#include "syscall_event_provider.skel.h"
+#include "xavcore/protection/proactive_protection/event.h"
+#include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/raw_syscall_event.h"
 
 namespace xavcore {
-EbpfEventProvider::EbpfEventProvider()
+SyscallEventProvider::SyscallEventProvider()
     : rb_(nullptr), status_(Status::Stopped), lost_event_count_(0) {
     this->logger_ = spdlog::stderr_color_mt("ebpf_event_provider");
     this->logger_->set_level(spdlog::level::info);
 
-    this->skel_ = ebpf_event_provider_bpf::open_and_load();
-    this->logger_->info("Ebpf event provider loaded");
+    this->skel_ = syscall_event_provider_bpf::open_and_load();
+    this->logger_->info("Syscall event provider loaded");
     if (!this->skel_) {
         throw std::runtime_error("Failed to open and load BPF skeleton");
     }
 }
 
-EbpfEventProvider::~EbpfEventProvider() {
+SyscallEventProvider::~SyscallEventProvider() {
     if (this->status_ == Status::Started) {
         (void)this->stop();
     }
-    ebpf_event_provider_bpf::destroy(this->skel_);
+    syscall_event_provider_bpf::destroy(this->skel_);
 }
 
-outcome::result<void> EbpfEventProvider::start() {
+outcome::result<void> SyscallEventProvider::start() {
     if (this->status_ != Status::Stopped) {
         return outcome::failure(
             std::make_error_code(std::errc::device_or_resource_busy));
     }
 
-    int ret = ebpf_event_provider_bpf::attach(this->skel_);
+    int ret = syscall_event_provider_bpf::attach(this->skel_);
     if (ret) {
         return outcome::failure(std::make_error_code(std::errc::io_error));
     }
     this->rb_ =
         ring_buffer__new(bpf_map__fd(this->skel_->maps.rb),
-                         EbpfEventProvider::event_callback, this, nullptr);
+                         SyscallEventProvider::event_callback, this, nullptr);
     if (!this->rb_) {
         return outcome::failure(std::make_error_code(std::errc::io_error));
     }
@@ -87,7 +87,7 @@ outcome::result<void> EbpfEventProvider::start() {
     return outcome::success();
 }
 
-outcome::result<void> EbpfEventProvider::stop() {
+outcome::result<void> SyscallEventProvider::stop() {
     if (this->status_ != Status::Started) {
         return outcome::failure(
             std::make_error_code(std::errc::no_such_device_or_address));
@@ -102,7 +102,7 @@ outcome::result<void> EbpfEventProvider::stop() {
     ring_buffer__free(this->rb_);
     this->rb_ = nullptr;
 
-    ebpf_event_provider_bpf::detach(this->skel_);
+    syscall_event_provider_bpf::detach(this->skel_);
 
     this->status_ = Status::Stopped;
 
@@ -113,7 +113,7 @@ std::uint64_t EbpfEventProvider::lost_event_count() {
     return this->lost_event_count_;
 }
 
-outcome::result<void> EbpfEventProvider::listener_register(
+outcome::result<void> SyscallEventProvider::listener_register(
     IEventListener& listener) {
     if (this->listeners_.find(&listener) != this->listeners_.end()) {
         return outcome::failure(std::make_error_code(std::errc::file_exists));
@@ -122,7 +122,7 @@ outcome::result<void> EbpfEventProvider::listener_register(
     return outcome::success();
 }
 
-outcome::result<void> EbpfEventProvider::listener_unregister(
+outcome::result<void> SyscallEventProvider::listener_unregister(
     IEventListener& listener) {
     if (this->listeners_.find(&listener) == this->listeners_.end()) {
         return outcome::failure(

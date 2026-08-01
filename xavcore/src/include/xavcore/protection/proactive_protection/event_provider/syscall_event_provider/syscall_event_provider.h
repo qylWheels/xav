@@ -14,20 +14,20 @@
 #include <thread>
 #include <unordered_set>
 
-#include "ebpf_event_provider.skel.h"
-#include "xavcore/protection/behavior_monitor.h"
-#include "xavcore/protection/event.h"
-#include "xavcore/protection/event_provider/ebpf/raw_syscall_event.h"
+#include "syscall_event_provider.skel.h"
+#include "xavcore/protection/proactive_protection/behavior_monitor.h"
+#include "xavcore/protection/proactive_protection/event.h"
+#include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/raw_syscall_event.h"
 
 namespace xavcore {
-class EbpfEventProvider : public IEventProvider {
+class SyscallEventProvider : public IEventProvider {
 public:
-    EbpfEventProvider();
-    ~EbpfEventProvider();
-    EbpfEventProvider(const EbpfEventProvider&) = delete;
-    EbpfEventProvider& operator=(const EbpfEventProvider&) = delete;
-    EbpfEventProvider(EbpfEventProvider&&) = delete;
-    EbpfEventProvider& operator=(EbpfEventProvider&&) = delete;
+    SyscallEventProvider();
+    ~SyscallEventProvider();
+    SyscallEventProvider(const SyscallEventProvider&) = delete;
+    SyscallEventProvider& operator=(const SyscallEventProvider&) = delete;
+    SyscallEventProvider(SyscallEventProvider&&) = delete;
+    SyscallEventProvider& operator=(SyscallEventProvider&&) = delete;
 
 public:
     virtual outcome::result<void> start() override;
