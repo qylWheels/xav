@@ -13,7 +13,7 @@ add_custom_target(vmlinux_header DEPENDS ${VMLINUX_HEADER})
 # eBPF objects.
 set(
     EBPF_OUTPUT
-    ${CMAKE_CURRENT_BINARY_DIR}/ebpf.bpf.o
+    ${CMAKE_CURRENT_BINARY_DIR}/ebpf_event_provider.bpf.o
 )
 if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|amd64|X86_64|AMD64")
     set(EBPF_TARGET_ARCH __TARGET_ARCH_x86_64)
@@ -27,24 +27,24 @@ add_custom_command(
         -target bpf
         -O2
         -g
-        -c ${CMAKE_CURRENT_SOURCE_DIR}/ebpf.bpf.c
+        -c ${CMAKE_CURRENT_SOURCE_DIR}/ebpf_event_provider.bpf.c
         -o ${EBPF_OUTPUT}
         -D ${EBPF_TARGET_ARCH}
         -I${CMAKE_CURRENT_BINARY_DIR}
         -I${CMAKE_SOURCE_DIR}/src/include
 
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/ebpf.bpf.c
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/ebpf_event_provider.bpf.c
 )
 add_custom_target(
-    ebpf_obj
+    ebpf_event_provider_obj
     DEPENDS ${EBPF_OUTPUT}
 )
-add_dependencies(ebpf_obj vmlinux_header)
+add_dependencies(ebpf_event_provider_obj vmlinux_header)
 
 # Skeleton header.
 set(
     SKELETON_HEADER
-    ${CMAKE_CURRENT_BINARY_DIR}/ebpf.skel.h
+    ${CMAKE_CURRENT_BINARY_DIR}/ebpf_event_provider.skel.h
 )
 add_custom_command(
     OUTPUT ${SKELETON_HEADER}
@@ -56,16 +56,16 @@ add_custom_command(
     USES_TERMINAL
 )
 add_custom_target(
-    ebpf_skeleton_header
+    ebpf_event_provider_skeleton_header
     DEPENDS ${SKELETON_HEADER}
 )
-add_dependencies(ebpf_skeleton_header ebpf_obj)
+add_dependencies(ebpf_event_provider_skeleton_header ebpf_event_provider_obj)
 
-add_library(ebpf SHARED)
-target_sources(ebpf PRIVATE ebpf.cpp)
-add_dependencies(ebpf ebpf_skeleton_header)
-target_include_directories(ebpf PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
-target_link_libraries(ebpf
+add_library(ebpf_event_provider SHARED)
+target_sources(ebpf_event_provider PRIVATE ebpf_event_provider.cpp)
+add_dependencies(ebpf_event_provider ebpf_event_provider_skeleton_header)
+target_include_directories(ebpf_event_provider PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
+target_link_libraries(ebpf_event_provider
     PUBLIC
     xavcore_includes elf bpf z httplib::httplib
     spdlog::spdlog

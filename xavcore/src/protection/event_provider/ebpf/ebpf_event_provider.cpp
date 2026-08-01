@@ -20,42 +20,43 @@
 #include <stop_token>
 #include <system_error>
 
-#include "syscall_monitor.skel.h"
+#include "ebpf.skel.h"
 #include "xavcore/protection/event.h"
 #include "xavcore/protection/event_provider/ebpf/raw_syscall_event.h"
 
 namespace xavcore {
-SyscallMonitor::SyscallMonitor()
+EbpfEventProvider::EbpfEventProvider()
     : rb_(nullptr), status_(Status::Stopped), lost_event_count_(0) {
-    this->logger_ = spdlog::stderr_color_mt("syscall_monitor");
+    this->logger_ = spdlog::stderr_color_mt("ebpf");
     this->logger_->set_level(spdlog::level::info);
 
-    this->skel_ = syscall_monitor_bpf::open_and_load();
-    this->logger_->info("Syscall monitor ebpf loaded");
+    this->skel_ = ebpf_bpf::open_and_load();
+    this->logger_->info("Ebpf loaded");
     if (!this->skel_) {
         throw std::runtime_error("Failed to open and load BPF skeleton");
     }
 }
 
-SyscallMonitor::~SyscallMonitor() {
+EbpfEventProvider::~EbpfEventProvider() {
     if (this->status_ == Status::Started) {
         (void)this->stop();
     }
-    syscall_monitor_bpf::destroy(this->skel_);
+    ebpf_bpf::destroy(this->skel_);
 }
 
-outcome::result<void> SyscallMonitor::start() {
+outcome::result<void> EbpfEventProvider::start() {
     if (this->status_ != Status::Stopped) {
         return outcome::failure(
             std::make_error_code(std::errc::device_or_resource_busy));
     }
 
-    int ret = syscall_monitor_bpf::attach(this->skel_);
+    int ret = ebpf_bpf::attach(this->skel_);
     if (ret) {
         return outcome::failure(std::make_error_code(std::errc::io_error));
     }
-    this->rb_ = ring_buffer__new(bpf_map__fd(this->skel_->maps.rb),
-                                 SyscallMonitor::event_callback, this, nullptr);
+    this->rb_ =
+        ring_buffer__new(bpf_map__fd(this->skel_->maps.rb),
+                         EbpfEventProvider::event_callback, this, nullptr);
     if (!this->rb_) {
         return outcome::failure(std::make_error_code(std::errc::io_error));
     }
@@ -86,7 +87,7 @@ outcome::result<void> SyscallMonitor::start() {
     return outcome::success();
 }
 
-outcome::result<void> SyscallMonitor::stop() {
+outcome::result<void> EbpfEventProvider::stop() {
     if (this->status_ != Status::Started) {
         return outcome::failure(
             std::make_error_code(std::errc::no_such_device_or_address));
@@ -101,18 +102,18 @@ outcome::result<void> SyscallMonitor::stop() {
     ring_buffer__free(this->rb_);
     this->rb_ = nullptr;
 
-    syscall_monitor_bpf::detach(this->skel_);
+    ebpf_bpf::detach(this->skel_);
 
     this->status_ = Status::Stopped;
 
     return outcome::success();
 }
 
-std::uint64_t SyscallMonitor::lost_event_count() {
+std::uint64_t EbpfEventProvider::lost_event_count() {
     return this->lost_event_count_;
 }
 
-outcome::result<void> SyscallMonitor::listener_register(
+outcome::result<void> EbpfEventProvider::listener_register(
     IEventListener& listener) {
     if (this->listeners_.find(&listener) != this->listeners_.end()) {
         return outcome::failure(std::make_error_code(std::errc::file_exists));
@@ -121,7 +122,7 @@ outcome::result<void> SyscallMonitor::listener_register(
     return outcome::success();
 }
 
-outcome::result<void> SyscallMonitor::listener_unregister(
+outcome::result<void> EbpfEventProvider::listener_unregister(
     IEventListener& listener) {
     if (this->listeners_.find(&listener) == this->listeners_.end()) {
         return outcome::failure(
@@ -131,8 +132,8 @@ outcome::result<void> SyscallMonitor::listener_unregister(
     return outcome::success();
 }
 
-int SyscallMonitor::event_callback(void* ctx, void* data, std::size_t size) {
-    SyscallMonitor* self = static_cast<SyscallMonitor*>(ctx);
+int EbpfEventProvider::event_callback(void* ctx, void* data, std::size_t size) {
+    EbpfEventProvider* self = static_cast<EbpfEventProvider*>(ctx);
     RawSyscallEvent* raw_event = static_cast<RawSyscallEvent*>(data);
 
     auto result = self->raw_events_to_handle_.enqueue(*raw_event);
@@ -144,7 +145,7 @@ int SyscallMonitor::event_callback(void* ctx, void* data, std::size_t size) {
     return 0;
 }
 
-Process SyscallMonitor::pid_to_process(
+Process EbpfEventProvider::pid_to_process(
     std::uint32_t pid) {  // Parse process info.
     Process proc{.pid = pid};
     try {
@@ -173,7 +174,7 @@ Process SyscallMonitor::pid_to_process(
     return proc;
 }
 
-std::optional<std::filesystem::path> SyscallMonitor::fd_to_path(
+std::optional<std::filesystem::path> EbpfEventProvider::fd_to_path(
     std::uint32_t pid, int fd) noexcept {
     try {
         auto fds = pfs::procfs().get_task(pid).get_fds();
@@ -188,7 +189,7 @@ std::optional<std::filesystem::path> SyscallMonitor::fd_to_path(
     }
 }
 
-std::optional<std::filesystem::path> SyscallMonitor::ptr_to_path(
+std::optional<std::filesystem::path> EbpfEventProvider::ptr_to_path(
     std::uint32_t pid, const void* addr) noexcept {
     return std::nullopt;
     try {
@@ -215,7 +216,7 @@ std::optional<std::filesystem::path> SyscallMonitor::ptr_to_path(
     }
 }
 
-void SyscallMonitor::handle_raw_event(const RawSyscallEvent& raw_event) {
+void EbpfEventProvider::handle_raw_event(const RawSyscallEvent& raw_event) {
     Event event;
 
     // Dispatch event.
@@ -308,7 +309,7 @@ void SyscallMonitor::handle_raw_event(const RawSyscallEvent& raw_event) {
     }
 }
 
-std::optional<std::vector<char>> SyscallMonitor::read_process_memory(
+std::optional<std::vector<char>> EbpfEventProvider::read_process_memory(
     std::uint32_t pid, const void* addr, size_t size) noexcept {
     try {
         std::vector<char> memory(size, 0);
@@ -328,7 +329,7 @@ std::optional<std::vector<char>> SyscallMonitor::read_process_memory(
     }
 }
 
-ReadSyscallEventPayload SyscallMonitor::read_event_handler(
+ReadSyscallEventPayload EbpfEventProvider::read_event_handler(
     int fd, void* buf, size_t count, ::ssize_t ret,
     std::uint32_t pid) {  // Parse syscall info.
     ReadSyscallEventPayload payload;
@@ -342,7 +343,7 @@ ReadSyscallEventPayload SyscallMonitor::read_event_handler(
     return payload;
 }
 
-WriteSyscallEventPayload SyscallMonitor::write_event_handler(
+WriteSyscallEventPayload EbpfEventProvider::write_event_handler(
     int fd, const void* buf, size_t count, ::ssize_t ret, std::uint32_t pid) {
     WriteSyscallEventPayload payload;
     payload.fd = fd;
@@ -355,7 +356,7 @@ WriteSyscallEventPayload SyscallMonitor::write_event_handler(
     return payload;
 }
 
-UnlinkSyscallEventPayload SyscallMonitor::unlink_event_handler(
+UnlinkSyscallEventPayload EbpfEventProvider::unlink_event_handler(
     const char* pathname, int ret, std::uint32_t pid) {
     UnlinkSyscallEventPayload payload;
     payload.pathname = pathname;
@@ -365,7 +366,7 @@ UnlinkSyscallEventPayload SyscallMonitor::unlink_event_handler(
     return payload;
 }
 
-UnlinkatSyscallEventPayload SyscallMonitor::unlinkat_event_handler(
+UnlinkatSyscallEventPayload EbpfEventProvider::unlinkat_event_handler(
     int dirfd, const char* pathname, int flags, int ret, std::uint32_t pid) {
     UnlinkatSyscallEventPayload payload;
     payload.dirfd = dirfd;
@@ -387,7 +388,7 @@ UnlinkatSyscallEventPayload SyscallMonitor::unlinkat_event_handler(
     return payload;
 }
 
-RenameSyscallEventPayload SyscallMonitor::rename_event_handler(
+RenameSyscallEventPayload EbpfEventProvider::rename_event_handler(
     const char* oldpath, const char* newpath, int ret, std::uint32_t pid) {
     RenameSyscallEventPayload payload;
     payload.oldpath = oldpath;
@@ -399,7 +400,7 @@ RenameSyscallEventPayload SyscallMonitor::rename_event_handler(
     return payload;
 }
 
-RenameatSyscallEventPayload SyscallMonitor::renameat_event_handler(
+RenameatSyscallEventPayload EbpfEventProvider::renameat_event_handler(
     int olddirfd, const char* oldpath, int newdirfd, const char* newpath,
     int ret, std::uint32_t pid) {
     RenameatSyscallEventPayload payload;
@@ -414,7 +415,7 @@ RenameatSyscallEventPayload SyscallMonitor::renameat_event_handler(
     return payload;
 }
 
-Renameat2SyscallEventPayload SyscallMonitor::renameat2_event_handler(
+Renameat2SyscallEventPayload EbpfEventProvider::renameat2_event_handler(
     int olddirfd, const char* oldpath, int newdirfd, const char* newpath,
     unsigned int flags, int ret, std::uint32_t pid) {
     Renameat2SyscallEventPayload payload;
@@ -430,7 +431,7 @@ Renameat2SyscallEventPayload SyscallMonitor::renameat2_event_handler(
     return payload;
 }
 
-ChmodSyscallEventPayload SyscallMonitor::chmod_event_handler(
+ChmodSyscallEventPayload EbpfEventProvider::chmod_event_handler(
     const char* pathname, mode_t mode, int ret, std::uint32_t pid) {
     ChmodSyscallEventPayload payload;
     payload.pathname = pathname;
@@ -441,7 +442,7 @@ ChmodSyscallEventPayload SyscallMonitor::chmod_event_handler(
     return payload;
 }
 
-FchmodSyscallEventPayload SyscallMonitor::fchmod_event_handler(
+FchmodSyscallEventPayload EbpfEventProvider::fchmod_event_handler(
     int fd, mode_t mode, int ret, std::uint32_t pid) {
     FchmodSyscallEventPayload payload;
     payload.fd = fd;
@@ -452,7 +453,7 @@ FchmodSyscallEventPayload SyscallMonitor::fchmod_event_handler(
     return payload;
 }
 
-FchmodatSyscallEventPayload SyscallMonitor::fchmodat_event_handler(
+FchmodatSyscallEventPayload EbpfEventProvider::fchmodat_event_handler(
     int dirfd, const char* pathname, mode_t mode, int flags, int ret,
     std::uint32_t pid) {
     FchmodatSyscallEventPayload payload;

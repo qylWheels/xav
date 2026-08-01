@@ -14,20 +14,20 @@
 #include <thread>
 #include <unordered_set>
 
-#include "syscall_monitor.skel.h"
+#include "ebpf_event_provider.skel.h"
 #include "xavcore/protection/behavior_monitor.h"
 #include "xavcore/protection/event.h"
 #include "xavcore/protection/event_provider/ebpf/raw_syscall_event.h"
 
 namespace xavcore {
-class SyscallMonitor : public IEventProvider {
+class EbpfEventProvider : public IEventProvider {
 public:
-    SyscallMonitor();
-    ~SyscallMonitor();
-    SyscallMonitor(const SyscallMonitor&) = delete;
-    SyscallMonitor& operator=(const SyscallMonitor&) = delete;
-    SyscallMonitor(SyscallMonitor&&) = delete;
-    SyscallMonitor& operator=(SyscallMonitor&&) = delete;
+    EbpfEventProvider();
+    ~EbpfEventProvider();
+    EbpfEventProvider(const EbpfEventProvider&) = delete;
+    EbpfEventProvider& operator=(const EbpfEventProvider&) = delete;
+    EbpfEventProvider(EbpfEventProvider&&) = delete;
+    EbpfEventProvider& operator=(EbpfEventProvider&&) = delete;
 
 public:
     virtual outcome::result<void> start() override;
@@ -126,7 +126,7 @@ private:
 
 private:
     std::shared_ptr<spdlog::logger> logger_;
-    syscall_monitor_bpf* skel_;
+    ebpf_event_provider_bpf* skel_;
     ring_buffer* rb_;
     std::unordered_set<IEventListener*> listeners_;
     std::atomic_uint64_t lost_event_count_;
