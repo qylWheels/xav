@@ -126,7 +126,7 @@ private:
 
 private:
     std::shared_ptr<spdlog::logger> logger_;
-    ebpf_event_provider_bpf* skel_;
+    syscall_event_provider_bpf* skel_;
     ring_buffer* rb_;
     std::unordered_set<IEventListener*> listeners_;
     std::atomic_uint64_t lost_event_count_;
