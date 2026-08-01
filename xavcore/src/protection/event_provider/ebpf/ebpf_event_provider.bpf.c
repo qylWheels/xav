@@ -7,7 +7,7 @@
 
 #include "xavcore/protection/event_provider/ebpf/raw_syscall_event.h"
 
-#define PREFIX "xavcore ebpf: "
+#define PREFIX "xavcore ebpf event provider: "
 
 struct {
     __uint(type, BPF_MAP_TYPE_HASH);

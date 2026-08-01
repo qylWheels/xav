@@ -1,4 +1,4 @@
-#include "xavcore/protection/event_provider/ebpf/ebpf.h"
+#include "xavcore/protection/event_provider/ebpf/ebpf_event_provider.h"
 
 #include <bits/types/struct_iovec.h>
 #include <bpf/libbpf.h>
@@ -20,18 +20,18 @@
 #include <stop_token>
 #include <system_error>
 
-#include "ebpf.skel.h"
+#include "ebpf_event_provider.skel.h"
 #include "xavcore/protection/event.h"
 #include "xavcore/protection/event_provider/ebpf/raw_syscall_event.h"
 
 namespace xavcore {
 EbpfEventProvider::EbpfEventProvider()
     : rb_(nullptr), status_(Status::Stopped), lost_event_count_(0) {
-    this->logger_ = spdlog::stderr_color_mt("ebpf");
+    this->logger_ = spdlog::stderr_color_mt("ebpf_event_provider");
     this->logger_->set_level(spdlog::level::info);
 
-    this->skel_ = ebpf_bpf::open_and_load();
-    this->logger_->info("Ebpf loaded");
+    this->skel_ = ebpf_event_provider_bpf::open_and_load();
+    this->logger_->info("Ebpf event provider loaded");
     if (!this->skel_) {
         throw std::runtime_error("Failed to open and load BPF skeleton");
     }
@@ -41,7 +41,7 @@ EbpfEventProvider::~EbpfEventProvider() {
     if (this->status_ == Status::Started) {
         (void)this->stop();
     }
-    ebpf_bpf::destroy(this->skel_);
+    ebpf_event_provider_bpf::destroy(this->skel_);
 }
 
 outcome::result<void> EbpfEventProvider::start() {
@@ -50,7 +50,7 @@ outcome::result<void> EbpfEventProvider::start() {
             std::make_error_code(std::errc::device_or_resource_busy));
     }
 
-    int ret = ebpf_bpf::attach(this->skel_);
+    int ret = ebpf_event_provider_bpf::attach(this->skel_);
     if (ret) {
         return outcome::failure(std::make_error_code(std::errc::io_error));
     }
@@ -102,7 +102,7 @@ outcome::result<void> EbpfEventProvider::stop() {
     ring_buffer__free(this->rb_);
     this->rb_ = nullptr;
 
-    ebpf_bpf::detach(this->skel_);
+    ebpf_event_provider_bpf::detach(this->skel_);
 
     this->status_ = Status::Stopped;
 
