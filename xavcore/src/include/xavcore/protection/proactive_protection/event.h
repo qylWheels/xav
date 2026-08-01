@@ -2,7 +2,6 @@
 
 #include <unistd.h>
 
-#include <bitset>
 #include <cstdint>
 #include <filesystem>
 #include <optional>
@@ -24,31 +23,6 @@ struct Process {
 };
 
 #define FILE_EVENT_TYPE_MASK_SIZE 16
-
-struct FileEvent {
-    enum class FileEventType {
-        Create,
-        Delete,
-        Read,
-        Write,
-        Move,
-        AttributeChange,
-
-        Count,
-    };
-    std::bitset<FILE_EVENT_TYPE_MASK_SIZE> event_type_mask;
-
-    // Who did the operation.
-    Process proc;
-
-    // Who is(are) affected by the operation.
-    std::string path1;
-    std::optional<std::string> path2;
-
-    // Attributes of files.
-    std::optional<std::filesystem::file_status> stat1;
-    std::optional<std::filesystem::file_status> stat2;
-};
 
 struct ReadSyscallEventPayload {
     int fd;
@@ -143,7 +117,7 @@ using SyscallEventPayload =
 
 struct Event {
     Process process;
-    std::variant<FileEvent, SyscallEventPayload> payload;
+    std::variant<SyscallEventPayload> payload;
 };
 }  // namespace xavcore
 
