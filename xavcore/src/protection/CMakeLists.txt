@@ -3,7 +3,7 @@ add_subdirectory(on_access_scanning)
 add_subdirectory(proactive_protection)
 
 # VMLinux header.
-set(VMLINUX_HEADER ${CMAKE_BINARY_DIR}/vmlinux.h)
+set(VMLINUX_HEADER ${CMAKE_CURRENT_BINARY_DIR}/vmlinux.h)
 add_custom_command(
     OUTPUT ${VMLINUX_HEADER}
     
