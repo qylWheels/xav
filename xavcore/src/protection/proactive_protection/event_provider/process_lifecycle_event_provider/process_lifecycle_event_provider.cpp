@@ -110,6 +110,7 @@ int ProcessLifecycleEventProvider::event_callback(void* ctx, void* data,
                 .timestamp = std::chrono::system_clock::now(),
                 .pid = raw_event->u.create.pid,
             };
+            self->logger_->info("Process create, pid={}", e.pid);
             Event e2{
                 .payload = e,
             };
@@ -126,6 +127,7 @@ int ProcessLifecycleEventProvider::event_callback(void* ctx, void* data,
                 .timestamp = std::chrono::system_clock::now(),
                 .pid = raw_event->u.exit.pid,
             };
+            self->logger_->info("Process exit, pid={}", e.pid);
             Event e2{
                 .payload = e,
             };
