@@ -10,6 +10,7 @@
 #include <sys/uio.h>
 #include <unistd.h>
 
+#include <cctype>
 #include <cstddef>
 #include <cstdint>
 #include <numeric>
@@ -36,6 +37,13 @@ SyscallEventProvider::SyscallEventProvider()
     this->logger_->info("Syscall event provider loaded");
     if (!this->skel_) {
         throw std::runtime_error("Failed to open and load BPF skeleton");
+    }
+
+    // Scan procfs to initialize process status.
+    for (const auto& task : pfs::procfs().get_processes()) {
+        auto process = this->pid_to_process(task.id());
+        this->process_status_[task.id()] =
+            Processes{.active_process{process}, .history_processes{}};
     }
 }
 
