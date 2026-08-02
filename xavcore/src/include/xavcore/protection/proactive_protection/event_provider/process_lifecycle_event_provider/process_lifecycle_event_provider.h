@@ -1,8 +1,14 @@
 #pragma once
 
+#include <spdlog/logger.h>
+#include <spdlog/spdlog.h>
+
+#include <atomic>
 #include <chrono>
 #include <cstdint>
+#include <unordered_set>
 
+#include "process_lifecycle_event_provider.skel.h"
 #include "xavcore/protection/proactive_protection/behavior_monitor.h"
 
 namespace xavcore {
@@ -18,7 +24,7 @@ struct ProcessExitEvent {
 
 class ProcessLifecycleEventProvider : public IEventProvider {
 public:
-    ProcessLifecycleEventProvider();
+    ProcessLifecycleEventProvider(spdlog::logger& logger);
     ~ProcessLifecycleEventProvider();
     ProcessLifecycleEventProvider(const ProcessLifecycleEventProvider&) =
         delete;
@@ -36,5 +42,19 @@ public:
         IEventListener& listener) override;
     virtual outcome::result<void> listener_unregister(
         IEventListener& listener) override;
+
+private:
+    static int event_callback(void* ctx, void* data, std::size_t size);
+
+private:
+    enum class Status { Stopped, Running };
+
+    Status status_;
+    spdlog::logger* logger_;
+    process_lifecycle_event_provider_bpf* skel_;
+    ring_buffer* rb_;
+    std::jthread monitor_thread_;
+    std::atomic_uint64_t lost_event_count_;
+    std::unordered_set<IEventListener*> listeners_;
 };
 }  // namespace xavcore
