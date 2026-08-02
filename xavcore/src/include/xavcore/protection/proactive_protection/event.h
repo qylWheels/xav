@@ -107,12 +107,16 @@ struct FchmodatSyscallEventPayload {
     int ret;
 };
 
-using SyscallEventPayload =
+struct SyscallEvent {
+    std::chrono::time_point<std::chrono::system_clock> timestamp;
+    Process process;
     std::variant<ReadSyscallEventPayload, WriteSyscallEventPayload,
                  UnlinkSyscallEventPayload, UnlinkatSyscallEventPayload,
                  RenameSyscallEventPayload, RenameatSyscallEventPayload,
                  Renameat2SyscallEventPayload, ChmodSyscallEventPayload,
-                 FchmodSyscallEventPayload, FchmodatSyscallEventPayload>;
+                 FchmodSyscallEventPayload, FchmodatSyscallEventPayload>
+        payload;
+};
 
 struct ProcessCreateEvent {
     std::chrono::time_point<std::chrono::system_clock> timestamp;
@@ -129,7 +133,7 @@ using ProcessLifecycleEvent =
 
 struct Event {
     Process process;
-    std::variant<SyscallEventPayload, ProcessLifecycleEvent> payload;
+    std::variant<SyscallEvent, ProcessLifecycleEvent> payload;
 };
 }  // namespace xavcore
 
