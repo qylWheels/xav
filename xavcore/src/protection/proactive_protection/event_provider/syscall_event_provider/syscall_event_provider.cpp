@@ -24,7 +24,6 @@
 
 #include "syscall_event_provider.skel.h"
 #include "xavcore/protection/proactive_protection/event.h"
-#include "xavcore/protection/proactive_protection/event_provider/process_lifecycle_event_provider/process_lifecycle_event_provider.h"
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/raw_syscall_event.h"
 
 namespace xavcore {
