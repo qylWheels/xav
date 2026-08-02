@@ -12,6 +12,7 @@
 #include "xavcore/protection/on_access_scanning/on_access_scanner.h"
 #include "xavcore/protection/proactive_protection/behavior_monitor.h"
 #include "xavcore/protection/proactive_protection/event_listener/placeholder_event_listener/placeholder_event_listener.h"
+#include "xavcore/protection/proactive_protection/event_provider/process_lifecycle_event_provider/process_lifecycle_event_provider.h"
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event_provider.h"
 #include "xavcore/scan/exact_hash.h"
 #include "xavcore/scan/normal_scan_strategy.h"
@@ -38,6 +39,8 @@ void startup() {
     // Event providers.
     std::shared_ptr<xavcore::IEventProvider> syscall_event_provider =
         std::make_shared<xavcore::SyscallEventProvider>();
+    std::shared_ptr<xavcore::IEventProvider> process_lifecycle_event_provider =
+        std::make_shared<xavcore::ProcessLifecycleEventProvider>(*logger);
 
     // Event listeners.
     std::shared_ptr<xavcore::IEventListener> placeholder_event_listener =
@@ -45,7 +48,15 @@ void startup() {
     auto ret =
         syscall_event_provider->listener_register(*placeholder_event_listener);
     if (!ret) {
-        logger->error("Failed to register listener: {}", ret.error().message());
+        logger->error("Failed to register syscall event listener: {}",
+                      ret.error().message());
+        return;
+    }
+    ret = process_lifecycle_event_provider->listener_register(
+        *placeholder_event_listener);
+    if (!ret) {
+        logger->error("Failed to register process lifecycle event listener: {}",
+                      ret.error().message());
         return;
     }
 
@@ -53,6 +64,12 @@ void startup() {
     ret = syscall_event_provider->start();
     if (!ret) {
         logger->error("Failed to start syscall monitor: {}",
+                      ret.error().message());
+        return;
+    }
+    ret = process_lifecycle_event_provider->start();
+    if (!ret) {
+        logger->error("Failed to start process lifecycle monitor: {}",
                       ret.error().message());
         return;
     }
