@@ -228,7 +228,7 @@ std::optional<std::filesystem::path> SyscallEventProvider::ptr_to_path(
 }
 
 void SyscallEventProvider::handle_raw_event(const RawSyscallEvent& raw_event) {
-    Event event;
+    SyscallEvent event{.timestamp{std::chrono::system_clock::now()}};
 
     // Dispatch event.
     switch (raw_event.syscall_id) {
@@ -310,7 +310,16 @@ void SyscallEventProvider::handle_raw_event(const RawSyscallEvent& raw_event) {
     }
 
     // Get process information.
-    event.process = this->pid_to_process(raw_event.pid);
+    auto it = this->process_status_.find(raw_event.pid);
+    if (it == this->process_status_.end()) {
+        event.process = this->pid_to_process(raw_event.pid);
+    } else {
+        if (it->second.active_process.has_value()) {
+            event.process = it->second.active_process.value();
+        } else {
+            event.process = this->pid_to_process(raw_event.pid);
+        }
+    }
 
     // Send event.
     for (auto listener : this->listeners_) {
