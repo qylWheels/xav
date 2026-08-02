@@ -111,12 +111,9 @@ int ProcessLifecycleEventProvider::event_callback(void* ctx, void* data,
                 .pid = raw_event->u.create.pid,
             };
             self->logger_->info("Process create, pid={}", e.pid);
-            Event e2{
-                .payload = e,
-            };
             for (auto& listener : self->listeners_) {
-                if (listener->is_accept(e2)) {
-                    (void)listener->accept(e2);
+                if (listener->is_accept(e)) {
+                    (void)listener->accept(e);
                 }
             }
             break;
@@ -128,12 +125,9 @@ int ProcessLifecycleEventProvider::event_callback(void* ctx, void* data,
                 .pid = raw_event->u.exit.pid,
             };
             self->logger_->info("Process exit, pid={}", e.pid);
-            Event e2{
-                .payload = e,
-            };
             for (auto& listener : self->listeners_) {
-                if (listener->is_accept(e2)) {
-                    (void)listener->accept(e2);
+                if (listener->is_accept(e)) {
+                    (void)listener->accept(e);
                 }
             }
             break;
