@@ -16,8 +16,9 @@ struct {
 
 SEC("tp/sched/sched_process_fork")
 int trace_process_fork(struct trace_event_raw_sched_process_fork* ctx) {
-    RawProcessCreateEvent* e = (RawProcessCreateEvent*)bpf_ringbuf_reserve(
-        &rb, sizeof(RawProcessCreateEvent), 0);
+    struct RawProcessCreateEvent* e =
+        (struct RawProcessCreateEvent*)bpf_ringbuf_reserve(
+            &rb, sizeof(struct RawProcessCreateEvent), 0);
     if (!e) {
         bpf_printk(PREFIX "[%s] bpf_ringbuf_reserve failed\n", __func__);
         return 0;
@@ -29,8 +30,9 @@ int trace_process_fork(struct trace_event_raw_sched_process_fork* ctx) {
 
 SEC("tp/sched/sched_process_exit")
 int trace_process_exit(struct trace_event_raw_sched_process_template* ctx) {
-    RawProcessExitEvent* e = (RawProcessExitEvent*)bpf_ringbuf_reserve(
-        &rb, sizeof(RawProcessExitEvent), 0);
+    struct RawProcessExitEvent* e =
+        (struct RawProcessExitEvent*)bpf_ringbuf_reserve(
+            &rb, sizeof(struct RawProcessExitEvent), 0);
     if (!e) {
         bpf_printk(PREFIX "[%s] bpf_ringbuf_reserve failed\n", __func__);
         return 0;
