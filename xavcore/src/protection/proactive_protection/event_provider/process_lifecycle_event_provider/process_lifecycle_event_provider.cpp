@@ -110,7 +110,6 @@ int ProcessLifecycleEventProvider::event_callback(void* ctx, void* data,
                 .timestamp = std::chrono::system_clock::now(),
                 .pid = raw_event->u.create.pid,
             };
-            self->logger_->info("Process create, pid={}", e.pid);
             for (auto& listener : self->listeners_) {
                 if (listener->is_accept(e)) {
                     (void)listener->accept(e);
@@ -124,7 +123,6 @@ int ProcessLifecycleEventProvider::event_callback(void* ctx, void* data,
                 .timestamp = std::chrono::system_clock::now(),
                 .pid = raw_event->u.exit.pid,
             };
-            self->logger_->info("Process exit, pid={}", e.pid);
             for (auto& listener : self->listeners_) {
                 if (listener->is_accept(e)) {
                     (void)listener->accept(e);
