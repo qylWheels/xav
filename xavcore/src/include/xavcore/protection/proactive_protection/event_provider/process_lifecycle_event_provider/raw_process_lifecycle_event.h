@@ -21,8 +21,8 @@ struct __attribute__((packed)) RawProcessExitEvent {
 struct __attribute__((packed)) RawProcessLifecycleEvent {
     u8 tag;  // 0 = create, 1 = exit
     union {
-        RawProcessCreateEvent create;
-        RawProcessExitEvent exit;
+        struct RawProcessCreateEvent create;
+        struct RawProcessExitEvent exit;
     } u;
 };
 
