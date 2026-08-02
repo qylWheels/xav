@@ -59,6 +59,17 @@ void startup() {
                       ret.error().message());
         return;
     }
+    ret = process_lifecycle_event_provider->listener_register(
+        *std::dynamic_pointer_cast<xavcore::IEventListener>(
+            syscall_event_provider));
+    if (!ret) {
+        logger->error(
+            "Failed to register syscall event provider as a listener to "
+            "process lifecycle "
+            "event provider: {}",
+            ret.error().message());
+        return;
+    }
 
     // Start protection.
     ret = syscall_event_provider->start();
