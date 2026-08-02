@@ -131,10 +131,7 @@ struct ProcessExitEvent {
 using ProcessLifecycleEvent =
     std::variant<ProcessCreateEvent, ProcessExitEvent>;
 
-struct Event {
-    Process process;
-    std::variant<SyscallEvent, ProcessLifecycleEvent> payload;
-};
+using Event = std::variant<SyscallEvent, ProcessLifecycleEvent>;
 }  // namespace xavcore
 
 namespace std {
