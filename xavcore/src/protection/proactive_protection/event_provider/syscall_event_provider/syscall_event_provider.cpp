@@ -19,9 +19,11 @@
 #include <stdexcept>
 #include <stop_token>
 #include <system_error>
+#include <variant>
 
 #include "syscall_event_provider.skel.h"
 #include "xavcore/protection/proactive_protection/event.h"
+#include "xavcore/protection/proactive_protection/event_provider/process_lifecycle_event_provider/process_lifecycle_event_provider.h"
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/raw_syscall_event.h"
 
 namespace xavcore {
@@ -476,6 +478,50 @@ FchmodatSyscallEventPayload SyscallEventProvider::fchmodat_event_handler(
     }
 
     return payload;
+}
+
+bool SyscallEventProvider::is_accept(const Event& event) {
+    return std::holds_alternative<ProcessLifecycleEvent>(event);
+}
+
+outcome::result<void> SyscallEventProvider::accept(const Event& event) {
+    ProcessLifecycleEvent process_lifecycle_event =
+        std::get<ProcessLifecycleEvent>(event);
+    std::visit(
+        [this](auto&& arg) {
+            using T = std::decay_t<decltype(arg)>;
+            if constexpr (std::is_same_v<T, ProcessCreateEvent>) {
+                auto it = this->process_status_.find(arg.pid);
+                if (it == this->process_status_.end()) {
+                    this->process_status_.emplace(
+                        arg.pid,
+                        Processes{
+                            .active_process{this->pid_to_process(arg.pid)},
+                            .history_processes{},
+                        });
+                } else {
+                    it->second.active_process = this->pid_to_process(arg.pid);
+                }
+            } else if constexpr (std::is_same_v<T, ProcessExitEvent>) {
+                auto it = this->process_status_.find(arg.pid);
+                if (it == this->process_status_.end()) {
+                    this->process_status_.emplace(
+                        arg.pid,
+                        Processes{
+                            .active_process{},
+                            .history_processes{this->pid_to_process(arg.pid)},
+                        });
+                } else {
+                    if (it->second.active_process.has_value()) {
+                        it->second.history_processes.emplace_back(
+                            it->second.active_process.value());
+                    }
+                    it->second.active_process = std::nullopt;
+                }
+            } else {
+            }
+        },
+        process_lifecycle_event);
 }
 
 }  // namespace xavcore

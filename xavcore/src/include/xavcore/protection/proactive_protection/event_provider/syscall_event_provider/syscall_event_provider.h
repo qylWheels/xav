@@ -12,6 +12,7 @@
 #include <memory>
 #include <optional>
 #include <thread>
+#include <unordered_map>
 #include <unordered_set>
 
 #include "syscall_event_provider.skel.h"
@@ -20,7 +21,7 @@
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/raw_syscall_event.h"
 
 namespace xavcore {
-class SyscallEventProvider : public IEventProvider {
+class SyscallEventProvider : public IEventProvider, public IEventListener {
 public:
     SyscallEventProvider();
     ~SyscallEventProvider();
@@ -120,6 +121,10 @@ private:  // High-level I/O syscall handlers.
     Event mmap_event_handler(void* addr, size_t length, int prot, int flags,
                              int fd, off_t offset, std::uint32_t pid);
 
+public:  // IEventListener.
+    virtual bool is_accept(const Event& event) override;
+    virtual outcome::result<void> accept(const Event& event) override;
+
 private:
     enum class Status { Started, Stopped };
     Status status_;
@@ -133,5 +138,12 @@ private:
     std::jthread monitor_thread_;
     moodycamel::ConcurrentQueue<RawSyscallEvent> raw_events_to_handle_;
     std::jthread handle_raw_events_thread_;
+
+private:  // Process status.
+    struct Processes {
+        std::optional<Process> active_process;
+        std::vector<Process> history_processes;
+    };
+    std::unordered_map<std::uint32_t, Processes> process_status_;
 };
 }  // namespace xavcore
