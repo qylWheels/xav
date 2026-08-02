@@ -2,6 +2,7 @@
 
 #include <unistd.h>
 
+#include <chrono>
 #include <cstdint>
 #include <filesystem>
 #include <optional>
@@ -21,8 +22,6 @@ struct Process {
         return pid == other.pid && start_time_tick == other.start_time_tick;
     }
 };
-
-#define FILE_EVENT_TYPE_MASK_SIZE 16
 
 struct ReadSyscallEventPayload {
     int fd;
@@ -115,9 +114,22 @@ using SyscallEventPayload =
                  Renameat2SyscallEventPayload, ChmodSyscallEventPayload,
                  FchmodSyscallEventPayload, FchmodatSyscallEventPayload>;
 
+struct ProcessCreateEvent {
+    std::chrono::time_point<std::chrono::system_clock> timestamp;
+    std::uint32_t pid;
+};
+
+struct ProcessExitEvent {
+    std::chrono::time_point<std::chrono::system_clock> timestamp;
+    std::uint32_t pid;
+};
+
+using ProcessLifecycleEventPayload =
+    std::variant<ProcessCreateEvent, ProcessExitEvent>;
+
 struct Event {
     Process process;
-    std::variant<SyscallEventPayload> payload;
+    std::variant<SyscallEventPayload, ProcessLifecycleEventPayload> payload;
 };
 }  // namespace xavcore
 

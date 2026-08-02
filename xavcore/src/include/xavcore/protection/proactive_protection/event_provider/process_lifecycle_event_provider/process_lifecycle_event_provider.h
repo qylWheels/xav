@@ -4,7 +4,6 @@
 #include <spdlog/spdlog.h>
 
 #include <atomic>
-#include <chrono>
 #include <cstdint>
 #include <unordered_set>
 
@@ -12,16 +11,6 @@
 #include "xavcore/protection/proactive_protection/behavior_monitor.h"
 
 namespace xavcore {
-struct ProcessCreateEvent {
-    std::chrono::time_point<std::chrono::system_clock> timestamp;
-    std::uint32_t pid;
-};
-
-struct ProcessExitEvent {
-    std::chrono::time_point<std::chrono::system_clock> timestamp;
-    std::uint32_t pid;
-};
-
 class ProcessLifecycleEventProvider : public IEventProvider {
 public:
     ProcessLifecycleEventProvider(spdlog::logger& logger);
