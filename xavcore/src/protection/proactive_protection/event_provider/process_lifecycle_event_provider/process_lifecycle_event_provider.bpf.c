@@ -16,28 +16,30 @@ struct {
 
 SEC("tp/sched/sched_process_fork")
 int trace_process_fork(struct trace_event_raw_sched_process_fork* ctx) {
-    struct RawProcessCreateEvent* e =
-        (struct RawProcessCreateEvent*)bpf_ringbuf_reserve(
-            &rb, sizeof(struct RawProcessCreateEvent), 0);
+    struct RawProcessLifecycleEvent* e =
+        (struct RawProcessLifecycleEvent*)bpf_ringbuf_reserve(
+            &rb, sizeof(struct RawProcessLifecycleEvent), 0);
     if (!e) {
         bpf_printk(PREFIX "[%s] bpf_ringbuf_reserve failed\n", __func__);
         return 0;
     }
-    e->pid = ctx->child_pid;
+    e->tag = 0;
+    e->u.create.pid = ctx->child_pid;
     bpf_ringbuf_submit(&rb, 0);
     return 0;
 }
 
 SEC("tp/sched/sched_process_exit")
 int trace_process_exit(struct trace_event_raw_sched_process_template* ctx) {
-    struct RawProcessExitEvent* e =
-        (struct RawProcessExitEvent*)bpf_ringbuf_reserve(
-            &rb, sizeof(struct RawProcessExitEvent), 0);
+    struct RawProcessLifecycleEvent* e =
+        (struct RawProcessLifecycleEvent*)bpf_ringbuf_reserve(
+            &rb, sizeof(struct RawProcessLifecycleEvent), 0);
     if (!e) {
         bpf_printk(PREFIX "[%s] bpf_ringbuf_reserve failed\n", __func__);
         return 0;
     }
-    e->pid = ctx->pid;
+    e->tag = 1;
+    e->u.exit.pid = ctx->pid;
     bpf_ringbuf_submit(&rb, 0);
     return 0;
 }
