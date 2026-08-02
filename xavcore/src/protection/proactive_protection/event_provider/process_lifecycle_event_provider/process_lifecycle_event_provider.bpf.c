@@ -25,7 +25,7 @@ int trace_process_fork(struct trace_event_raw_sched_process_fork* ctx) {
     }
     e->tag = 0;
     e->u.create.pid = ctx->child_pid;
-    bpf_ringbuf_submit(&rb, 0);
+    bpf_ringbuf_submit(e, 0);
     return 0;
 }
 
@@ -40,7 +40,7 @@ int trace_process_exit(struct trace_event_raw_sched_process_template* ctx) {
     }
     e->tag = 1;
     e->u.exit.pid = ctx->pid;
-    bpf_ringbuf_submit(&rb, 0);
+    bpf_ringbuf_submit(e, 0);
     return 0;
 }
 
