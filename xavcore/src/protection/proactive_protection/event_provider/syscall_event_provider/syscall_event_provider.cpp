@@ -539,6 +539,6 @@ outcome::result<void> SyscallEventProvider::accept(const Event& event) {
             }
         },
         process_lifecycle_event);
+    return outcome::success();
 }
-
 }  // namespace xavcore
