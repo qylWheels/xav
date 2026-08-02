@@ -124,12 +124,12 @@ struct ProcessExitEvent {
     std::uint32_t pid;
 };
 
-using ProcessLifecycleEventPayload =
+using ProcessLifecycleEvent =
     std::variant<ProcessCreateEvent, ProcessExitEvent>;
 
 struct Event {
     Process process;
-    std::variant<SyscallEventPayload, ProcessLifecycleEventPayload> payload;
+    std::variant<SyscallEventPayload, ProcessLifecycleEvent> payload;
 };
 }  // namespace xavcore
 
