@@ -2,3 +2,15 @@
     -webkit-user-select: none;
     user-select: none;
 }
+
+@import "tailwindcss";
+
+@layer base {
+
+    html,
+    body,
+    #root {
+        background-color: transparent !important;
+        overflow: hidden;
+    }
+}
