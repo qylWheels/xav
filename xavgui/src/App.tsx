@@ -2,19 +2,23 @@ import "@/index.css"
 import "./App.css"
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar"
+import TitleBar from "@/components/TitleBar"
 
 function App({ children }: { children: React.ReactNode }) {
   return (
-    <SidebarProvider style={
-      {
-        "--sidebar-width": "12rem",
-      } as React.CSSProperties
-    }>
-      <AppSidebar />
-      <main>
-        {children}
-      </main>
-    </SidebarProvider>
+    <div className="w-full h-full">
+      <TitleBar />
+      <SidebarProvider style={
+        {
+          "--sidebar-width": "12rem",
+        } as React.CSSProperties
+      }>
+        <AppSidebar />
+        <main>
+          {children}
+        </main>
+      </SidebarProvider>
+    </div>
   );
 }
 
