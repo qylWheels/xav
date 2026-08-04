@@ -10,7 +10,7 @@ function TitleBar() {
                 Xav
             </div>
 
-            <div className="flex items-center gap-3 justify-self-end">
+            <div data-tauri-drag-region className="flex items-center gap-3 justify-self-end">
                 <Button size="icon" variant="ghost"><Minus /></Button>
                 <Button size="icon" variant="ghost"><X /></Button>
             </div>
