@@ -3,6 +3,7 @@ import "./App.css"
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar"
 import TitleBar from "@/components/TitleBar"
+import Overview from "@/views/Overview";
 
 function App({ children }: { children: React.ReactNode }) {
   return (
@@ -16,6 +17,7 @@ function App({ children }: { children: React.ReactNode }) {
         }>
           <AppSidebar />
           <main>
+            <Overview />
             {children}
           </main>
         </SidebarProvider>
