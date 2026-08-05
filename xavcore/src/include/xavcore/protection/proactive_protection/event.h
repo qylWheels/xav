@@ -23,6 +23,39 @@ struct Process {
     }
 };
 
+struct FileCreateEventPayload {
+    std::filesystem::path path;
+};
+
+struct FileDeleteEventPayload {
+    std::filesystem::path path;
+};
+
+struct FileReadEventPayload {
+    std::filesystem::path path;
+};
+
+struct FileWriteEventPayload {
+    std::filesystem::path path;
+};
+
+struct FileRenameEventPayload {
+    std::filesystem::path oldpath;
+    std::filesystem::path newpath;
+};
+
+struct FileAttributeChangeEventPayload {
+    std::filesystem::path path;
+};
+
+struct FileEvent {
+    Process process;
+    std::variant<FileCreateEventPayload, FileDeleteEventPayload,
+                 FileReadEventPayload, FileWriteEventPayload,
+                 FileRenameEventPayload, FileAttributeChangeEventPayload>
+        payload;
+};
+
 struct ReadSyscallEventPayload {
     int fd;
     std::optional<std::filesystem::path> path;
@@ -131,7 +164,7 @@ struct ProcessExitEvent {
 using ProcessLifecycleEvent =
     std::variant<ProcessCreateEvent, ProcessExitEvent>;
 
-using Event = std::variant<SyscallEvent, ProcessLifecycleEvent>;
+using Event = std::variant<SyscallEvent, ProcessLifecycleEvent, FileEvent>;
 }  // namespace xavcore
 
 namespace std {
