@@ -1,4 +1,4 @@
-#include "xavcore/protection/event_collection/fanotify/fanotify_monitor.h"
+#include "xavcore/protection/proactive_protection/event_provider/fanotify/fanotify_monitor.h"
 
 #include <fcntl.h>
 #include <limits.h>
@@ -19,16 +19,21 @@
 #include <format>
 #include <fstream>
 #include <optional>
+#include <outcome/success_failure.hpp>
 #include <ranges>
 #include <stdexcept>
+#include <stop_token>
+#include <system_error>
 
-#include "xavcore/protection/event.h"
+#include "xavcore/protection/proactive_protection/event_provider/fanotify/fanotify_monitor.h"
 
 #define BUFSIZE (4 * 1024)  // 4KB
 
 namespace xavcore {
 FanotifyMonitor::FanotifyMonitor()
-    : total_event_count_(0), suspicious_event_count_(0) {
+    : total_event_count_(0),
+      suspicious_event_count_(0),
+      status_(Status::Stopped) {
     // Initialize logger.
     this->logger_ = spdlog::stdout_color_mt("behavior_monitor");
     this->logger_->set_level(spdlog::level::info);
@@ -63,7 +68,11 @@ FanotifyMonitor::~FanotifyMonitor() {
     close(this->mount_fd_);
 }
 
-void FanotifyMonitor::start_monitoring() {
+outcome::result<void> FanotifyMonitor::start() {
+    if (this->status_ == Status::Running) {
+        return outcome::success();
+    }
+
     // Mark the root directory for monitoring.
     // TODO: Monitor other type of event: attribute change.
     if (fanotify_mark(this->fanfd_, FAN_MARK_ADD | FAN_MARK_FILESYSTEM,
@@ -75,197 +84,231 @@ void FanotifyMonitor::start_monitoring() {
                         std::strerror(errno), __FILE__, __LINE__));
     }
 
-    // Poll and process fanotify events.
-    while (true) {
-        ssize_t len = read(this->fanfd_, this->fanbuf_, BUFSIZE);
-        if (len <= 0) continue;
+    this->monitoring_thread_ = std::jthread([this](std::stop_token st) {
+        // Poll and process fanotify events.
+        while (!st.stop_requested()) {
+            ssize_t len = read(this->fanfd_, this->fanbuf_, BUFSIZE);
+            if (len <= 0) continue;
 
-        // Ignore self event.
-        fanotify_event_metadata *metadata =
-            reinterpret_cast<fanotify_event_metadata *>(this->fanbuf_);
-        if (metadata->pid == getpid()) {
-            continue;
-        }
-
-        fanotify_event_info_header *additional_infos_hdr = nullptr;
-        std::size_t additional_infos_len = 0;
-        fanotify_event_info_fid *dfid_name_record = nullptr;
-        fanotify_event_info_fid *fid_record = nullptr;
-
-        // For rename event.
-        fanotify_event_info_fid *old_dfid_name_record = nullptr;
-        fanotify_event_info_fid *new_dfid_name_record = nullptr;
-
-        // It might be multiple events in one read.
-        while (FAN_EVENT_OK(metadata, len)) {
-            if (metadata->vers != FANOTIFY_METADATA_VERSION) {
-                throw std::runtime_error(
-                    std::format("fanotify metadata version mismatch: {} != {}",
-                                metadata->vers, FANOTIFY_METADATA_VERSION));
+            // Ignore self event.
+            fanotify_event_metadata *metadata =
+                reinterpret_cast<fanotify_event_metadata *>(this->fanbuf_);
+            if (metadata->pid == getpid()) {
+                continue;
             }
 
-            fid_record = nullptr;
-            dfid_name_record = nullptr;
-            old_dfid_name_record = nullptr;
-            new_dfid_name_record = nullptr;
-            additional_infos_hdr =
-                (struct fanotify_event_info_header *)(metadata + 1);
-            additional_infos_len = metadata->event_len - sizeof(*metadata);
+            fanotify_event_info_header *additional_infos_hdr = nullptr;
+            std::size_t additional_infos_len = 0;
+            fanotify_event_info_fid *dfid_name_record = nullptr;
+            fanotify_event_info_fid *fid_record = nullptr;
 
-            // Handle additional information.
-            while (additional_infos_len > 0) {
-                switch (additional_infos_hdr->info_type) {
-                    case FAN_EVENT_INFO_TYPE_FID:
-                        fid_record = (struct fanotify_event_info_fid *)
-                            additional_infos_hdr;
-                        break;
-                    case FAN_EVENT_INFO_TYPE_DFID_NAME:
-                        dfid_name_record = (struct fanotify_event_info_fid *)
-                            additional_infos_hdr;
-                        break;
-                    case FAN_EVENT_INFO_TYPE_OLD_DFID_NAME:
-                        old_dfid_name_record =
-                            (struct fanotify_event_info_fid *)
+            // For rename event.
+            fanotify_event_info_fid *old_dfid_name_record = nullptr;
+            fanotify_event_info_fid *new_dfid_name_record = nullptr;
+
+            // It might be multiple events in one read.
+            while (FAN_EVENT_OK(metadata, len)) {
+                if (metadata->vers != FANOTIFY_METADATA_VERSION) {
+                    throw std::runtime_error(std::format(
+                        "fanotify metadata version mismatch: {} != {}",
+                        metadata->vers, FANOTIFY_METADATA_VERSION));
+                }
+
+                fid_record = nullptr;
+                dfid_name_record = nullptr;
+                old_dfid_name_record = nullptr;
+                new_dfid_name_record = nullptr;
+                additional_infos_hdr =
+                    (struct fanotify_event_info_header *)(metadata + 1);
+                additional_infos_len = metadata->event_len - sizeof(*metadata);
+
+                // Handle additional information.
+                while (additional_infos_len > 0) {
+                    switch (additional_infos_hdr->info_type) {
+                        case FAN_EVENT_INFO_TYPE_FID:
+                            fid_record = (struct fanotify_event_info_fid *)
                                 additional_infos_hdr;
-                        break;
-                    case FAN_EVENT_INFO_TYPE_NEW_DFID_NAME:
-                        new_dfid_name_record =
-                            (struct fanotify_event_info_fid *)
-                                additional_infos_hdr;
-                        break;
-                    default:
-                        break;
+                            break;
+                        case FAN_EVENT_INFO_TYPE_DFID_NAME:
+                            dfid_name_record =
+                                (struct fanotify_event_info_fid *)
+                                    additional_infos_hdr;
+                            break;
+                        case FAN_EVENT_INFO_TYPE_OLD_DFID_NAME:
+                            old_dfid_name_record =
+                                (struct fanotify_event_info_fid *)
+                                    additional_infos_hdr;
+                            break;
+                        case FAN_EVENT_INFO_TYPE_NEW_DFID_NAME:
+                            new_dfid_name_record =
+                                (struct fanotify_event_info_fid *)
+                                    additional_infos_hdr;
+                            break;
+                        default:
+                            break;
+                    }
+                    additional_infos_len -= additional_infos_hdr->len;
+                    additional_infos_hdr =
+                        (struct fanotify_event_info_header
+                             *)((char *)additional_infos_hdr +
+                                additional_infos_hdr->len);
                 }
-                additional_infos_len -= additional_infos_hdr->len;
-                additional_infos_hdr = (struct fanotify_event_info_header
-                                            *)((char *)additional_infos_hdr +
-                                               additional_infos_hdr->len);
-            }
 
-            // Get information of the process which accessed the file.
-            Process proc = {
-                .pid = metadata->pid,
-                .ppid = this->get_proc_ppid(metadata->pid),
-                .start_time_tick =
-                    this->get_proc_start_time_tick(metadata->pid),
-                .exe_path = this->get_proc_exe_path(metadata->pid),
-                .cmdline = this->get_proc_cmdline(metadata->pid),
-            };
+                // Get information of the process which accessed the file.
+                Process proc = {
+                    .pid = metadata->pid,
+                    .ppid = this->get_proc_ppid(metadata->pid),
+                    .start_time_tick =
+                        this->get_proc_start_time_tick(metadata->pid),
+                    .exe_path = this->get_proc_exe_path(metadata->pid),
+                    .cmdline = this->get_proc_cmdline(metadata->pid),
+                };
 
-            // Generate event.
-            FileEvent event = {
-                .proc = proc,
-            };
+                // Generate event.
+                FileEvent event = {
+                    .proc = proc,
+                };
 
-            if (old_dfid_name_record == nullptr &&
-                new_dfid_name_record == nullptr) {  // NOT move event.
-                std::optional<std::string> result = std::nullopt;
-                if (dfid_name_record != nullptr) {
-                    result =
-                        this->get_path_from_dfid_name_record(dfid_name_record);
+                if (old_dfid_name_record == nullptr &&
+                    new_dfid_name_record == nullptr) {  // NOT move event.
+                    std::optional<std::string> result = std::nullopt;
+                    if (dfid_name_record != nullptr) {
+                        result = this->get_path_from_dfid_name_record(
+                            dfid_name_record);
+                    }
+                    event.path1 = result.has_value() ? result.value() : "";
+
+                    // Get file status.
+                    try {
+                        event.stat1 = std::filesystem::status(event.path1);
+                    } catch (...) {
+                        event.stat1 = std::nullopt;
+                    }
+                } else {  // IS move event.
+                    std::optional<std::string> result1 = std::nullopt;
+                    if (old_dfid_name_record != nullptr) {
+                        result1 = this->get_path_from_dfid_name_record(
+                            old_dfid_name_record);
+                    }
+                    event.path1 = result1.has_value() ? result1.value() : "";
+
+                    std::optional<std::string> result2 = std::nullopt;
+                    if (new_dfid_name_record != nullptr) {
+                        result2 = this->get_path_from_dfid_name_record(
+                            new_dfid_name_record);
+                    }
+                    event.path2 = result2.has_value() ? result2.value() : "";
+
+                    // Get file status.
+                    try {
+                        event.stat1 = std::filesystem::status(event.path1);
+                    } catch (...) {
+                        event.stat1 = std::nullopt;
+                    }
+                    try {
+                        event.stat2 =
+                            std::filesystem::status(event.path2.value());
+                    } catch (...) {
+                        event.stat2 = std::nullopt;
+                    }
                 }
-                event.path1 = result.has_value() ? result.value() : "";
 
-                // Get file status.
-                try {
-                    event.stat1 = std::filesystem::status(event.path1);
-                } catch (...) {
-                    event.stat1 = std::nullopt;
+                // Set event mask.
+                if (metadata->mask & FAN_CREATE) {
+                    event.event_type_mask.set(
+                        static_cast<int>(FileEvent::FileEventType::Create),
+                        true);
                 }
-            } else {  // IS move event.
-                std::optional<std::string> result1 = std::nullopt;
-                if (old_dfid_name_record != nullptr) {
-                    result1 = this->get_path_from_dfid_name_record(
-                        old_dfid_name_record);
+                if (metadata->mask & FAN_DELETE) {
+                    event.event_type_mask.set(
+                        static_cast<int>(FileEvent::FileEventType::Delete),
+                        true);
                 }
-                event.path1 = result1.has_value() ? result1.value() : "";
-
-                std::optional<std::string> result2 = std::nullopt;
-                if (new_dfid_name_record != nullptr) {
-                    result2 = this->get_path_from_dfid_name_record(
-                        new_dfid_name_record);
+                if (metadata->mask & FAN_ACCESS) {
+                    event.event_type_mask.set(
+                        static_cast<int>(FileEvent::FileEventType::Read), true);
                 }
-                event.path2 = result2.has_value() ? result2.value() : "";
-
-                // Get file status.
-                try {
-                    event.stat1 = std::filesystem::status(event.path1);
-                } catch (...) {
-                    event.stat1 = std::nullopt;
+                if (metadata->mask & FAN_MODIFY) {
+                    event.event_type_mask.set(
+                        static_cast<int>(FileEvent::FileEventType::Write),
+                        true);
                 }
-                try {
-                    event.stat2 = std::filesystem::status(event.path2.value());
-                } catch (...) {
-                    event.stat2 = std::nullopt;
+                if (metadata->mask & FAN_RENAME) {
+                    event.event_type_mask.set(
+                        static_cast<int>(FileEvent::FileEventType::Move), true);
                 }
-            }
+                if (metadata->mask & FAN_ATTRIB) {
+                    event.event_type_mask.set(
+                        static_cast<int>(
+                            FileEvent::FileEventType::AttributeChange),
+                        true);
+                }
 
-            // Set event mask.
-            if (metadata->mask & FAN_CREATE) {
-                event.event_type_mask.set(
-                    static_cast<int>(FileEvent::FileEventType::Create), true);
-            }
-            if (metadata->mask & FAN_DELETE) {
-                event.event_type_mask.set(
-                    static_cast<int>(FileEvent::FileEventType::Delete), true);
-            }
-            if (metadata->mask & FAN_ACCESS) {
-                event.event_type_mask.set(
-                    static_cast<int>(FileEvent::FileEventType::Read), true);
-            }
-            if (metadata->mask & FAN_MODIFY) {
-                event.event_type_mask.set(
-                    static_cast<int>(FileEvent::FileEventType::Write), true);
-            }
-            if (metadata->mask & FAN_RENAME) {
-                event.event_type_mask.set(
-                    static_cast<int>(FileEvent::FileEventType::Move), true);
-            }
-            if (metadata->mask & FAN_ATTRIB) {
-                event.event_type_mask.set(
-                    static_cast<int>(FileEvent::FileEventType::AttributeChange),
-                    true);
-            }
+                // Add event into map.
+                this->procs_events_[proc].push_back(event);
+                this->total_event_count_++;
 
-            // Add event into map.
-            this->procs_events_[proc].push_back(event);
-            this->total_event_count_++;
+                // // TODO: Only for test.
+                // std::deque<Event> mal_event_seq(
+                //     18,
+                //     FileEvent{
+                //         .event_type_mask =
+                //         std::bitset<FILE_EVENT_TYPE_MASK_SIZE>(
+                //             static_cast<int>(FileEvent::FileEventType::Write)),
+                //         .proc =
+                //             Process{
+                //                 .exe_path =
+                //                 "/home/comma/miniconda3/bin/python3.13",
+                //             },
+                //         .path1 = "/tmp/a0",
+                //     });
+                // auto &proc_events = this->procs_events_[proc];
+                // if (proc_events.size() >= mal_event_seq.size() &&
+                //     proc.exe_path.has_value() &&
+                //     proc.exe_path.value().find("python") !=
+                //     std::string::npos) { std::deque<Event> event_seq(
+                //         proc_events.end() - mal_event_seq.size(),
+                //         proc_events.end());
+                //     LevenshteinSimilarity levenshtein_similarity;
+                //     double similarity =
+                //     levenshtein_similarity.calc_similarity(
+                //         mal_event_seq, event_seq);
+                //     std::cout << "similarity of event sequence: " <<
+                //     similarity
+                //               << std::endl;
+                // }
 
-            // // TODO: Only for test.
-            // std::deque<Event> mal_event_seq(
-            //     18,
-            //     FileEvent{
-            //         .event_type_mask =
-            //         std::bitset<FILE_EVENT_TYPE_MASK_SIZE>(
-            //             static_cast<int>(FileEvent::FileEventType::Write)),
-            //         .proc =
-            //             Process{
-            //                 .exe_path =
-            //                 "/home/comma/miniconda3/bin/python3.13",
-            //             },
-            //         .path1 = "/tmp/a0",
-            //     });
-            // auto &proc_events = this->procs_events_[proc];
-            // if (proc_events.size() >= mal_event_seq.size() &&
-            //     proc.exe_path.has_value() &&
-            //     proc.exe_path.value().find("python") != std::string::npos) {
-            //     std::deque<Event> event_seq(
-            //         proc_events.end() - mal_event_seq.size(),
-            //         proc_events.end());
-            //     LevenshteinSimilarity levenshtein_similarity;
-            //     double similarity = levenshtein_similarity.calc_similarity(
-            //         mal_event_seq, event_seq);
-            //     std::cout << "similarity of event sequence: " << similarity
-            //               << std::endl;
-            // }
-
-            metadata = FAN_EVENT_NEXT(metadata, len);
+                metadata = FAN_EVENT_NEXT(metadata, len);
+            }
         }
-    }
+    });
+
+    this->status_ = Status::Running;
+    return outcome::success();
 }
 
-void FanotifyMonitor::stop_monitoring() {
-    // TODO
+outcome::result<void> FanotifyMonitor::stop() {
+    if (this->status_ == Status::Stopped) {
+        return outcome::success();
+    }
+
+    this->monitoring_thread_.request_stop();
+    this->monitoring_thread_.join();
+    this->status_ = Status::Stopped;
+
+    return outcome::success();
+}
+
+outcome::result<void> FanotifyMonitor::listener_register(
+    IEventListener &listener) {
+    this->listeners_.insert(&listener);
+    return outcome::success();
+}
+
+outcome::result<void> FanotifyMonitor::listener_unregister(
+    IEventListener &listener) {
+    this->listeners_.erase(&listener);
+    return outcome::success();
 }
 
 std::optional<std::string> FanotifyMonitor::get_path_from_dfid_name_record(

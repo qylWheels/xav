@@ -9,12 +9,14 @@
 #include <deque>
 #include <memory>
 #include <optional>
+#include <thread>
 #include <unordered_map>
+#include <unordered_set>
 
-#include "xavcore/protection/event.h"
+#include "xavcore/protection/proactive_protection/behavior_monitor.h"
 
 namespace xavcore {
-class FanotifyMonitor {
+class FanotifyMonitor : public IEventProvider {
 public:
     FanotifyMonitor();
     ~FanotifyMonitor();
@@ -24,8 +26,13 @@ public:
     FanotifyMonitor& operator=(FanotifyMonitor&&) = delete;
 
 public:
-    void start_monitoring();
-    void stop_monitoring();
+    virtual outcome::result<void> start() override;
+    virtual outcome::result<void> stop() override;
+    virtual std::uint64_t lost_event_count() override;
+    virtual outcome::result<void> listener_register(
+        IEventListener& listener) override;
+    virtual outcome::result<void> listener_unregister(
+        IEventListener& listener) override;
 
 public:
     std::uint64_t total_event_count() const { return this->total_event_count_; }
@@ -46,6 +53,12 @@ private:
     std::optional<std::string> get_proc_raw_stat(int pid, int n);
 
 private:
+    enum class Status {
+        Stopped,
+        Running,
+    };
+
+private:
     int fanfd_;
     char* fanbuf_;
     int mount_fd_;
@@ -53,5 +66,8 @@ private:
     std::atomic_uint64_t total_event_count_;
     std::atomic_uint64_t suspicious_event_count_;
     std::shared_ptr<spdlog::logger> logger_;
+    std::unordered_set<IEventListener*> listeners_;
+    Status status_;
+    std::jthread monitoring_thread_;
 };
 }  // namespace xavcore
