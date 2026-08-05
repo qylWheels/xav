@@ -13,3 +13,10 @@ add_custom_command(
     USES_TERMINAL
 )
 add_custom_target(vmlinux_header DEPENDS ${VMLINUX_HEADER})
+
+# Process status viewer.
+add_library(process_status_viewer SHARED process_status_viewer.cpp)
+target_link_libraries(
+    process_status_viewer PRIVATE
+    xavcore_includes pfs spdlog::spdlog outcome::hl
+)
