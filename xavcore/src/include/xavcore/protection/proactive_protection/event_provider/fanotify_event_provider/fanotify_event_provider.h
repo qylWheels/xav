@@ -16,14 +16,14 @@
 #include "xavcore/protection/proactive_protection/behavior_monitor.h"
 
 namespace xavcore {
-class FanotifyMonitor : public IEventProvider {
+class FanotifyEventProvider : public IEventProvider {
 public:
-    FanotifyMonitor();
-    ~FanotifyMonitor();
-    FanotifyMonitor(const FanotifyMonitor&) = delete;
-    FanotifyMonitor& operator=(const FanotifyMonitor&) = delete;
-    FanotifyMonitor(FanotifyMonitor&&) = delete;
-    FanotifyMonitor& operator=(FanotifyMonitor&&) = delete;
+    FanotifyEventProvider();
+    ~FanotifyEventProvider();
+    FanotifyEventProvider(const FanotifyEventProvider&) = delete;
+    FanotifyEventProvider& operator=(const FanotifyEventProvider&) = delete;
+    FanotifyEventProvider(FanotifyEventProvider&&) = delete;
+    FanotifyEventProvider& operator=(FanotifyEventProvider&&) = delete;
 
 public:
     virtual outcome::result<void> start() override;

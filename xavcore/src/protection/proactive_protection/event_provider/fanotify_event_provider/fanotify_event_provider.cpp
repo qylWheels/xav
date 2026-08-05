@@ -1,4 +1,4 @@
-#include "xavcore/protection/proactive_protection/event_provider/fanotify/fanotify_monitor.h"
+#include "xavcore/protection/proactive_protection/event_provider/fanotify_event_provider/fanotify_event_provider.h"
 
 #include <fcntl.h>
 #include <limits.h>
@@ -25,12 +25,12 @@
 #include <stop_token>
 #include <system_error>
 
-#include "xavcore/protection/proactive_protection/event_provider/fanotify/fanotify_monitor.h"
+#include "xavcore/protection/proactive_protection/event_provider/fanotify_event_provider/fanotify_event_provider.h"
 
 #define BUFSIZE (4 * 1024)  // 4KB
 
 namespace xavcore {
-FanotifyMonitor::FanotifyMonitor()
+FanotifyEventProvider::FanotifyEventProvider()
     : total_event_count_(0),
       suspicious_event_count_(0),
       status_(Status::Stopped) {
@@ -61,14 +61,14 @@ FanotifyMonitor::FanotifyMonitor()
     }
 }
 
-FanotifyMonitor::~FanotifyMonitor() {
+FanotifyEventProvider::~FanotifyEventProvider() {
     close(this->fanfd_);
     delete[] this->fanbuf_;
     this->fanbuf_ = nullptr;
     close(this->mount_fd_);
 }
 
-outcome::result<void> FanotifyMonitor::start() {
+outcome::result<void> FanotifyEventProvider::start() {
     if (this->status_ == Status::Running) {
         return outcome::success();
     }
@@ -287,7 +287,7 @@ outcome::result<void> FanotifyMonitor::start() {
     return outcome::success();
 }
 
-outcome::result<void> FanotifyMonitor::stop() {
+outcome::result<void> FanotifyEventProvider::stop() {
     if (this->status_ == Status::Stopped) {
         return outcome::success();
     }
@@ -299,19 +299,20 @@ outcome::result<void> FanotifyMonitor::stop() {
     return outcome::success();
 }
 
-outcome::result<void> FanotifyMonitor::listener_register(
+outcome::result<void> FanotifyEventProvider::listener_register(
     IEventListener &listener) {
     this->listeners_.insert(&listener);
     return outcome::success();
 }
 
-outcome::result<void> FanotifyMonitor::listener_unregister(
+outcome::result<void> FanotifyEventProvider::listener_unregister(
     IEventListener &listener) {
     this->listeners_.erase(&listener);
     return outcome::success();
 }
 
-std::optional<std::string> FanotifyMonitor::get_path_from_dfid_name_record(
+std::optional<std::string>
+FanotifyEventProvider::get_path_from_dfid_name_record(
     fanotify_event_info_fid *dfid_name_record) {
     // Get fd of the directory.
     struct file_handle *dir_handle =
@@ -349,7 +350,7 @@ std::optional<std::string> FanotifyMonitor::get_path_from_dfid_name_record(
     }
 }
 
-std::optional<int> FanotifyMonitor::get_proc_ppid(int pid) {
+std::optional<int> FanotifyEventProvider::get_proc_ppid(int pid) {
     try {
         auto ppid_str = this->get_proc_raw_stat(pid, 18);
         if (ppid_str.has_value()) {
@@ -361,8 +362,8 @@ std::optional<int> FanotifyMonitor::get_proc_ppid(int pid) {
     }
 }
 
-std::optional<unsigned long long> FanotifyMonitor::get_proc_start_time_tick(
-    int pid) {
+std::optional<unsigned long long>
+FanotifyEventProvider::get_proc_start_time_tick(int pid) {
     try {
         auto start_time_tick_str = this->get_proc_raw_stat(pid, 22);
         if (start_time_tick_str.has_value()) {
@@ -374,7 +375,7 @@ std::optional<unsigned long long> FanotifyMonitor::get_proc_start_time_tick(
     }
 }
 
-std::optional<std::string> FanotifyMonitor::get_proc_exe_path(int pid) {
+std::optional<std::string> FanotifyEventProvider::get_proc_exe_path(int pid) {
     try {
         std::string exe_path = std::format("/proc/{}/exe", pid);
         std::string exe_path_str;
@@ -385,7 +386,7 @@ std::optional<std::string> FanotifyMonitor::get_proc_exe_path(int pid) {
     }
 }
 
-std::optional<std::string> FanotifyMonitor::get_proc_cmdline(int pid) {
+std::optional<std::string> FanotifyEventProvider::get_proc_cmdline(int pid) {
     try {
         std::string cmdline_path = std::format("/proc/{}/cmdline", pid);
         std::ifstream cmdline_file(cmdline_path);
@@ -401,7 +402,8 @@ std::optional<std::string> FanotifyMonitor::get_proc_cmdline(int pid) {
     }
 }
 
-std::optional<std::string> FanotifyMonitor::get_proc_raw_stat(int pid, int n) {
+std::optional<std::string> FanotifyEventProvider::get_proc_raw_stat(int pid,
+                                                                    int n) {
     try {
         std::string stat_path = std::format("/proc/{}/stat", pid);
         std::ifstream stat_file(stat_path);
