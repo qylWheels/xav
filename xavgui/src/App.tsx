@@ -4,6 +4,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar"
 import TitleBar from "@/components/TitleBar"
 import Overview from "@/views/Overview";
+import Scan from "@/views/Scan";
 
 function App({ children }: { children: React.ReactNode }) {
   return (
@@ -17,7 +18,7 @@ function App({ children }: { children: React.ReactNode }) {
         }>
           <AppSidebar />
           <main>
-            <Overview />
+            <Scan />
             {children}
           </main>
         </SidebarProvider>
