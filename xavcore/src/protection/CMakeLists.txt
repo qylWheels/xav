@@ -1,4 +1,5 @@
 # Subdirectories.
+add_subdirectory(hips)
 add_subdirectory(on_access_scanning)
 add_subdirectory(proactive_protection)
 
