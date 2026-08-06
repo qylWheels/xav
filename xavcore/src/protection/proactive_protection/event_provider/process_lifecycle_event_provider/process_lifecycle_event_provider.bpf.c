@@ -14,6 +14,7 @@ struct {
     __uint(max_entries, 64 * 1024);  // 64KB
 } rb SEC(".maps");
 
+// TODO: add timestamp by using bpf_ktime_get_boot_ns().
 SEC("tp/sched/sched_process_fork")
 int trace_process_fork(struct trace_event_raw_sched_process_fork* ctx) {
     struct RawProcessLifecycleEvent* e =
