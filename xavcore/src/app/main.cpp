@@ -12,6 +12,7 @@
 #include "xavcore/protection/on_access_scanning/on_access_scanner.h"
 #include "xavcore/protection/proactive_protection/behavior_monitor.h"
 #include "xavcore/protection/proactive_protection/event_listener/placeholder_event_listener/placeholder_event_listener.h"
+#include "xavcore/protection/proactive_protection/event_provider/fanotify_event_provider/fanotify_event_provider.h"
 #include "xavcore/protection/proactive_protection/event_provider/process_lifecycle_event_provider/process_lifecycle_event_provider.h"
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event_provider.h"
 #include "xavcore/scan/exact_hash.h"
@@ -36,11 +37,18 @@ void startup() {
         std::make_unique<xavcore::NormalScanStrategy>(
             exact_hash_engine, yara_static_heuristic_engine);
 
+    // Process status viewer.
+    std::shared_ptr<xavcore::ProcessStatusViewer> process_status_viewer =
+        std::make_shared<xavcore::ProcessStatusViewer>(*logger);
+
     // Event providers.
     std::shared_ptr<xavcore::IEventProvider> syscall_event_provider =
         std::make_shared<xavcore::SyscallEventProvider>();
     std::shared_ptr<xavcore::IEventProvider> process_lifecycle_event_provider =
         std::make_shared<xavcore::ProcessLifecycleEventProvider>(*logger);
+    std::shared_ptr<xavcore::IEventProvider> fanotify_event_provider =
+        std::make_shared<xavcore::FanotifyEventProvider>(*process_status_viewer,
+                                                         *logger);
 
     // Event listeners.
     std::shared_ptr<xavcore::IEventListener> placeholder_event_listener =
@@ -68,6 +76,24 @@ void startup() {
             "process lifecycle "
             "event provider: {}",
             ret.error().message());
+        return;
+    }
+    ret = process_lifecycle_event_provider->listener_register(
+        *std::dynamic_pointer_cast<xavcore::IEventListener>(
+            process_status_viewer));
+    if (!ret) {
+        logger->error(
+            "Failed to register process status viewer as a listener to "
+            "process lifecycle "
+            "event provider: {}",
+            ret.error().message());
+        return;
+    }
+    ret =
+        fanotify_event_provider->listener_register(*placeholder_event_listener);
+    if (!ret) {
+        logger->error("Failed to register fanotify event listener: {}",
+                      ret.error().message());
         return;
     }
 
