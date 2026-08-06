@@ -319,23 +319,6 @@ void SyscallEventProvider::handle_raw_event(const RawSyscallEvent& raw_event) {
         }
     }
 
-    if (raw_event.syscall_id == SYS_rename) {
-        RenameSyscallEventPayload rename =
-            std::get<RenameSyscallEventPayload>(event.payload);
-        this->logger_->info(
-            "process {}({}) tries to rename file {} to {}",
-            event.process.pid.has_value() ? event.process.pid.value() : 0,
-            event.process.exe_path.has_value()
-                ? event.process.exe_path.value().string()
-                : "<unknown>",
-            rename.oldpath_class.has_value()
-                ? rename.oldpath_class.value().string()
-                : "<unknown>",
-            rename.newpath_class.has_value()
-                ? rename.newpath_class.value().string()
-                : "<unknown>");
-    }
-
     // Send event.
     for (auto listener : this->listeners_) {
         if (listener->is_accept(event)) {
