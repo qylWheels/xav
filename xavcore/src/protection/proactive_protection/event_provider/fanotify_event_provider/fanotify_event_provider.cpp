@@ -9,17 +9,14 @@
 #include <sys/fanotify.h>
 #include <unistd.h>
 
-#include <algorithm>
 #include <cerrno>
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
 #include <filesystem>
 #include <format>
-#include <fstream>
 #include <optional>
 #include <outcome/success_failure.hpp>
-#include <ranges>
 #include <stdexcept>
 #include <stop_token>
 
@@ -321,75 +318,6 @@ FanotifyEventProvider::get_path_from_dfid_name_record(
         }
         close(dir_fd);
         return result;
-    }
-}
-
-std::optional<int> FanotifyEventProvider::get_proc_ppid(int pid) {
-    try {
-        auto ppid_str = this->get_proc_raw_stat(pid, 18);
-        if (ppid_str.has_value()) {
-            return std::stoi(ppid_str.value());
-        }
-        return std::nullopt;
-    } catch (...) {
-        return std::nullopt;
-    }
-}
-
-std::optional<unsigned long long>
-FanotifyEventProvider::get_proc_start_time_tick(int pid) {
-    try {
-        auto start_time_tick_str = this->get_proc_raw_stat(pid, 22);
-        if (start_time_tick_str.has_value()) {
-            return std::stoull(start_time_tick_str.value());
-        }
-        return std::nullopt;
-    } catch (...) {
-        return std::nullopt;
-    }
-}
-
-std::optional<std::string> FanotifyEventProvider::get_proc_exe_path(int pid) {
-    try {
-        std::string exe_path = std::format("/proc/{}/exe", pid);
-        std::string exe_path_str;
-        exe_path_str = std::filesystem::read_symlink(exe_path);
-        return exe_path_str;
-    } catch (...) {
-        return std::nullopt;
-    }
-}
-
-std::optional<std::string> FanotifyEventProvider::get_proc_cmdline(int pid) {
-    try {
-        std::string cmdline_path = std::format("/proc/{}/cmdline", pid);
-        std::ifstream cmdline_file(cmdline_path);
-        std::vector<char> cmdline_content{
-            std::istreambuf_iterator<char>(cmdline_file),
-            std::istreambuf_iterator<char>()};
-        std::replace_if(
-            cmdline_content.begin(), cmdline_content.end(),
-            [](char c) { return c == '\0'; }, ' ');
-        return std::string(cmdline_content.begin(), cmdline_content.end());
-    } catch (...) {
-        return std::nullopt;
-    }
-}
-
-std::optional<std::string> FanotifyEventProvider::get_proc_raw_stat(int pid,
-                                                                    int n) {
-    try {
-        std::string stat_path = std::format("/proc/{}/stat", pid);
-        std::ifstream stat_file(stat_path);
-        std::string stat_content{std::istreambuf_iterator<char>(stat_file),
-                                 std::istreambuf_iterator<char>()};
-        auto take_view = stat_content | std::views::split(' ') |
-                         std::views::drop(n - 1) | std::views::take(1);
-        auto value = *take_view.begin();
-        std::string value_str{value.begin(), value.end()};
-        return value_str;
-    } catch (...) {
-        return std::nullopt;
     }
 }
 }  // namespace xavcore
