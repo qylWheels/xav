@@ -4,4 +4,5 @@ target_link_libraries(
     fanotify_event_provider
     PUBLIC
     xavcore_includes spdlog::spdlog pfs
+    process_status_viewer
 )

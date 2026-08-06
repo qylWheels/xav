@@ -14,11 +14,13 @@
 #include <unordered_set>
 
 #include "xavcore/protection/proactive_protection/behavior_monitor.h"
+#include "xavcore/protection/proactive_protection/event.h"
+#include "xavcore/protection/process_status_viewer.h"
 
 namespace xavcore {
 class FanotifyEventProvider : public IEventProvider {
 public:
-    FanotifyEventProvider();
+    FanotifyEventProvider(ProcessStatusViewer& process_status_viewer);
     ~FanotifyEventProvider();
     FanotifyEventProvider(const FanotifyEventProvider&) = delete;
     FanotifyEventProvider& operator=(const FanotifyEventProvider&) = delete;
@@ -69,5 +71,6 @@ private:
     std::unordered_set<IEventListener*> listeners_;
     Status status_;
     std::jthread monitoring_thread_;
+    ProcessStatusViewer* process_status_viewer_;
 };
 }  // namespace xavcore

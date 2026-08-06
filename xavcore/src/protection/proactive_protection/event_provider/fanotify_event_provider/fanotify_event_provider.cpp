@@ -10,7 +10,6 @@
 #include <unistd.h>
 
 #include <algorithm>
-#include <bitset>
 #include <cerrno>
 #include <cstddef>
 #include <cstdio>
@@ -23,17 +22,19 @@
 #include <ranges>
 #include <stdexcept>
 #include <stop_token>
-#include <system_error>
 
+#include "xavcore/protection/proactive_protection/event.h"
 #include "xavcore/protection/proactive_protection/event_provider/fanotify_event_provider/fanotify_event_provider.h"
 
 #define BUFSIZE (4 * 1024)  // 4KB
 
 namespace xavcore {
-FanotifyEventProvider::FanotifyEventProvider()
+FanotifyEventProvider::FanotifyEventProvider(
+    ProcessStatusViewer &process_status_viewer)
     : total_event_count_(0),
       suspicious_event_count_(0),
-      status_(Status::Stopped) {
+      status_(Status::Stopped),
+      process_status_viewer_(&process_status_viewer) {
     // Initialize logger.
     this->logger_ = spdlog::stdout_color_mt("behavior_monitor");
     this->logger_->set_level(spdlog::level::info);
@@ -155,18 +156,24 @@ outcome::result<void> FanotifyEventProvider::start() {
                 }
 
                 // Get information of the process which accessed the file.
-                Process proc = {
-                    .pid = metadata->pid,
-                    .ppid = this->get_proc_ppid(metadata->pid),
-                    .start_time_tick =
-                        this->get_proc_start_time_tick(metadata->pid),
-                    .exe_path = this->get_proc_exe_path(metadata->pid),
-                    .cmdline = this->get_proc_cmdline(metadata->pid),
-                };
+                std::optional<Process> proc =
+                    this->process_status_viewer_->pid_to_process(metadata->pid);
+                if (!proc.has_value()) {
+                    // Process not found, ignore the event.
+                    continue;
+                }
 
                 // Generate event.
                 FileEvent event = {
-                    .proc = proc,
+                    .process = proc.value(),
+                };
+
+                auto send_event = [this](const FileEvent &event) {
+                    for (auto listener : this->listeners_) {
+                        if (listener->is_accept(event)) {
+                            (void)listener->accept(event);
+                        }
+                    }
                 };
 
                 if (old_dfid_name_record == nullptr &&
@@ -176,13 +183,44 @@ outcome::result<void> FanotifyEventProvider::start() {
                         result = this->get_path_from_dfid_name_record(
                             dfid_name_record);
                     }
-                    event.path1 = result.has_value() ? result.value() : "";
 
-                    // Get file status.
-                    try {
-                        event.stat1 = std::filesystem::status(event.path1);
-                    } catch (...) {
-                        event.stat1 = std::nullopt;
+                    // Check event types.
+                    if (metadata->mask & FAN_CREATE) {
+                        FileCreateEventPayload create_event_payload{
+                            .path = result.has_value() ? result.value() : "",
+                        };
+                        event.payload = create_event_payload;
+                        send_event(event);
+                    }
+                    if (metadata->mask & FAN_DELETE) {
+                        FileDeleteEventPayload delete_event_payload{
+                            .path = result.has_value() ? result.value() : "",
+                        };
+                        event.payload = delete_event_payload;
+                        send_event(event);
+                    }
+                    if (metadata->mask & FAN_ACCESS) {
+                        FileReadEventPayload read_event_payload{
+                            .path = result.has_value() ? result.value() : "",
+                        };
+                        event.payload = read_event_payload;
+                        send_event(event);
+                    }
+                    if (metadata->mask & FAN_MODIFY) {
+                        FileWriteEventPayload write_event_payload{
+                            .path = result.has_value() ? result.value() : "",
+                        };
+                        event.payload = write_event_payload;
+                        send_event(event);
+                    }
+                    if (metadata->mask & FAN_ATTRIB) {
+                        FileAttributeChangeEventPayload
+                            attribute_change_event_payload{
+                                .path =
+                                    result.has_value() ? result.value() : "",
+                            };
+                        event.payload = attribute_change_event_payload;
+                        send_event(event);
                     }
                 } else {  // IS move event.
                     std::optional<std::string> result1 = std::nullopt;
@@ -190,58 +228,24 @@ outcome::result<void> FanotifyEventProvider::start() {
                         result1 = this->get_path_from_dfid_name_record(
                             old_dfid_name_record);
                     }
-                    event.path1 = result1.has_value() ? result1.value() : "";
 
                     std::optional<std::string> result2 = std::nullopt;
                     if (new_dfid_name_record != nullptr) {
                         result2 = this->get_path_from_dfid_name_record(
                             new_dfid_name_record);
                     }
-                    event.path2 = result2.has_value() ? result2.value() : "";
 
-                    // Get file status.
-                    try {
-                        event.stat1 = std::filesystem::status(event.path1);
-                    } catch (...) {
-                        event.stat1 = std::nullopt;
+                    // Check event types.
+                    if (metadata->mask & FAN_RENAME) {
+                        FileRenameEventPayload rename_event_payload{
+                            .oldpath =
+                                result1.has_value() ? result1.value() : "",
+                            .newpath =
+                                result2.has_value() ? result2.value() : "",
+                        };
+                        event.payload = rename_event_payload;
+                        send_event(event);
                     }
-                    try {
-                        event.stat2 =
-                            std::filesystem::status(event.path2.value());
-                    } catch (...) {
-                        event.stat2 = std::nullopt;
-                    }
-                }
-
-                // Set event mask.
-                if (metadata->mask & FAN_CREATE) {
-                    event.event_type_mask.set(
-                        static_cast<int>(FileEvent::FileEventType::Create),
-                        true);
-                }
-                if (metadata->mask & FAN_DELETE) {
-                    event.event_type_mask.set(
-                        static_cast<int>(FileEvent::FileEventType::Delete),
-                        true);
-                }
-                if (metadata->mask & FAN_ACCESS) {
-                    event.event_type_mask.set(
-                        static_cast<int>(FileEvent::FileEventType::Read), true);
-                }
-                if (metadata->mask & FAN_MODIFY) {
-                    event.event_type_mask.set(
-                        static_cast<int>(FileEvent::FileEventType::Write),
-                        true);
-                }
-                if (metadata->mask & FAN_RENAME) {
-                    event.event_type_mask.set(
-                        static_cast<int>(FileEvent::FileEventType::Move), true);
-                }
-                if (metadata->mask & FAN_ATTRIB) {
-                    event.event_type_mask.set(
-                        static_cast<int>(
-                            FileEvent::FileEventType::AttributeChange),
-                        true);
                 }
 
                 // Add event into map.
