@@ -5,7 +5,6 @@
 #include <spdlog/spdlog.h>
 
 #include <cstdint>
-#include <memory>
 #include <optional>
 #include <thread>
 #include <unordered_set>
@@ -16,7 +15,8 @@
 namespace xavcore {
 class FanotifyEventProvider : public IEventProvider {
 public:
-    FanotifyEventProvider(ProcessStatusViewer& process_status_viewer);
+    FanotifyEventProvider(ProcessStatusViewer& process_status_viewer,
+                          spdlog::logger& logger);
     ~FanotifyEventProvider();
     FanotifyEventProvider(const FanotifyEventProvider&) = delete;
     FanotifyEventProvider& operator=(const FanotifyEventProvider&) = delete;
@@ -46,7 +46,7 @@ private:
     int fanfd_;
     char* fanbuf_;
     int mount_fd_;
-    std::shared_ptr<spdlog::logger> logger_;
+    spdlog::logger* logger_;
     std::unordered_set<IEventListener*> listeners_;
     Status status_;
     std::jthread monitoring_thread_;

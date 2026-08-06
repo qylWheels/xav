@@ -27,12 +27,10 @@
 
 namespace xavcore {
 FanotifyEventProvider::FanotifyEventProvider(
-    ProcessStatusViewer &process_status_viewer)
-    : status_(Status::Stopped), process_status_viewer_(&process_status_viewer) {
-    // Initialize logger.
-    this->logger_ = spdlog::stdout_color_mt("behavior_monitor");
-    this->logger_->set_level(spdlog::level::info);
-
+    ProcessStatusViewer &process_status_viewer, spdlog::logger &logger)
+    : logger_(&logger),
+      status_(Status::Stopped),
+      process_status_viewer_(&process_status_viewer) {
     // Initialize the fanotify descriptor.
     this->fanfd_ =
         fanotify_init(FAN_CLASS_NOTIF | FAN_CLOEXEC | FAN_UNLIMITED_QUEUE |
