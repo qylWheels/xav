@@ -1,8 +1,7 @@
 #include "xavcore/protection/process_status_viewer.h"
 
-#include <pfs/procfs.h>
-
 #include <numeric>
+#include <pfs/procfs.hpp>
 
 #include "pfs/procfs.hpp"
 
