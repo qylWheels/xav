@@ -65,23 +65,19 @@ std::optional<Process> ProcessStatusViewer::pid_to_process(std::uint32_t pid) {
 }
 
 std::optional<Process> ProcessStatusViewer::parse_pid(std::uint32_t pid) {
-    // Check if the process exists.
+    // Unnullable fields.
+    Process proc{.pid = pid};
     try {
-        pfs::procfs().get_task(pid);
+        proc.start_time_tick = pfs::procfs().get_task(pid).get_stat().starttime;
     } catch (...) {
         return std::nullopt;
     }
 
-    Process proc{.pid = pid};
+    // Nullable fields.
     try {
         proc.ppid = pfs::procfs().get_task(pid).get_stat().ppid;
     } catch (...) {
         proc.ppid = std::nullopt;
-    }
-    try {
-        proc.start_time_tick = pfs::procfs().get_task(pid).get_stat().starttime;
-    } catch (...) {
-        proc.start_time_tick = std::nullopt;
     }
     try {
         proc.exe_path = pfs::procfs().get_task(pid).get_exe();
