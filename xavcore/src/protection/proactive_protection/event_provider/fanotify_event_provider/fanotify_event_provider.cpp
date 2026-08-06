@@ -153,6 +153,9 @@ outcome::result<void> FanotifyEventProvider::start() {
                     this->process_status_viewer_->pid_to_process(metadata->pid);
                 if (!proc.has_value()) {
                     // Process not found, ignore the event.
+                    this->logger_->warn(
+                        "Process not found, ignore the event: {}",
+                        metadata->mask);
                     continue;
                 }
 
