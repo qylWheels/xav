@@ -28,10 +28,7 @@
 namespace xavcore {
 FanotifyEventProvider::FanotifyEventProvider(
     ProcessStatusViewer &process_status_viewer)
-    : total_event_count_(0),
-      suspicious_event_count_(0),
-      status_(Status::Stopped),
-      process_status_viewer_(&process_status_viewer) {
+    : status_(Status::Stopped), process_status_viewer_(&process_status_viewer) {
     // Initialize logger.
     this->logger_ = spdlog::stdout_color_mt("behavior_monitor");
     this->logger_->set_level(spdlog::level::info);
@@ -244,10 +241,6 @@ outcome::result<void> FanotifyEventProvider::start() {
                         send_event(event);
                     }
                 }
-
-                // Add event into map.
-                this->procs_events_[proc].push_back(event);
-                this->total_event_count_++;
 
                 metadata = FAN_EVENT_NEXT(metadata, len);
             }

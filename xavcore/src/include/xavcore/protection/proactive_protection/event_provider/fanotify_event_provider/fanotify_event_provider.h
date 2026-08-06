@@ -4,17 +4,13 @@
 #include <spdlog/logger.h>
 #include <spdlog/spdlog.h>
 
-#include <atomic>
 #include <cstdint>
-#include <deque>
 #include <memory>
 #include <optional>
 #include <thread>
-#include <unordered_map>
 #include <unordered_set>
 
 #include "xavcore/protection/proactive_protection/behavior_monitor.h"
-#include "xavcore/protection/proactive_protection/event.h"
 #include "xavcore/protection/process_status_viewer.h"
 
 namespace xavcore {
@@ -36,13 +32,6 @@ public:
     virtual outcome::result<void> listener_unregister(
         IEventListener& listener) override;
 
-public:
-    std::uint64_t total_event_count() const { return this->total_event_count_; }
-
-    std::uint64_t suspicious_event_count() const {
-        return this->suspicious_event_count_;
-    }
-
 private:
     std::optional<std::string> get_path_from_dfid_name_record(
         fanotify_event_info_fid* dfid_name_record);
@@ -57,9 +46,6 @@ private:
     int fanfd_;
     char* fanbuf_;
     int mount_fd_;
-    std::unordered_map<Process, std::deque<Event>> procs_events_;
-    std::atomic_uint64_t total_event_count_;
-    std::atomic_uint64_t suspicious_event_count_;
     std::shared_ptr<spdlog::logger> logger_;
     std::unordered_set<IEventListener*> listeners_;
     Status status_;
