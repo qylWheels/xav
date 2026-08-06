@@ -4,6 +4,7 @@
 #include <spdlog/logger.h>
 #include <spdlog/spdlog.h>
 
+#include <atomic>
 #include <cstdint>
 #include <optional>
 #include <thread>
@@ -51,5 +52,6 @@ private:
     Status status_;
     std::jthread monitoring_thread_;
     ProcessStatusViewer* process_status_viewer_;
+    std::atomic_uint64_t lost_event_count_;
 };
 }  // namespace xavcore

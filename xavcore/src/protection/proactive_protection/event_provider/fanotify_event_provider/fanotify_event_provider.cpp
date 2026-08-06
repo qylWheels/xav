@@ -30,7 +30,8 @@ FanotifyEventProvider::FanotifyEventProvider(
     ProcessStatusViewer &process_status_viewer, spdlog::logger &logger)
     : logger_(&logger),
       status_(Status::Stopped),
-      process_status_viewer_(&process_status_viewer) {
+      process_status_viewer_(&process_status_viewer),
+      lost_event_count_(0) {
     // Initialize the fanotify descriptor.
     this->fanfd_ =
         fanotify_init(FAN_CLASS_NOTIF | FAN_CLOEXEC | FAN_UNLIMITED_QUEUE |
@@ -259,6 +260,10 @@ outcome::result<void> FanotifyEventProvider::stop() {
     this->status_ = Status::Stopped;
 
     return outcome::success();
+}
+
+std::uint64_t FanotifyEventProvider::lost_event_count() {
+    return this->lost_event_count_;
 }
 
 outcome::result<void> FanotifyEventProvider::listener_register(
