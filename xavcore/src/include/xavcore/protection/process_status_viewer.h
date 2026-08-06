@@ -3,6 +3,7 @@
 #include <spdlog/logger.h>
 
 #include <cstdint>
+#include <deque>
 #include <optional>
 #include <unordered_map>
 
@@ -29,11 +30,7 @@ private:
     std::optional<Process> parse_pid(std::uint32_t pid);
 
 private:  // Process status.
-    struct Processes {
-        std::optional<Process> active_process;
-        std::vector<Process> history_processes;
-    };
-    std::unordered_map<std::uint32_t, Processes> process_status_;
+    std::unordered_map<std::uint32_t, std::deque<Process>> process_status_;
     spdlog::logger* logger_;
 };
 }  // namespace xavcore

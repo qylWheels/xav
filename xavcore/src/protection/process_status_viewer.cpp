@@ -24,13 +24,16 @@ outcome::result<void> ProcessStatusViewer::accept(const Event& event) {
             if constexpr (std::is_same_v<T, ProcessCreateEvent>) {
                 auto it = this->process_status_.find(arg.pid);
                 if (it == this->process_status_.end()) {
-                    this->process_status_.emplace(
-                        arg.pid, Processes{
-                                     .active_process{this->parse_pid(arg.pid)},
-                                     .history_processes{},
-                                 });
+                    auto proc = this->parse_pid(arg.pid);
+                    if (proc.has_value()) {
+                        this->process_status_.emplace(
+                            arg.pid, std::deque<Process>{proc.value()});
+                    }
                 } else {
-                    it->second.active_process = this->parse_pid(arg.pid);
+                    auto proc = this->parse_pid(arg.pid);
+                    if (proc.has_value()) {
+                        it->second.emplace_back(proc.value());
+                    }
                 }
             } else if constexpr (std::is_same_v<T, ProcessExitEvent>) {
                 auto it = this->process_status_.find(arg.pid);
@@ -38,19 +41,18 @@ outcome::result<void> ProcessStatusViewer::accept(const Event& event) {
                     auto proc = this->parse_pid(arg.pid);
                     if (proc.has_value()) {
                         this->process_status_.emplace(
-                            arg.pid, Processes{
-                                         .active_process{},
-                                         .history_processes{proc.value()},
-                                     });
+                            arg.pid, std::deque<Process>{proc.value()});
                     }
                 } else {
-                    if (it->second.active_process.has_value()) {
-                        it->second.history_processes.emplace_back(
-                            it->second.active_process.value());
+                    if (it->second.back().pid != arg.pid) {
+                        auto proc = this->parse_pid(arg.pid);
+                        if (proc.has_value()) {
+                            it->second.emplace_back(proc.value());
+                        }
                     }
-                    it->second.active_process = std::nullopt;
                 }
             } else {
+                logger_->error("Unknown process lifecycle event");
             }
         },
         process_lifecycle_event);
@@ -58,8 +60,8 @@ outcome::result<void> ProcessStatusViewer::accept(const Event& event) {
 }
 std::optional<Process> ProcessStatusViewer::pid_to_process(std::uint32_t pid) {
     auto it = this->process_status_.find(pid);
-    if (it != this->process_status_.end()) {
-        return it->second.active_process;
+    if (it != this->process_status_.end() && !it->second.empty()) {
+        return it->second.back();
     }
     return this->parse_pid(pid);
 }
