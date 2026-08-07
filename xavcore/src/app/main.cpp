@@ -9,6 +9,7 @@
 #include <memory>
 #include <thread>
 
+#include "xavcore/protection/hips/monitor/hips_monitor.h"
 #include "xavcore/protection/on_access_scanning/on_access_scanner.h"
 #include "xavcore/protection/proactive_protection/behavior_monitor.h"
 #include "xavcore/protection/proactive_protection/event_listener/placeholder_event_listener/placeholder_event_listener.h"
@@ -97,6 +98,9 @@ void startup() {
         return;
     }
 
+    // HIPS monitor.
+    auto hips_monitor = std::make_shared<xavcore::HipsMonitor>(*logger);
+
     // Start protection.
     ret = syscall_event_provider->start();
     if (!ret) {
@@ -119,6 +123,12 @@ void startup() {
     xavcore::OnAccessScanner on_access_scanner(*normal_scan_strategy);
     std::jthread on_access_scanner_thread(
         [&on_access_scanner]() { on_access_scanner.start_monitoring(); });
+    ret = hips_monitor->start();
+    if (!ret) {
+        logger->error("Failed to start HIPS monitor: {}",
+                      ret.error().message());
+        return;
+    }
 
     // Configure API server.
     httplib::Server http_server;
