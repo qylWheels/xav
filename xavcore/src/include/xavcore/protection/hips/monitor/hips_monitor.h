@@ -33,7 +33,6 @@ private:
     Status status_;
     spdlog::logger* logger_;
     hips_monitor_bpf* skel_;
-    ring_buffer* rb_;
     std::jthread monitor_thread_;
 };
 }  // namespace xavcore
