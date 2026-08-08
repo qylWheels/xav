@@ -19,8 +19,8 @@ typedef std::int32_t i32;
 typedef std::int64_t i64;
 #endif  // __BPF__, __bpf__
 
-#define MAX_NAME_LEN 128
-#define MAX_PATH_LEN 768
+#define MAX_NAME_LEN (128)
+#define MAX_PATH_LEN (768)
 
 struct __attribute__((packed)) Rule {
     char name[MAX_NAME_LEN];
