@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <filesystem>
 #include <span>
 #include <string>
 
@@ -27,7 +26,10 @@ public:
     virtual std::uint16_t priority() = 0;
 
     // Who triggers the rule.
-    virtual std::filesystem::path trigger() = 0;
+    virtual std::string trigger() = 0;
+
+    // Is trigger uses wildcard.
+    virtual bool use_wildcard_in_trigger() = 0;
 };
 
 class IFileRule : public IRule {
@@ -48,7 +50,10 @@ public:
     virtual EventType event_type() = 0;
 
     // The path of the file.
-    virtual std::filesystem::path path() = 0;
+    virtual std::string path() = 0;
+
+    // Is path uses wildcard.
+    virtual bool use_wildcard_in_path() = 0;
 };
 
 class IRuleGroup {

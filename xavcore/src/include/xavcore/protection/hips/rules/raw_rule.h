@@ -29,6 +29,7 @@ struct __attribute__((packed)) Rule {
     bool kill_process;
     u16 priority;
     char trigger[MAX_PATH_LEN];
+    bool use_wildcard_in_trigger;
 };
 
 enum FileEventType {
@@ -43,4 +44,5 @@ struct __attribute__((packed)) FileRule {
     struct Rule rule;
     enum FileEventType event_type;
     char path[MAX_PATH_LEN];
+    bool use_wildcard_in_path;
 };
