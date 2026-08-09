@@ -21,6 +21,7 @@ typedef std::int64_t i64;
 
 #define MAX_NAME_LEN (128)
 #define MAX_PATH_LEN (768)
+#define MAX_PATTERN_LEN (MAX_PATH_LEN / 4)
 
 struct __attribute__((packed)) Rule {
     char name[MAX_NAME_LEN];
@@ -28,7 +29,7 @@ struct __attribute__((packed)) Rule {
     bool allow;
     bool kill_process;
     u16 priority;
-    char trigger[MAX_PATH_LEN];
+    char trigger[MAX_PATTERN_LEN];
     bool use_wildcard_in_trigger;
 };
 
@@ -43,6 +44,6 @@ enum FileEventType {
 struct __attribute__((packed)) FileRule {
     struct Rule rule;
     enum FileEventType event_type;
-    char path[MAX_PATH_LEN];
+    char path[MAX_PATTERN_LEN];
     bool use_wildcard_in_path;
 };
