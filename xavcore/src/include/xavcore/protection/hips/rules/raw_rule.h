@@ -6,6 +6,7 @@ typedef __u8 u8;
 typedef __u16 u16;
 typedef __u32 u32;
 typedef __u64 u64;
+typedef __s8 i8;
 typedef __s32 i32;
 typedef __s64 i64;
 #else
@@ -14,6 +15,7 @@ typedef std::uint8_t u8;
 typedef std::uint16_t u16;
 typedef std::uint32_t u32;
 typedef std::uint64_t u64;
+typedef std::int8_t i8;
 typedef std::int32_t i32;
 typedef std::int64_t i64;
 #endif  // __BPF__, __bpf__
@@ -33,7 +35,7 @@ struct __attribute__((packed)) Rule {
     u8 enabled;
     u8 allow;
     u8 kill_process;
-    u16 priority;
+    i8 priority;
     char trigger[MAX_PATTERN_LEN];
     u8 use_wildcard_in_trigger;
 };

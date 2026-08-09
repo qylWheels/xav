@@ -23,7 +23,7 @@ public:
     virtual bool kill_process() = 0;
 
     // The lower the value, the higher the priority of the rule.
-    virtual std::uint16_t priority() = 0;
+    virtual std::int8_t priority() = 0;
 
     // Who triggers the rule.
     virtual std::string trigger() = 0;
