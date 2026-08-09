@@ -20,7 +20,7 @@ typedef std::int64_t i64;
 #endif  // __BPF__, __bpf__
 
 #define MAX_NAME_LEN (128)
-#define MAX_PATH_LEN (768)
+#define MAX_PATH_LEN (512)
 #define MAX_PATTERN_LEN (MAX_PATH_LEN / 4)
 
 struct __attribute__((packed)) Rule {
