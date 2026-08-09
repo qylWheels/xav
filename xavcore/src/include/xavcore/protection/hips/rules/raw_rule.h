@@ -18,12 +18,18 @@ typedef std::int32_t i32;
 typedef std::int64_t i64;
 #endif  // __BPF__, __bpf__
 
+#define MAX_GROUP_NAME_LEN (48)
 #define MAX_NAME_LEN (128)
 #define MAX_PATH_LEN (512)
 #define MAX_PATTERN_LEN (MAX_PATH_LEN / 4)
 
-struct __attribute__((packed)) Rule {
+struct __attribute__((packed)) RuleIdentifier {
+    char group_name[MAX_GROUP_NAME_LEN];
     char name[MAX_NAME_LEN];
+};
+
+struct __attribute__((packed)) Rule {
+    struct RuleIdentifier id;
     u8 enabled;
     u8 allow;
     u8 kill_process;
