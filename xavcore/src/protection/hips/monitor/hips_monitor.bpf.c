@@ -144,15 +144,34 @@ u8 str_is_match_pat(const char *pattern, const char *s) {
     }
 }
 
+struct pathbuf {
+    char path[MAX_PATH_LEN + 5];
+};
+
+struct {
+    __uint(type, BPF_MAP_TYPE_PERCPU_ARRAY);
+    __uint(max_entries, 8);
+    __type(key, int);
+    __type(value, struct pathbuf);
+} pathbuf SEC(".maps");
+
 SEC("lsm/path_unlink")
 int BPF_PROG(path_unlink_monitor, struct path *dir, struct dentry *dentry) {
-    char dir_path[256] = {0};
-    bpf_d_path(dir, dir_path, sizeof(dir_path));
-    bpf_printk(PREFIX "path_unlink_monitor is triggered: %s\n", dir_path);
-    char pattern[16] = "f*ks??t";
-    char dentry_name[32] = {0};
-    bpf_core_read_str(dentry_name, sizeof(dentry_name), dentry->d_name.name);
-    if (str_is_match_pat((const char *)pattern, (const char *)dentry_name) ==
+    int zero = 0, one = 1;
+    struct pathbuf *pathbuf0 =
+        (struct pathbuf *)bpf_map_lookup_elem(&pathbuf, &zero);
+    struct pathbuf *pathbuf1 =
+        (struct pathbuf *)bpf_map_lookup_elem(&pathbuf, &one);
+    if (pathbuf0 == NULL || pathbuf1 == NULL) {
+        // This is unreachable.
+        return 0;
+    }
+    bpf_d_path(dir, pathbuf0->path, MAX_PATH_LEN);
+    BPF_SNPRINTF(pathbuf1->path, MAX_PATH_LEN, "%s/%s", (u64)pathbuf0->path,
+                 (u64)dentry->d_name.name);
+    bpf_printk(PREFIX "path_unlink_monitor is triggered: %s\n", pathbuf1->path);
+    char pattern[16] = "*/f*ks??t";
+    if (str_is_match_pat((const char *)pattern, (const char *)pathbuf1->path) ==
         1) {
         return -1;
     }
