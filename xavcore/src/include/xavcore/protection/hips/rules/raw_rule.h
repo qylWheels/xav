@@ -2,7 +2,6 @@
 
 #if defined(__BPF__) || defined(__bpf__)
 #include "vmlinux.h"
-typedef _Bool bool;
 typedef __u8 u8;
 typedef __u16 u16;
 typedef __u32 u32;
@@ -25,12 +24,12 @@ typedef std::int64_t i64;
 
 struct __attribute__((packed)) Rule {
     char name[MAX_NAME_LEN];
-    bool enabled;
-    bool allow;
-    bool kill_process;
+    u8 enabled;
+    u8 allow;
+    u8 kill_process;
     u16 priority;
     char trigger[MAX_PATTERN_LEN];
-    bool use_wildcard_in_trigger;
+    u8 use_wildcard_in_trigger;
 };
 
 enum FileEventType {
@@ -45,5 +44,5 @@ struct __attribute__((packed)) FileRule {
     struct Rule rule;
     enum FileEventType event_type;
     char path[MAX_PATTERN_LEN];
-    bool use_wildcard_in_path;
+    u8 use_wildcard_in_path;
 };
