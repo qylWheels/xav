@@ -10,6 +10,21 @@
 
 #define PREFIX "xavcore hips monitor: "
 
+struct rules_with_same_priority {
+    __uint(type, BPF_MAP_TYPE_ARRAY);
+    __uint(max_entries, MAX_RULE_WITH_SAME_PRIORITY_COUNT);
+    __type(key, __u32);
+    // XXX: Must use sizeof(), or clang will complain.
+    __type(value, sizeof(struct Rule));
+};
+
+struct {
+    __uint(type, BPF_MAP_TYPE_ARRAY_OF_MAPS);
+    __uint(max_entries, MAX_PRIORITY_COUNT);
+    __type(key, __u32);
+    __array(values, struct rules_with_same_priority);
+} hips_rules SEC(".maps");
+
 // If s1 or s2 is NULL, return false.
 u8 str_is_equal(const char *s1, const char *s2) {
     const int max_len = MAX_PATH_LEN;
