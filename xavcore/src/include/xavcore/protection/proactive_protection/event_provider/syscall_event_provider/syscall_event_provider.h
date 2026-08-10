@@ -61,32 +61,6 @@ private:
 private:
     void handle_raw_event(const RawSyscallEvent& raw_event);
 
-private:  // Basic file syscall handlers.
-    ReadSyscallEventPayload read_event_handler(int fd, void* buf, size_t count,
-                                               ::ssize_t ret,
-                                               std::uint32_t pid);
-    WriteSyscallEventPayload write_event_handler(int fd, const void* buf,
-                                                 size_t count, ::ssize_t ret,
-                                                 std::uint32_t pid);
-
-private:  // Directory and filesystem syscall handlers.
-    UnlinkSyscallEventPayload unlink_event_handler(const char* pathname,
-                                                   int ret, std::uint32_t pid);
-    UnlinkatSyscallEventPayload unlinkat_event_handler(int dirfd,
-                                                       const char* pathname,
-                                                       int flags, int ret,
-                                                       std::uint32_t pid);
-    RenameSyscallEventPayload rename_event_handler(const char* oldpath,
-                                                   const char* newpath, int ret,
-                                                   std::uint32_t pid);
-    RenameatSyscallEventPayload renameat_event_handler(
-        int olddirfd, const char* oldpath, int newdirfd, const char* newpath,
-        int ret, std::uint32_t pid);
-
-    Renameat2SyscallEventPayload renameat2_event_handler(
-        int olddirfd, const char* oldpath, int newdirfd, const char* newpath,
-        unsigned int flags, int ret, std::uint32_t pid);
-
 private:  // File metadata syscall handlers.
     ChmodSyscallEventPayload chmod_event_handler(const char* pathname,
                                                  mode_t mode, int ret,
