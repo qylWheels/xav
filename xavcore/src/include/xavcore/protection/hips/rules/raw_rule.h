@@ -31,7 +31,7 @@ struct __attribute__((packed)) RuleIdentifier {
     char name[MAX_NAME_LEN];
 };
 
-struct __attribute__((packed)) Rule {
+struct __attribute__((packed)) RuleHeader {
     struct RuleIdentifier id;
     u8 enabled;
     u8 allow;
@@ -50,8 +50,15 @@ enum FileEventType {
 };
 
 struct __attribute__((packed)) FileRule {
-    struct Rule rule;
+    struct RuleHeader rule;
     enum FileEventType event_type;
     char path[MAX_PATTERN_LEN];
     u8 use_wildcard_in_path;
+};
+
+struct __attribute__((packed)) Rule {
+    u16 tag;
+    union {
+        struct FileRule file_rule;
+    } u;
 };
