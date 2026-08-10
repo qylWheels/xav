@@ -100,6 +100,11 @@ using ProcessLifecycleEvent =
     std::variant<ProcessCreateEvent, ProcessExitEvent>;
 
 using Event = std::variant<SyscallEvent, ProcessLifecycleEvent, FileEvent>;
+
+class IEvent {
+public:
+    virtual ~IEvent() = default;
+};
 }  // namespace xavcore
 
 namespace std {
