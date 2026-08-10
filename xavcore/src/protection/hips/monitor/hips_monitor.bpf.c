@@ -10,21 +10,14 @@
 
 #define PREFIX "xavcore hips monitor: "
 
-struct rules_with_same_priority {
+struct {
     __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, MAX_RULE_WITH_SAME_PRIORITY_COUNT);
+    __uint(max_entries, MAX_RULE_COUNT);
 
     // XXX: Must use __uint() and *_size, or clang will complain
     // about __type(value, struct Rule).
     __uint(key_size, 4);
     __uint(value_size, sizeof(struct Rule));
-};
-
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY_OF_MAPS);
-    __uint(max_entries, MAX_PRIORITY_COUNT);
-    __type(key, __u32);
-    __array(values, struct rules_with_same_priority);
 } hips_rules SEC(".maps");
 
 // If s1 or s2 is NULL, return false.
@@ -171,6 +164,11 @@ struct {
     __type(key, int);
     __type(value, struct pathbuf);
 } pathbuf SEC(".maps");
+
+static long match_rule_callback(struct bpf_map *map, const void *key,
+                                void *value, void *ctx) {
+    return 0;
+}
 
 SEC("lsm/path_unlink")
 int BPF_PROG(path_unlink_monitor, struct path *dir, struct dentry *dentry) {
