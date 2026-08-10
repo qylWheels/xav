@@ -50,7 +50,7 @@ enum FileEventType {
 };
 
 struct __attribute__((packed)) FileRule {
-    struct RuleHeader rule;
+    struct RuleHeader header;
     enum FileEventType event_type;
     char path[MAX_PATTERN_LEN];
     u8 use_wildcard_in_path;
