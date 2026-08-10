@@ -8,7 +8,6 @@
 #include <optional>
 #include <string>
 #include <variant>
-#include <vector>
 
 namespace xavcore {
 struct Process {
@@ -56,67 +55,6 @@ struct FileEvent {
         payload;
 };
 
-struct ReadSyscallEventPayload {
-    int fd;
-    std::optional<std::filesystem::path> path;
-    void* buf;
-    std::optional<std::vector<char>> buf_content;
-    std::size_t count;
-    ::ssize_t ret;
-};
-
-struct WriteSyscallEventPayload {
-    int fd;
-    std::optional<std::filesystem::path> path;
-    const void* buf;
-    std::optional<std::vector<char>> buf_content;
-    std::size_t count;
-    ::ssize_t ret;
-};
-
-struct UnlinkSyscallEventPayload {
-    const char* pathname;
-    std::optional<std::filesystem::path> path;
-    int ret;
-};
-
-struct UnlinkatSyscallEventPayload {
-    int dirfd;
-    const char* pathname;
-    std::optional<std::filesystem::path> path;
-    int flags;
-    int ret;
-};
-
-struct RenameSyscallEventPayload {
-    const char* oldpath;
-    std::optional<std::filesystem::path> oldpath_class;
-    const char* newpath;
-    std::optional<std::filesystem::path> newpath_class;
-    int ret;
-};
-
-struct RenameatSyscallEventPayload {
-    int olddirfd;
-    const char* oldpath;
-    std::optional<std::filesystem::path> oldpath_class;
-    int newdirfd;
-    const char* newpath;
-    std::optional<std::filesystem::path> newpath_class;
-    int ret;
-};
-
-struct Renameat2SyscallEventPayload {
-    int olddirfd;
-    const char* oldpath;
-    std::optional<std::filesystem::path> oldpath_class;
-    int newdirfd;
-    const char* newpath;
-    std::optional<std::filesystem::path> newpath_class;
-    unsigned int flags;
-    int ret;
-};
-
 struct ChmodSyscallEventPayload {
     const char* pathname;
     std::optional<std::filesystem::path> path;
@@ -143,11 +81,8 @@ struct FchmodatSyscallEventPayload {
 struct SyscallEvent {
     std::chrono::time_point<std::chrono::system_clock> timestamp;
     Process process;
-    std::variant<ReadSyscallEventPayload, WriteSyscallEventPayload,
-                 UnlinkSyscallEventPayload, UnlinkatSyscallEventPayload,
-                 RenameSyscallEventPayload, RenameatSyscallEventPayload,
-                 Renameat2SyscallEventPayload, ChmodSyscallEventPayload,
-                 FchmodSyscallEventPayload, FchmodatSyscallEventPayload>
+    std::variant<ChmodSyscallEventPayload, FchmodSyscallEventPayload,
+                 FchmodatSyscallEventPayload>
         payload;
 };
 
