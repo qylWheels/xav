@@ -24,8 +24,7 @@ typedef std::int64_t i64;
 #define MAX_NAME_LEN (128)
 #define MAX_PATH_LEN (512)
 #define MAX_PATTERN_LEN (MAX_PATH_LEN / 4)
-#define MAX_PRIORITY_COUNT (1 << sizeof(i8))
-#define MAX_RULE_WITH_SAME_PRIORITY_COUNT (128)
+#define MAX_RULE_COUNT (1024)
 
 struct __attribute__((packed)) RuleIdentifier {
     char group_name[MAX_GROUP_NAME_LEN];
