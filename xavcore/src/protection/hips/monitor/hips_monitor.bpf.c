@@ -10,14 +10,19 @@
 
 #define PREFIX "xavcore hips monitor: "
 
+struct all_rules {
+    struct Rule rules[MAX_RULE_COUNT];
+    u32 rule_count;
+};
+
 struct {
     __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, MAX_RULE_COUNT);
+    __uint(max_entries, 1);
 
     // XXX: Must use __uint() and *_size, or clang will complain
     // about __type(value, struct Rule).
     __uint(key_size, 4);
-    __uint(value_size, sizeof(struct Rule));
+    __uint(value_size, sizeof(struct all_rules));
 } hips_rules SEC(".maps");
 
 // If s1 or s2 is NULL, return false.
@@ -165,8 +170,48 @@ struct {
     __type(value, struct pathbuf);
 } pathbuf SEC(".maps");
 
-static long match_rule_callback(struct bpf_map *map, const void *key,
-                                void *value, void *ctx) {
+struct match_context {
+    u8 path_index;
+    u8 allow;
+};
+
+static long match_rule_callback(u64 i, void *ctx) {
+    struct match_context *c = (struct match_context *)ctx;
+    u32 zero = 0;
+
+    // Get all rules.
+    struct all_rules *all_rules =
+        (struct all_rules *)bpf_map_lookup_elem(&hips_rules, &zero);
+    if (all_rules == NULL) {
+        // Unreachable.
+        return 0;
+    }
+
+    if (i >= all_rules->rule_count || i >= MAX_RULE_COUNT) {
+        return 1;  // End loop.
+    }
+
+    // Get path.
+    struct pathbuf *path =
+        (struct pathbuf *)bpf_map_lookup_elem(&pathbuf, &c->path_index);
+    if (path == NULL) {
+        // Unreachable.
+        return 0;
+    }
+
+    struct Rule *rule = &all_rules->rules[i];
+    switch (rule->tag) {
+        case 0: {
+            struct FileRule *file_rule = &rule->u.file_rule;
+            char pattern[16] = "*/f*ks??t";
+            if (str_is_match_pat((const char *)pattern,
+                                 (const char *)path->path) == 1) {
+                c->allow = 0;
+            }
+            return 1;  // End loop.
+        }
+    }
+
     return 0;
 }
 
@@ -185,11 +230,13 @@ int BPF_PROG(path_unlink_monitor, struct path *dir, struct dentry *dentry) {
     BPF_SNPRINTF(pathbuf1->path, MAX_PATH_LEN, "%s/%s", (u64)pathbuf0->path,
                  (u64)dentry->d_name.name);
     bpf_printk(PREFIX "path_unlink_monitor is triggered: %s\n", pathbuf1->path);
-    char pattern[16] = "*/f*ks??t";
-    if (str_is_match_pat((const char *)pattern, (const char *)pathbuf1->path) ==
-        1) {
+
+    struct match_context c = {1, 1};
+    bpf_loop(MAX_RULE_COUNT, (void *)match_rule_callback, &c, 0);
+    if (!c.allow) {
         return -1;
     }
+
     return 0;
 }
 
