@@ -13,9 +13,11 @@
 struct rules_with_same_priority {
     __uint(type, BPF_MAP_TYPE_ARRAY);
     __uint(max_entries, MAX_RULE_WITH_SAME_PRIORITY_COUNT);
-    __type(key, __u32);
-    // XXX: Must use sizeof(), or clang will complain.
-    __type(value, sizeof(struct Rule));
+
+    // XXX: Must use __uint() and *_size, or clang will complain
+    // about __type(value, struct Rule).
+    __uint(key_size, 4);
+    __uint(value_size, sizeof(struct Rule));
 };
 
 struct {
