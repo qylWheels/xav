@@ -166,12 +166,12 @@ struct pathbuf {
 struct {
     __uint(type, BPF_MAP_TYPE_PERCPU_ARRAY);
     __uint(max_entries, 8);
-    __type(key, int);
+    __type(key, __u32);
     __type(value, struct pathbuf);
 } pathbuf SEC(".maps");
 
 struct match_context {
-    u8 path_index;
+    u32 path_index;
     u8 allow;
 };
 
@@ -203,8 +203,7 @@ static long match_rule_callback(u64 i, void *ctx) {
     switch (rule->tag) {
         case 0: {
             struct FileRule *file_rule = &rule->u.file_rule;
-            char pattern[16] = "*/f*ks??t";
-            if (str_is_match_pat((const char *)pattern,
+            if (str_is_match_pat((const char *)file_rule->path,
                                  (const char *)path->path) == 1) {
                 c->allow = 0;
             }
@@ -229,7 +228,32 @@ int BPF_PROG(path_unlink_monitor, struct path *dir, struct dentry *dentry) {
     bpf_d_path(dir, pathbuf0->path, MAX_PATH_LEN);
     BPF_SNPRINTF(pathbuf1->path, MAX_PATH_LEN, "%s/%s", (u64)pathbuf0->path,
                  (u64)dentry->d_name.name);
-    bpf_printk(PREFIX "path_unlink_monitor is triggered: %s\n", pathbuf1->path);
+
+    // TODO: Only for test.
+    struct all_rules *all_rules =
+        (struct all_rules *)bpf_map_lookup_elem(&hips_rules, &zero);
+    if (all_rules == NULL) {
+        // Unreachable.
+        return 0;
+    }
+    all_rules->rule_count = 1;
+    all_rules->rules[0].tag = 0;
+    all_rules->rules[0].u.file_rule = (struct FileRule){
+        .header =
+            {
+                .id =
+                    {
+                        .group_name = "test",
+                        .name = "test",
+                    },
+                .enabled = 1,
+                .allow = 0,
+                .kill_process = 0,
+            },
+        .event_type = DELETE,
+        .path = "*/f*ks??t",
+        .use_wildcard_in_path = 1,
+    };
 
     struct match_context c = {1, 1};
     bpf_loop(MAX_RULE_COUNT, (void *)match_rule_callback, &c, 0);
