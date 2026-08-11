@@ -12,6 +12,7 @@
 #include "xavcore/protection/hips/monitor/hips_monitor.h"
 #include "xavcore/protection/on_access_scanning/on_access_scanner.h"
 #include "xavcore/protection/proactive_protection/behavior_monitor.h"
+#include "xavcore/protection/proactive_protection/event_listener/anomalous_syscall_detection_listener/anomalous_syscall_detection_listener.h"
 #include "xavcore/protection/proactive_protection/event_listener/placeholder_event_listener/placeholder_event_listener.h"
 #include "xavcore/protection/proactive_protection/event_provider/fanotify_event_provider/fanotify_event_provider.h"
 #include "xavcore/protection/proactive_protection/event_provider/process_lifecycle_event_provider/process_lifecycle_event_provider.h"
@@ -54,11 +55,23 @@ void startup() {
     // Event listeners.
     std::shared_ptr<xavcore::IEventListener> placeholder_event_listener =
         std::make_shared<xavcore::PlaceholderEventListener>();
+    std::shared_ptr<xavcore::IEventListener>
+        anomalous_syscall_detection_listener =
+            std::make_shared<xavcore::AnomalousSyscallDetectionListener>(
+                *logger);
     auto ret =
         syscall_event_provider->listener_register(*placeholder_event_listener);
     if (!ret) {
         logger->error("Failed to register syscall event listener: {}",
                       ret.error().message());
+        return;
+    }
+    ret = syscall_event_provider->listener_register(
+        *anomalous_syscall_detection_listener);
+    if (!ret) {
+        logger->error(
+            "Failed to register anomalous syscall detection listener: {}",
+            ret.error().message());
         return;
     }
     ret = process_lifecycle_event_provider->listener_register(
