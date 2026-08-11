@@ -39,7 +39,8 @@ struct FileAttributeChangeEventPayload {
     std::filesystem::path path;
 };
 
-struct FileEvent {
+struct FileEvent : public IEvent {
+    std::chrono::time_point<std::chrono::system_clock> timestamp;
     Process process;
     std::variant<FileCreateEventPayload, FileDeleteEventPayload,
                  FileReadEventPayload, FileWriteEventPayload,
