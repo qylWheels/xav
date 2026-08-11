@@ -41,8 +41,6 @@ SyscallEventProvider::SyscallEventProvider()
     // Scan procfs to initialize process status.
     for (const auto& task : pfs::procfs().get_processes()) {
         auto process = this->pid_to_process(task.id());
-        this->process_status_[task.id()] =
-            Processes{.active_process{process}, .history_processes{}};
     }
 }
 
@@ -340,50 +338,5 @@ FchmodatSyscallEventPayload SyscallEventProvider::fchmodat_event_handler(
     }
 
     return payload;
-}
-
-bool SyscallEventProvider::is_accept(const Event& event) {
-    return std::holds_alternative<ProcessLifecycleEvent>(event);
-}
-
-outcome::result<void> SyscallEventProvider::accept(const Event& event) {
-    ProcessLifecycleEvent process_lifecycle_event =
-        std::get<ProcessLifecycleEvent>(event);
-    std::visit(
-        [this](auto&& arg) {
-            using T = std::decay_t<decltype(arg)>;
-            if constexpr (std::is_same_v<T, ProcessCreateEvent>) {
-                auto it = this->process_status_.find(arg.pid);
-                if (it == this->process_status_.end()) {
-                    this->process_status_.emplace(
-                        arg.pid,
-                        Processes{
-                            .active_process{this->pid_to_process(arg.pid)},
-                            .history_processes{},
-                        });
-                } else {
-                    it->second.active_process = this->pid_to_process(arg.pid);
-                }
-            } else if constexpr (std::is_same_v<T, ProcessExitEvent>) {
-                auto it = this->process_status_.find(arg.pid);
-                if (it == this->process_status_.end()) {
-                    this->process_status_.emplace(
-                        arg.pid,
-                        Processes{
-                            .active_process{},
-                            .history_processes{this->pid_to_process(arg.pid)},
-                        });
-                } else {
-                    if (it->second.active_process.has_value()) {
-                        it->second.history_processes.emplace_back(
-                            it->second.active_process.value());
-                    }
-                    it->second.active_process = std::nullopt;
-                }
-            } else {
-            }
-        },
-        process_lifecycle_event);
-    return outcome::success();
 }
 }  // namespace xavcore
