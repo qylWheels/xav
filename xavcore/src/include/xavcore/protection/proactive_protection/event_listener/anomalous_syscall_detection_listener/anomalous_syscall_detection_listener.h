@@ -2,6 +2,8 @@
 
 #include <spdlog/logger.h>
 
+#include <mlpack.hpp>
+
 #include "xavcore/protection/proactive_protection/behavior_monitor.h"
 
 namespace xavcore {
@@ -25,5 +27,7 @@ public:
 
 private:
     spdlog::logger *logger_;
+    arma::mat training_set_;
+    mlpack::KNN knn_;
 };
 }  // namespace xavcore
