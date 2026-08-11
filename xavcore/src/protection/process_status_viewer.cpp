@@ -3,7 +3,7 @@
 #include <numeric>
 #include <pfs/procfs.hpp>
 
-#include "pfs/procfs.hpp"
+#include "xavcore/protection/proactive_protection/event_provider/process_lifecycle_event_provider/process_lifecycle_event_provider.h"
 
 namespace xavcore {
 ProcessStatusViewer::ProcessStatusViewer(spdlog::logger& logger)
@@ -11,51 +11,48 @@ ProcessStatusViewer::ProcessStatusViewer(spdlog::logger& logger)
 
 ProcessStatusViewer::~ProcessStatusViewer() = default;
 
-bool ProcessStatusViewer::is_accept(const Event& event) {
-    return std::holds_alternative<ProcessLifecycleEvent>(event);
+bool ProcessStatusViewer::is_accept(const IEvent& event) {
+    return typeid(event) == typeid(ProcessCreateEvent) ||
+           typeid(event) == typeid(ProcessExitEvent);
 }
 
-outcome::result<void> ProcessStatusViewer::accept(const Event& event) {
-    ProcessLifecycleEvent process_lifecycle_event =
-        std::get<ProcessLifecycleEvent>(event);
-    std::visit(
-        [this](auto&& arg) {
-            using T = std::decay_t<decltype(arg)>;
-            if constexpr (std::is_same_v<T, ProcessCreateEvent>) {
-                auto it = this->process_status_.find(arg.pid);
-                if (it == this->process_status_.end()) {
-                    auto proc = this->parse_pid(arg.pid);
-                    if (proc.has_value()) {
-                        this->process_status_.emplace(
-                            arg.pid, std::deque<Process>{proc.value()});
-                    }
-                } else {
-                    auto proc = this->parse_pid(arg.pid);
-                    if (proc.has_value()) {
-                        it->second.emplace_back(proc.value());
-                    }
-                }
-            } else if constexpr (std::is_same_v<T, ProcessExitEvent>) {
-                auto it = this->process_status_.find(arg.pid);
-                if (it == this->process_status_.end()) {
-                    auto proc = this->parse_pid(arg.pid);
-                    if (proc.has_value()) {
-                        this->process_status_.emplace(
-                            arg.pid, std::deque<Process>{proc.value()});
-                    }
-                } else {
-                    if (it->second.back().pid != arg.pid) {
-                        auto proc = this->parse_pid(arg.pid);
-                        if (proc.has_value()) {
-                            it->second.emplace_back(proc.value());
-                        }
-                    }
-                }
-            } else {
-                logger_->error("Unknown process lifecycle event");
+outcome::result<void> ProcessStatusViewer::accept(const IEvent& event) {
+    if (typeid(event) == typeid(ProcessCreateEvent)) {
+        auto e = dynamic_cast<const ProcessCreateEvent&>(event);
+        auto it = this->process_status_.find(e.pid);
+        if (it == this->process_status_.end()) {
+            auto proc = this->parse_pid(e.pid);
+            if (proc.has_value()) {
+                this->process_status_.emplace(
+                    e.pid, std::deque<Process>{proc.value()});
             }
-        },
-        process_lifecycle_event);
+        } else {
+            auto proc = this->parse_pid(e.pid);
+            if (proc.has_value()) {
+                it->second.emplace_back(proc.value());
+            }
+        }
+    } else if (typeid(event) == typeid(ProcessExitEvent)) {
+        auto e = dynamic_cast<const ProcessExitEvent&>(event);
+        auto it = this->process_status_.find(e.pid);
+        if (it == this->process_status_.end()) {
+            auto proc = this->parse_pid(e.pid);
+            if (proc.has_value()) {
+                this->process_status_.emplace(
+                    e.pid, std::deque<Process>{proc.value()});
+            }
+        } else {
+            if (it->second.back().pid != e.pid) {
+                auto proc = this->parse_pid(e.pid);
+                if (proc.has_value()) {
+                    it->second.emplace_back(proc.value());
+                }
+            }
+        }
+    } else {
+        logger_->error("Unknown process lifecycle event");
+    }
+
     return outcome::success();
 }
 std::optional<Process> ProcessStatusViewer::pid_to_process(std::uint32_t pid) {

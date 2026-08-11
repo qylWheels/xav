@@ -20,4 +20,5 @@ add_library(process_status_viewer SHARED process_status_viewer.cpp)
 target_link_libraries(
     process_status_viewer PUBLIC
     xavcore_includes pfs spdlog::spdlog outcome::hl
+    process_lifecycle_event_provider
 )

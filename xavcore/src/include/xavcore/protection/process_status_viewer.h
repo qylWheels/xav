@@ -20,8 +20,8 @@ public:
     ProcessStatusViewer& operator=(ProcessStatusViewer&&) = delete;
 
 public:
-    virtual bool is_accept(const Event& event) override;
-    virtual outcome::result<void> accept(const Event& event) override;
+    virtual bool is_accept(const IEvent& event) override;
+    virtual outcome::result<void> accept(const IEvent& event) override;
 
 public:
     std::optional<Process> pid_to_process(std::uint32_t pid);
