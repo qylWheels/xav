@@ -36,8 +36,8 @@ public:
 
 public:
     // Procedure: accept? -> enqueue -> on_event.
-    virtual bool is_accept(const Event& event) = 0;
-    virtual outcome::result<void> accept(const Event& event) = 0;
+    virtual bool is_accept(const IEvent& event) = 0;
+    virtual outcome::result<void> accept(const IEvent& event) = 0;
 };
 
 }  // namespace xavcore
