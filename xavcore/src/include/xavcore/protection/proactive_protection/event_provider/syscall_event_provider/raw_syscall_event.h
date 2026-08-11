@@ -16,7 +16,7 @@ typedef std::int32_t i32;
 typedef std::int64_t i64;
 #endif  // __BPF__, __bpf__
 
-struct __attribute__((packed)) RawSyscallEvent {
+struct RawSyscallEvent {
     u8 enter_captured;
     u8 exit_captured;
 
