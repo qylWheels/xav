@@ -153,13 +153,12 @@ int SyscallEventProvider::event_callback(void* ctx, void* data,
 void SyscallEventProvider::handle_raw_event(const RawSyscallEvent& raw_event) {
     SyscallEvent event;
     event.timestamp = std::chrono::system_clock::now();
-
-    // Dispatch event.
-    switch (raw_event.syscall_id) {
-        default: {
-            // Nothing to do.
-            return;
-        }
+    event.id = raw_event.syscall_id;
+    if (raw_event.enter_captured) {
+        event.args = std::vector(raw_event.args, raw_event.args + 6);
+    }
+    if (raw_event.exit_captured) {
+        event.ret = raw_event.ret;
     }
 
     // Get process information.
