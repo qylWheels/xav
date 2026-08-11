@@ -11,6 +11,16 @@
 #include "xavcore/protection/proactive_protection/behavior_monitor.h"
 
 namespace xavcore {
+struct ProcessCreateEvent : public IEvent {
+    std::chrono::time_point<std::chrono::system_clock> timestamp;
+    std::uint32_t pid;
+};
+
+struct ProcessExitEvent : public IEvent {
+    std::chrono::time_point<std::chrono::system_clock> timestamp;
+    std::uint32_t pid;
+};
+
 class ProcessLifecycleEventProvider : public IEventProvider {
 public:
     ProcessLifecycleEventProvider(spdlog::logger& logger);

@@ -2,7 +2,6 @@
 
 #include <unistd.h>
 
-#include <chrono>
 #include <cstdint>
 #include <filesystem>
 #include <optional>
@@ -55,20 +54,7 @@ struct FileEvent {
         payload;
 };
 
-struct ProcessCreateEvent {
-    std::chrono::time_point<std::chrono::system_clock> timestamp;
-    std::uint32_t pid;
-};
-
-struct ProcessExitEvent {
-    std::chrono::time_point<std::chrono::system_clock> timestamp;
-    std::uint32_t pid;
-};
-
-using ProcessLifecycleEvent =
-    std::variant<ProcessCreateEvent, ProcessExitEvent>;
-
-using Event = std::variant<ProcessLifecycleEvent, FileEvent>;
+using Event = std::variant<FileEvent>;
 
 class IEvent {
 public:
