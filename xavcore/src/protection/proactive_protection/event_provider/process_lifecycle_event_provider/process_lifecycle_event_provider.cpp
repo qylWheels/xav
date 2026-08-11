@@ -106,10 +106,8 @@ int ProcessLifecycleEventProvider::event_callback(void* ctx, void* data,
     switch (raw_event->tag) {
         case 0: {
             // Process create event
-            ProcessCreateEvent e{
-                .timestamp = std::chrono::system_clock::now(),
-                .pid = raw_event->u.create.pid,
-            };
+            ProcessCreateEvent e(std::chrono::system_clock::now(),
+                                 raw_event->u.create.pid);
             for (auto& listener : self->listeners_) {
                 if (listener->is_accept(e)) {
                     (void)listener->accept(e);
@@ -119,10 +117,8 @@ int ProcessLifecycleEventProvider::event_callback(void* ctx, void* data,
         }
         case 1: {
             // Process exit event
-            ProcessExitEvent e{
-                .timestamp = std::chrono::system_clock::now(),
-                .pid = raw_event->u.exit.pid,
-            };
+            ProcessExitEvent e(std::chrono::system_clock::now(),
+                               raw_event->u.exit.pid);
             for (auto& listener : self->listeners_) {
                 if (listener->is_accept(e)) {
                     (void)listener->accept(e);
