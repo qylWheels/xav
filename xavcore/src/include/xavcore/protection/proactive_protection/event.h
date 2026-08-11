@@ -55,29 +55,6 @@ struct FileEvent {
         payload;
 };
 
-struct ChmodSyscallEventPayload {
-    const char* pathname;
-    std::optional<std::filesystem::path> path;
-    mode_t mode;
-    int ret;
-};
-
-struct FchmodSyscallEventPayload {
-    int fd;
-    std::optional<std::filesystem::path> path;
-    mode_t mode;
-    int ret;
-};
-
-struct FchmodatSyscallEventPayload {
-    int dirfd;
-    const char* pathname;
-    std::optional<std::filesystem::path> path;
-    mode_t mode;
-    int flags;
-    int ret;
-};
-
 struct SyscallEvent {
     std::chrono::time_point<std::chrono::system_clock> timestamp;
     Process process;
