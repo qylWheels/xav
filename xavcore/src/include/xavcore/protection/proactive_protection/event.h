@@ -6,7 +6,6 @@
 #include <filesystem>
 #include <optional>
 #include <string>
-#include <variant>
 
 namespace xavcore {
 struct Process {
@@ -20,41 +19,6 @@ struct Process {
         return pid == other.pid && start_time_tick == other.start_time_tick;
     }
 };
-
-struct FileCreateEventPayload {
-    std::filesystem::path path;
-};
-
-struct FileDeleteEventPayload {
-    std::filesystem::path path;
-};
-
-struct FileReadEventPayload {
-    std::filesystem::path path;
-};
-
-struct FileWriteEventPayload {
-    std::filesystem::path path;
-};
-
-struct FileRenameEventPayload {
-    std::filesystem::path oldpath;
-    std::filesystem::path newpath;
-};
-
-struct FileAttributeChangeEventPayload {
-    std::filesystem::path path;
-};
-
-struct FileEvent {
-    Process process;
-    std::variant<FileCreateEventPayload, FileDeleteEventPayload,
-                 FileReadEventPayload, FileWriteEventPayload,
-                 FileRenameEventPayload, FileAttributeChangeEventPayload>
-        payload;
-};
-
-using Event = std::variant<FileEvent>;
 
 class IEvent {
 public:

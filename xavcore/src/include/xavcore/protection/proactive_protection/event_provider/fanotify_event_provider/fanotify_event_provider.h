@@ -14,6 +14,39 @@
 #include "xavcore/protection/process_status_viewer.h"
 
 namespace xavcore {
+struct FileCreateEventPayload {
+    std::filesystem::path path;
+};
+
+struct FileDeleteEventPayload {
+    std::filesystem::path path;
+};
+
+struct FileReadEventPayload {
+    std::filesystem::path path;
+};
+
+struct FileWriteEventPayload {
+    std::filesystem::path path;
+};
+
+struct FileRenameEventPayload {
+    std::filesystem::path oldpath;
+    std::filesystem::path newpath;
+};
+
+struct FileAttributeChangeEventPayload {
+    std::filesystem::path path;
+};
+
+struct FileEvent {
+    Process process;
+    std::variant<FileCreateEventPayload, FileDeleteEventPayload,
+                 FileReadEventPayload, FileWriteEventPayload,
+                 FileRenameEventPayload, FileAttributeChangeEventPayload>
+        payload;
+};
+
 class FanotifyEventProvider : public IEventProvider {
 public:
     FanotifyEventProvider(ProcessStatusViewer& process_status_viewer,
