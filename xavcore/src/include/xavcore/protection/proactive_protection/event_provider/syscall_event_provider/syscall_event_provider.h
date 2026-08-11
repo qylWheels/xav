@@ -11,6 +11,7 @@
 #include <memory>
 #include <thread>
 #include <unordered_set>
+#include <vector>
 
 #include "syscall_event_provider.skel.h"
 #include "xavcore/protection/proactive_protection/behavior_monitor.h"
@@ -18,12 +19,12 @@
 #include "xavcore/protection/process_status_viewer.h"
 
 namespace xavcore {
-struct SyscallEvent {
+struct SyscallEvent : public IEvent {
     std::chrono::time_point<std::chrono::system_clock> timestamp;
     Process process;
-    std::variant<ChmodSyscallEventPayload, FchmodSyscallEventPayload,
-                 FchmodatSyscallEventPayload>
-        payload;
+    std::uint32_t id;
+    std::vector<std::uint64_t> args;
+    std::uint64_t ret;
 };
 
 class SyscallEventProvider : public IEventProvider {
