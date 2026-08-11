@@ -7,6 +7,7 @@ target_link_libraries(
     anomalous_syscall_detection_listener
     PUBLIC
     xavcore_includes outcome::hl
+    syscall_event_provider
 )
 target_include_directories(
     anomalous_syscall_detection_listener
