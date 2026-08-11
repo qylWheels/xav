@@ -25,25 +25,3 @@ struct __attribute__((packed)) RawSyscallEvent {
     u64 args[6];
     u64 ret;
 };
-
-#ifdef __cplusplus
-static_assert(sizeof(RawSyscallEvent) == 66,
-              "RawSyscallEvent size is not 66 bytes");
-#else
-_Static_assert(sizeof(struct RawSyscallEvent) == 66,
-               "RawSyscallEvent size is not 66 bytes");
-#endif  // __cplusplus
-
-struct __attribute__((packed)) RawReadSyscallEvent {
-    u8 enter_captured;
-    u8 exit_captured;
-
-    u32 pid;
-
-    i32 fd;
-    u64 buf;
-    u64 count;
-    i64 ret;
-
-    u8 path[];
-};
