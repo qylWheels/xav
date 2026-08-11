@@ -68,7 +68,7 @@ struct ProcessExitEvent {
 using ProcessLifecycleEvent =
     std::variant<ProcessCreateEvent, ProcessExitEvent>;
 
-using Event = std::variant<SyscallEvent, ProcessLifecycleEvent, FileEvent>;
+using Event = std::variant<ProcessLifecycleEvent, FileEvent>;
 
 class IEvent {
 public:
