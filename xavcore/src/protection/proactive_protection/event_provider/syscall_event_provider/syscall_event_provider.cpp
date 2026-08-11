@@ -27,8 +27,12 @@
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/raw_syscall_event.h"
 
 namespace xavcore {
-SyscallEventProvider::SyscallEventProvider()
-    : rb_(nullptr), status_(Status::Stopped), lost_event_count_(0) {
+SyscallEventProvider::SyscallEventProvider(
+    ProcessStatusViewer& process_status_viewer)
+    : rb_(nullptr),
+      status_(Status::Stopped),
+      lost_event_count_(0),
+      process_status_viewer_(&process_status_viewer) {
     this->logger_ = spdlog::stderr_color_mt("ebpf_event_provider");
     this->logger_->set_level(spdlog::level::info);
 
@@ -255,15 +259,12 @@ void SyscallEventProvider::handle_raw_event(const RawSyscallEvent& raw_event) {
     }
 
     // Get process information.
-    auto it = this->process_status_.find(raw_event.pid);
-    if (it == this->process_status_.end()) {
-        event.process = this->pid_to_process(raw_event.pid);
+    auto process = this->process_status_viewer_->pid_to_process(raw_event.pid);
+    if (process.has_value()) {
+        event.process = process.value();
     } else {
-        if (it->second.active_process.has_value()) {
-            event.process = it->second.active_process.value();
-        } else {
-            event.process = this->pid_to_process(raw_event.pid);
-        }
+        ++this->lost_event_count_;
+        return;
     }
 
     // Send event.
