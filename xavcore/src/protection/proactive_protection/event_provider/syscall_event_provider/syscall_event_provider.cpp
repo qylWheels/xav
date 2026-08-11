@@ -151,7 +151,8 @@ int SyscallEventProvider::event_callback(void* ctx, void* data,
 }
 
 void SyscallEventProvider::handle_raw_event(const RawSyscallEvent& raw_event) {
-    SyscallEvent event{.timestamp{std::chrono::system_clock::now()}};
+    SyscallEvent event;
+    event.timestamp = std::chrono::system_clock::now();
 
     // Dispatch event.
     switch (raw_event.syscall_id) {
