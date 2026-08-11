@@ -1,5 +1,6 @@
 {
   "dependencies": [
+    "concurrentqueue",
     "cpp-httplib",
     "cpptrace",
     "cryptopp",
@@ -10,6 +11,6 @@
     "rapidfuzz",
     "spdlog",
     "yara",
-    "concurrentqueue"
+    "mlpack"
   ]
 }

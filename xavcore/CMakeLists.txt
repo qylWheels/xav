@@ -9,6 +9,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Packages from vcpkg.
+find_path(MLPACK_INCLUDE_DIRS "mlpack.hpp")
 find_package(leveldb CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(outcome CONFIG REQUIRED)
