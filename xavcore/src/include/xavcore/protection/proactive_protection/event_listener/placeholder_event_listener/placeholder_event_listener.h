@@ -14,9 +14,9 @@ public:
     PlaceholderEventListener& operator=(PlaceholderEventListener&&) = delete;
 
 public:
-    virtual bool is_accept(const Event& event) override { return true; }
+    virtual bool is_accept(const IEvent& event) override { return true; }
 
-    virtual outcome::result<void> accept(const Event& event) override {
+    virtual outcome::result<void> accept(const IEvent& event) override {
         return outcome::success();
     }
 };
