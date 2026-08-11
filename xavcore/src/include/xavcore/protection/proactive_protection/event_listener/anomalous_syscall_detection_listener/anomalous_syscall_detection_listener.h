@@ -22,5 +22,8 @@ public:
 public:
     virtual bool is_accept(const IEvent &event) override;
     virtual outcome::result<void> accept(const IEvent &event) override;
+
+private:
+    spdlog::logger *logger_;
 };
 }  // namespace xavcore
