@@ -24,6 +24,7 @@
 #include "syscall_event_provider.skel.h"
 #include "xavcore/protection/proactive_protection/event.h"
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/raw_syscall_event.h"
+#include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event.h"
 
 namespace xavcore {
 SyscallEventProvider::SyscallEventProvider(
@@ -173,20 +174,20 @@ void SyscallEventProvider::handle_raw_event(const RawSyscallEvent& raw_event) {
         return;
     }
 
-    if (event.args.empty()) {
-        this->logger_->info(
-            "[{}] {} called syscall: {}() = {}",
-            event.timestamp.time_since_epoch().count(),
-            event.process.pid.has_value() ? event.process.pid.value() : -1,
-            event.id, event.ret);
-    } else {
-        this->logger_->info(
-            "[{}] {} called syscall: {}({}, {}, {}, {}, {}, {}) = {}",
-            event.timestamp.time_since_epoch().count(),
-            event.process.pid.has_value() ? event.process.pid.value() : -1,
-            event.id, event.args[0], event.args[1], event.args[2],
-            event.args[3], event.args[4], event.args[5], event.ret);
-    }
+    // if (event.args.empty()) {
+    //     this->logger_->info(
+    //         "[{}] {} called syscall: {}() = {}",
+    //         event.timestamp.time_since_epoch().count(),
+    //         event.process.pid.has_value() ? event.process.pid.value() : -1,
+    //         event.id, event.ret);
+    // } else {
+    //     this->logger_->info(
+    //         "[{}] {} called syscall: {}({}, {}, {}, {}, {}, {}) = {}",
+    //         event.timestamp.time_since_epoch().count(),
+    //         event.process.pid.has_value() ? event.process.pid.value() : -1,
+    //         event.id, event.args[0], event.args[1], event.args[2],
+    //         event.args[3], event.args[4], event.args[5], event.ret);
+    // }
 
     // Send event.
     for (auto listener : this->listeners_) {
