@@ -14,7 +14,6 @@
 
 #include "syscall_event_provider.skel.h"
 #include "xavcore/protection/proactive_protection/behavior_monitor.h"
-#include "xavcore/protection/proactive_protection/event.h"
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/raw_syscall_event.h"
 #include "xavcore/protection/process_status_viewer.h"
 
@@ -39,9 +38,6 @@ public:
 
 private:
     static int event_callback(void* ctx, void* data, std::size_t size);
-
-private:
-    Process pid_to_process(std::uint32_t pid);
 
 private:
     void handle_raw_event(const RawSyscallEvent& raw_event);

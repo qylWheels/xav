@@ -13,7 +13,6 @@
 #include <cctype>
 #include <cstddef>
 #include <cstdint>
-#include <numeric>
 #include <optional>
 #include <outcome/success_failure.hpp>
 #include <pfs/procfs.hpp>
@@ -39,11 +38,6 @@ SyscallEventProvider::SyscallEventProvider(
     this->logger_->info("Syscall event provider loaded");
     if (!this->skel_) {
         throw std::runtime_error("Failed to open and load BPF skeleton");
-    }
-
-    // Scan procfs to initialize process status.
-    for (const auto& task : pfs::procfs().get_processes()) {
-        auto process = this->pid_to_process(task.id());
     }
 }
 
@@ -154,35 +148,6 @@ int SyscallEventProvider::event_callback(void* ctx, void* data,
     }
 
     return 0;
-}
-
-Process SyscallEventProvider::pid_to_process(
-    std::uint32_t pid) {  // Parse process info.
-    Process proc{.pid = pid};
-    try {
-        proc.ppid = pfs::procfs().get_task(pid).get_stat().ppid;
-    } catch (...) {
-        proc.ppid = std::nullopt;
-    }
-    try {
-        proc.start_time_tick = pfs::procfs().get_task(pid).get_stat().starttime;
-    } catch (...) {
-        proc.start_time_tick = std::nullopt;
-    }
-    try {
-        proc.exe_path = pfs::procfs().get_task(pid).get_exe();
-    } catch (...) {
-        proc.exe_path = std::nullopt;
-    }
-    try {
-        const auto cmd_args = pfs::procfs().get_task(pid).get_cmdline();
-        proc.cmdline = std::accumulate(
-            cmd_args.begin(), cmd_args.end(), std::string(),
-            [](std::string acc, std::string arg) { return acc + " " + arg; });
-    } catch (...) {
-        proc.cmdline = std::nullopt;
-    }
-    return proc;
 }
 
 void SyscallEventProvider::handle_raw_event(const RawSyscallEvent& raw_event) {
