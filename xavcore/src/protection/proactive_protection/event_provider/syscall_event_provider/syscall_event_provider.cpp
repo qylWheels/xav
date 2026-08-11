@@ -231,26 +231,6 @@ void SyscallEventProvider::handle_raw_event(const RawSyscallEvent& raw_event) {
 
     // Dispatch event.
     switch (raw_event.syscall_id) {
-        case SYS_chmod: {
-            event.payload = this->chmod_event_handler(
-                reinterpret_cast<const char*>(raw_event.args[0]),
-                raw_event.args[1], raw_event.ret, raw_event.pid);
-            break;
-        }
-        case SYS_fchmod: {
-            event.payload =
-                this->fchmod_event_handler(raw_event.args[0], raw_event.args[1],
-                                           raw_event.ret, raw_event.pid);
-            break;
-        }
-        case SYS_fchmodat: {
-            event.payload = this->fchmodat_event_handler(
-                raw_event.args[0],
-                reinterpret_cast<const char*>(raw_event.args[1]),
-                raw_event.args[2], raw_event.args[3], raw_event.ret,
-                raw_event.pid);
-            break;
-        }
         default: {
             // Nothing to do.
             return;
