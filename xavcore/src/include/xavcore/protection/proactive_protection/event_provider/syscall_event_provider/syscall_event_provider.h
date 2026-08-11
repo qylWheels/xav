@@ -18,6 +18,14 @@
 #include "xavcore/protection/process_status_viewer.h"
 
 namespace xavcore {
+struct SyscallEvent {
+    std::chrono::time_point<std::chrono::system_clock> timestamp;
+    Process process;
+    std::variant<ChmodSyscallEventPayload, FchmodSyscallEventPayload,
+                 FchmodatSyscallEventPayload>
+        payload;
+};
+
 class SyscallEventProvider : public IEventProvider {
 public:
     SyscallEventProvider(ProcessStatusViewer& process_status_viewer);

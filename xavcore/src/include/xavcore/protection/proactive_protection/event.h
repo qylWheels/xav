@@ -55,14 +55,6 @@ struct FileEvent {
         payload;
 };
 
-struct SyscallEvent {
-    std::chrono::time_point<std::chrono::system_clock> timestamp;
-    Process process;
-    std::variant<ChmodSyscallEventPayload, FchmodSyscallEventPayload,
-                 FchmodatSyscallEventPayload>
-        payload;
-};
-
 struct ProcessCreateEvent {
     std::chrono::time_point<std::chrono::system_clock> timestamp;
     std::uint32_t pid;
