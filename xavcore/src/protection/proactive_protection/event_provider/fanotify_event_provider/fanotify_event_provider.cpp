@@ -160,9 +160,9 @@ outcome::result<void> FanotifyEventProvider::start() {
                 }
 
                 // Generate event.
-                FileEvent event = {
-                    .process = proc.value(),
-                };
+                FileEvent event;
+                event.timestamp = std::chrono::system_clock::now();
+                event.process = proc.value();
 
                 auto send_event = [this](const FileEvent &event) {
                     for (auto listener : this->listeners_) {
