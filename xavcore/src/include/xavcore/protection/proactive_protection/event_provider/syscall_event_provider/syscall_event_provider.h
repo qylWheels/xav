@@ -61,40 +61,6 @@ private:
 private:
     void handle_raw_event(const RawSyscallEvent& raw_event);
 
-private:  // File metadata syscall handlers.
-    ChmodSyscallEventPayload chmod_event_handler(const char* pathname,
-                                                 mode_t mode, int ret,
-                                                 std::uint32_t pid);
-    FchmodSyscallEventPayload fchmod_event_handler(int fd, mode_t mode, int ret,
-                                                   std::uint32_t pid);
-    FchmodatSyscallEventPayload fchmodat_event_handler(int dirfd,
-                                                       const char* pathname,
-                                                       mode_t mode, int flags,
-                                                       int ret,
-                                                       std::uint32_t pid);
-    Event chown_event_handler(const char* pathname, uid_t owner, gid_t group,
-                              std::uint32_t pid);
-    Event fchown_event_handler(int fd, uid_t owner, gid_t group,
-                               std::uint32_t pid);
-    Event lchown_event_handler(const char* pathname, uid_t owner, gid_t group,
-                               std::uint32_t pid);
-    Event fchownat_event_handler(int dirfd, const char* pathname, uid_t owner,
-                                 gid_t group, int flags, std::uint32_t pid);
-    Event utime_event_handler(const char* filename, const struct utimbuf* times,
-                              std::uint32_t pid);
-    Event utimes_event_handler(const char* filename,
-                               const struct timeval* times, std::uint32_t pid);
-
-private:  // Links syscall handlers.
-    Event readlink_event_handler(const char* pathname, char* buf, size_t bufsiz,
-                                 std::uint32_t pid);
-    Event readlinkat_event_handler(int dirfd, const char* pathname, char* buf,
-                                   size_t bufsiz, std::uint32_t pid);
-
-private:  // High-level I/O syscall handlers.
-    Event mmap_event_handler(void* addr, size_t length, int prot, int flags,
-                             int fd, off_t offset, std::uint32_t pid);
-
 private:
     enum class Status { Started, Stopped };
     Status status_;

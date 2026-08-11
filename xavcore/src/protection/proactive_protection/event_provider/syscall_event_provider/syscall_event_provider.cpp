@@ -20,7 +20,6 @@
 #include <stdexcept>
 #include <stop_token>
 #include <system_error>
-#include <variant>
 
 #include "syscall_event_provider.skel.h"
 #include "xavcore/protection/proactive_protection/event.h"
@@ -293,51 +292,5 @@ std::optional<std::vector<char>> SyscallEventProvider::read_process_memory(
     } catch (...) {
         return std::nullopt;
     }
-}
-
-ChmodSyscallEventPayload SyscallEventProvider::chmod_event_handler(
-    const char* pathname, mode_t mode, int ret, std::uint32_t pid) {
-    ChmodSyscallEventPayload payload;
-    payload.pathname = pathname;
-    payload.mode = mode;
-    payload.ret = ret;
-    payload.path = this->ptr_to_path(pid, pathname);
-
-    return payload;
-}
-
-FchmodSyscallEventPayload SyscallEventProvider::fchmod_event_handler(
-    int fd, mode_t mode, int ret, std::uint32_t pid) {
-    FchmodSyscallEventPayload payload;
-    payload.fd = fd;
-    payload.mode = mode;
-    payload.ret = ret;
-    payload.path = this->fd_to_path(pid, fd);
-
-    return payload;
-}
-
-FchmodatSyscallEventPayload SyscallEventProvider::fchmodat_event_handler(
-    int dirfd, const char* pathname, mode_t mode, int flags, int ret,
-    std::uint32_t pid) {
-    FchmodatSyscallEventPayload payload;
-    payload.dirfd = dirfd;
-    payload.pathname = pathname;
-    payload.mode = mode;
-    payload.flags = flags;
-    payload.ret = ret;
-    auto dirpath = this->fd_to_path(pid, dirfd);
-    auto filepath = this->ptr_to_path(pid, pathname);
-    try {
-        if (dirpath.has_value() && filepath.has_value()) {
-            payload.path = dirpath.value() / filepath.value();
-        } else {
-            payload.path = std::nullopt;
-        }
-    } catch (...) {
-        payload.path = std::nullopt;
-    }
-
-    return payload;
 }
 }  // namespace xavcore
