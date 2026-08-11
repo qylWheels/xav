@@ -185,47 +185,6 @@ Process SyscallEventProvider::pid_to_process(
     return proc;
 }
 
-std::optional<std::filesystem::path> SyscallEventProvider::fd_to_path(
-    std::uint32_t pid, int fd) noexcept {
-    try {
-        auto fds = pfs::procfs().get_task(pid).get_fds();
-        auto it = fds.find(fd);
-        if (it != fds.end()) {
-            return it->second.get_target();
-        } else {
-            return std::nullopt;
-        }
-    } catch (...) {
-        return std::nullopt;
-    }
-}
-
-std::optional<std::filesystem::path> SyscallEventProvider::ptr_to_path(
-    std::uint32_t pid, const void* addr) noexcept {
-    try {
-        char buf[1];
-        std::string path_str;
-        iovec local, remote;
-        std::size_t i = 0;
-        local.iov_base = buf;
-        local.iov_len = 1;
-        remote.iov_len = 1;
-        do {
-            remote.iov_base = reinterpret_cast<void*>((std::size_t)addr + i);
-            ssize_t ret = process_vm_readv(pid, &local, 1, &remote, 1, 0);
-            if (ret == -1) {
-                return std::nullopt;
-            } else {
-                path_str += buf;
-                i += 1;
-            }
-        } while (buf[0] != '\0' && i < PATH_MAX);
-        return path_str;
-    } catch (...) {
-        return std::nullopt;
-    }
-}
-
 void SyscallEventProvider::handle_raw_event(const RawSyscallEvent& raw_event) {
     SyscallEvent event{.timestamp{std::chrono::system_clock::now()}};
 
@@ -251,26 +210,6 @@ void SyscallEventProvider::handle_raw_event(const RawSyscallEvent& raw_event) {
         if (listener->is_accept(event)) {
             (void)listener->accept(event);
         }
-    }
-}
-
-std::optional<std::vector<char>> SyscallEventProvider::read_process_memory(
-    std::uint32_t pid, const void* addr, size_t size) noexcept {
-    try {
-        std::vector<char> memory(size, 0);
-        iovec local, remote;
-        local.iov_base = memory.data();
-        local.iov_len = size;
-        remote.iov_base = const_cast<void*>(addr);
-        remote.iov_len = size;
-        ssize_t ret = process_vm_readv(pid, &local, 1, &remote, 1, 0);
-        if (ret == -1) {
-            return std::nullopt;
-        } else {
-            return memory;
-        }
-    } catch (...) {
-        return std::nullopt;
     }
 }
 }  // namespace xavcore

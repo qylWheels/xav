@@ -8,9 +8,7 @@
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
-#include <filesystem>
 #include <memory>
-#include <optional>
 #include <thread>
 #include <unordered_set>
 
@@ -44,19 +42,6 @@ private:
 
 private:
     Process pid_to_process(std::uint32_t pid);
-
-    // Get file path from file descriptor, return nullopt if failed.
-    std::optional<std::filesystem::path> fd_to_path(std::uint32_t pid,
-                                                    int fd) noexcept;
-
-    // Get file path from pointer, return nullopt if failed.
-    std::optional<std::filesystem::path> ptr_to_path(std::uint32_t pid,
-                                                     const void* addr) noexcept;
-
-    // Read memory of process.
-    std::optional<std::vector<char>> read_process_memory(std::uint32_t pid,
-                                                         const void* addr,
-                                                         size_t size) noexcept;
 
 private:
     void handle_raw_event(const RawSyscallEvent& raw_event);
