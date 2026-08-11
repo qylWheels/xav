@@ -44,7 +44,7 @@ void startup() {
 
     // Event providers.
     std::shared_ptr<xavcore::IEventProvider> syscall_event_provider =
-        std::make_shared<xavcore::SyscallEventProvider>();
+        std::make_shared<xavcore::SyscallEventProvider>(*process_status_viewer);
     std::shared_ptr<xavcore::IEventProvider> process_lifecycle_event_provider =
         std::make_shared<xavcore::ProcessLifecycleEventProvider>(*logger);
     std::shared_ptr<xavcore::IEventProvider> fanotify_event_provider =
@@ -66,17 +66,6 @@ void startup() {
     if (!ret) {
         logger->error("Failed to register process lifecycle event listener: {}",
                       ret.error().message());
-        return;
-    }
-    ret = process_lifecycle_event_provider->listener_register(
-        *std::dynamic_pointer_cast<xavcore::IEventListener>(
-            syscall_event_provider));
-    if (!ret) {
-        logger->error(
-            "Failed to register syscall event provider as a listener to "
-            "process lifecycle "
-            "event provider: {}",
-            ret.error().message());
         return;
     }
     ret = process_lifecycle_event_provider->listener_register(
