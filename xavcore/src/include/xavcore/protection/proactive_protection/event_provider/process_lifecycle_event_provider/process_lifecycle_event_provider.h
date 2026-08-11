@@ -14,11 +14,21 @@ namespace xavcore {
 struct ProcessCreateEvent : public IEvent {
     std::chrono::time_point<std::chrono::system_clock> timestamp;
     std::uint32_t pid;
+
+    ProcessCreateEvent(
+        std::chrono::time_point<std::chrono::system_clock> timestamp,
+        std::uint32_t pid)
+        : timestamp(timestamp), pid(pid) {}
 };
 
 struct ProcessExitEvent : public IEvent {
     std::chrono::time_point<std::chrono::system_clock> timestamp;
     std::uint32_t pid;
+
+    ProcessExitEvent(
+        std::chrono::time_point<std::chrono::system_clock> timestamp,
+        std::uint32_t pid)
+        : timestamp(timestamp), pid(pid) {}
 };
 
 class ProcessLifecycleEventProvider : public IEventProvider {
