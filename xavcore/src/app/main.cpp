@@ -15,6 +15,7 @@
 // #include
 // "xavcore/protection/proactive_protection/event_listener/anomalous_syscall_detection_listener/anomalous_syscall_detection_listener.h"
 #include "xavcore/protection/proactive_protection/event_listener/placeholder_event_listener/placeholder_event_listener.h"
+#include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rule_based_detection_listener.h"
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event_provider.h"
 #include "xavcore/scan/exact_hash.h"
 #include "xavcore/scan/normal_scan_strategy.h"
@@ -49,6 +50,8 @@ void startup() {
     //     anomalous_syscall_detection_listener =
     //         std::make_shared<xavcore::AnomalousSyscallDetectionListener>(
     //             *logger);
+    std::shared_ptr<xavcore::IEventListener> rule_based_detection_listener =
+        std::make_shared<xavcore::RuleBasedDetectionListener>(*logger);
     auto ret =
         syscall_event_provider->listener_register(*placeholder_event_listener);
     if (!ret) {
@@ -64,6 +67,13 @@ void startup() {
     //         ret.error().message());
     //     return;
     // }
+    ret = syscall_event_provider->listener_register(
+        *rule_based_detection_listener);
+    if (!ret) {
+        logger->error("Failed to register rule based detection listener: {}",
+                      ret.error().message());
+        return;
+    }
 
     // HIPS monitor.
     auto hips_monitor = std::make_shared<xavcore::HipsMonitor>(*logger);
