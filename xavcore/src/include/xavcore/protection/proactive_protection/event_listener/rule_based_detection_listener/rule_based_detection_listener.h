@@ -2,10 +2,14 @@
 
 #include <spdlog/logger.h>
 
+#include <deque>
+#include <unordered_map>
 #include <unordered_set>
 
 #include "xavcore/protection/proactive_protection/behavior_monitor.h"
+#include "xavcore/protection/proactive_protection/event.h"
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rule_interfaces.h"
+#include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event.h"
 
 namespace xavcore {
 class RuleBasedDetectionListener : public IEventListener {
@@ -30,5 +34,6 @@ public:
 private:
     spdlog::logger* logger_;
     std::unordered_set<IProactiveProtectionRule*> rules_;
+    std::unordered_map<Process, std::deque<SyscallEvent>> proc_syscall_events_;
 };
 }  // namespace xavcore

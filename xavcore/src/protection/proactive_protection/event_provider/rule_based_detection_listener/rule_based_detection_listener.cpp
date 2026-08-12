@@ -19,7 +19,12 @@ bool RuleBasedDetectionListener::is_accept(const IEvent& event) {
     }
 }
 
-outcome::result<void> RuleBasedDetectionListener::accept(const IEvent& event) {}
+outcome::result<void> RuleBasedDetectionListener::accept(const IEvent& event) {
+    const SyscallEvent& syscall_event =
+        dynamic_cast<const SyscallEvent&>(event);
+    this->proc_syscall_events_[syscall_event.process].push_back(syscall_event);
+    return outcome::success();
+}
 
 outcome::result<void> RuleBasedDetectionListener::add_rule(
     IProactiveProtectionRule& rule) {
