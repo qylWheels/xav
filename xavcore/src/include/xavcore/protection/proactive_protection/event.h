@@ -12,7 +12,7 @@ namespace xavcore {
 struct Process {
     // Unnullable fields.
     std::uint32_t pid;
-    std::chrono::time_point<std::chrono::system_clock> start_time;
+    std::chrono::time_point<std::chrono::system_clock> start_time_point;
 
     // Nullable fields.
     std::optional<std::uint32_t> ppid;
@@ -20,7 +20,7 @@ struct Process {
     std::optional<std::string> cmdline;
 
     bool operator==(const Process& other) const {
-        return pid == other.pid && start_time == other.start_time;
+        return pid == other.pid && start_time_point == other.start_time_point;
     }
 };
 
@@ -35,8 +35,8 @@ template <>
 struct hash<xavcore::Process> {
     std::size_t operator()(const xavcore::Process& p) const {
         std::size_t seed = std::hash<std::optional<std::int64_t>>{}(p.pid);
-        seed ^=
-            std::hash<std::uint64_t>()(p.start_time.time_since_epoch().count());
+        seed ^= std::hash<std::uint64_t>()(
+            p.start_time_point.time_since_epoch().count());
         return seed;
     }
 };
