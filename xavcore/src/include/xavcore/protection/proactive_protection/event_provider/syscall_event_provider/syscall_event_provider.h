@@ -6,6 +6,7 @@
 #include <unistd.h>
 
 #include <atomic>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -15,12 +16,11 @@
 #include "syscall_event_provider.skel.h"
 #include "xavcore/protection/proactive_protection/behavior_monitor.h"
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/raw_syscall_event.h"
-#include "xavcore/protection/process_status_viewer.h"
 
 namespace xavcore {
 class SyscallEventProvider : public IEventProvider {
 public:
-    SyscallEventProvider(ProcessStatusViewer& process_status_viewer);
+    SyscallEventProvider();
     ~SyscallEventProvider();
     SyscallEventProvider(const SyscallEventProvider&) = delete;
     SyscallEventProvider& operator=(const SyscallEventProvider&) = delete;
@@ -55,6 +55,6 @@ private:
     std::jthread monitor_thread_;
     moodycamel::ConcurrentQueue<RawSyscallEvent> raw_events_to_handle_;
     std::jthread handle_raw_events_thread_;
-    ProcessStatusViewer* process_status_viewer_;
+    std::chrono::time_point<std::chrono::system_clock> sys_boot_time_point_;
 };
 }  // namespace xavcore

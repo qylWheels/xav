@@ -8,13 +8,15 @@
 #include <sys/resource.h>
 #include <sys/syscall.h>
 #include <sys/uio.h>
+#include <time.h>
 #include <unistd.h>
 
 #include <cctype>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <optional>
+#include <ctime>
 #include <outcome/success_failure.hpp>
 #include <pfs/procfs.hpp>
 #include <stdexcept>
@@ -27,12 +29,8 @@
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event.h"
 
 namespace xavcore {
-SyscallEventProvider::SyscallEventProvider(
-    ProcessStatusViewer& process_status_viewer)
-    : rb_(nullptr),
-      status_(Status::Stopped),
-      lost_event_count_(0),
-      process_status_viewer_(&process_status_viewer) {
+SyscallEventProvider::SyscallEventProvider()
+    : rb_(nullptr), status_(Status::Stopped), lost_event_count_(0) {
     this->logger_ = spdlog::stderr_color_mt("ebpf_event_provider");
     this->logger_->set_level(spdlog::level::info);
 
@@ -41,6 +39,13 @@ SyscallEventProvider::SyscallEventProvider(
     if (!this->skel_) {
         throw std::runtime_error("Failed to open and load BPF skeleton");
     }
+
+    // Calculate the system boot time point.
+    struct timespec ts;
+    clock_gettime(CLOCK_BOOTTIME, &ts);
+    auto boot_time =
+        std::chrono::seconds(ts.tv_sec) + std::chrono::nanoseconds(ts.tv_nsec);
+    this->sys_boot_time_point_ = std::chrono::system_clock::now() - boot_time;
 }
 
 SyscallEventProvider::~SyscallEventProvider() {
@@ -154,7 +159,12 @@ int SyscallEventProvider::event_callback(void* ctx, void* data,
 
 void SyscallEventProvider::handle_raw_event(const RawSyscallEvent& raw_event) {
     SyscallEvent event;
-    event.timestamp = std::chrono::system_clock::now();
+    event.timestamp = this->sys_boot_time_point_ +
+                      std::chrono::nanoseconds(raw_event.timestamp);
+    event.process = {.pid = raw_event.pid,
+                     .start_time_point = this->sys_boot_time_point_ +
+                                         std::chrono::nanoseconds(
+                                             raw_event.proc_start_boottime)};
     event.id = raw_event.syscall_id;
     if (raw_event.enter_captured) {
         std::uint64_t args[6];
@@ -163,15 +173,6 @@ void SyscallEventProvider::handle_raw_event(const RawSyscallEvent& raw_event) {
     }
     if (raw_event.exit_captured) {
         event.ret = raw_event.ret;
-    }
-
-    // Get process information.
-    auto process = this->process_status_viewer_->pid_to_process(raw_event.pid);
-    if (process.has_value()) {
-        event.process = process.value();
-    } else {
-        ++this->lost_event_count_;
-        return;
     }
 
     // if (event.args.empty()) {
