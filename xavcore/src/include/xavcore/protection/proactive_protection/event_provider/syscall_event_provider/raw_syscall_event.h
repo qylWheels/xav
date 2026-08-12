@@ -21,10 +21,14 @@ struct __attribute__((packed)) RawSyscallEvent {
     u8 exit_captured;
 
     // Event timestamp.
+    // This is the time elapsed since system boot, in nanoseconds.
+    // Does include the time the system was suspended.
     u64 timestamp;
 
     // Process information.
     u32 pid;
+    // Boot based time in nanoseconds. Includes the time the system was
+    // suspended.
     u64 proc_start_boottime;
 
     // Syscall information.
