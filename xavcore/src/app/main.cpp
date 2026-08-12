@@ -15,8 +15,6 @@
 // #include
 // "xavcore/protection/proactive_protection/event_listener/anomalous_syscall_detection_listener/anomalous_syscall_detection_listener.h"
 #include "xavcore/protection/proactive_protection/event_listener/placeholder_event_listener/placeholder_event_listener.h"
-#include "xavcore/protection/proactive_protection/event_provider/fanotify_event_provider/fanotify_event_provider.h"
-#include "xavcore/protection/proactive_protection/event_provider/process_lifecycle_event_provider/process_lifecycle_event_provider.h"
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event_provider.h"
 #include "xavcore/scan/exact_hash.h"
 #include "xavcore/scan/normal_scan_strategy.h"
@@ -39,10 +37,6 @@ void startup() {
     std::unique_ptr<xavcore::IScanStrategy> normal_scan_strategy =
         std::make_unique<xavcore::NormalScanStrategy>(
             exact_hash_engine, yara_static_heuristic_engine);
-
-    // Process status viewer.
-    std::shared_ptr<xavcore::ProcessStatusViewer> process_status_viewer =
-        std::make_shared<xavcore::ProcessStatusViewer>(*logger);
 
     // Event providers.
     std::shared_ptr<xavcore::IEventProvider> syscall_event_provider =
@@ -75,31 +69,6 @@ void startup() {
     //         ret.error().message());
     //     return;
     // }
-    ret = process_lifecycle_event_provider->listener_register(
-        *placeholder_event_listener);
-    if (!ret) {
-        logger->error("Failed to register process lifecycle event listener: {}",
-                      ret.error().message());
-        return;
-    }
-    ret = process_lifecycle_event_provider->listener_register(
-        *std::dynamic_pointer_cast<xavcore::IEventListener>(
-            process_status_viewer));
-    if (!ret) {
-        logger->error(
-            "Failed to register process status viewer as a listener to "
-            "process lifecycle "
-            "event provider: {}",
-            ret.error().message());
-        return;
-    }
-    ret =
-        fanotify_event_provider->listener_register(*placeholder_event_listener);
-    if (!ret) {
-        logger->error("Failed to register fanotify event listener: {}",
-                      ret.error().message());
-        return;
-    }
 
     // HIPS monitor.
     auto hips_monitor = std::make_shared<xavcore::HipsMonitor>(*logger);
@@ -108,18 +77,6 @@ void startup() {
     ret = syscall_event_provider->start();
     if (!ret) {
         logger->error("Failed to start syscall monitor: {}",
-                      ret.error().message());
-        return;
-    }
-    ret = process_lifecycle_event_provider->start();
-    if (!ret) {
-        logger->error("Failed to start process lifecycle monitor: {}",
-                      ret.error().message());
-        return;
-    }
-    ret = fanotify_event_provider->start();
-    if (!ret) {
-        logger->error("Failed to start fanotify monitor: {}",
                       ret.error().message());
         return;
     }
