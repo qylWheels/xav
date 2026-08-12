@@ -1,3 +1,4 @@
 # Subdirectories.
 # add_subdirectory(fanotify_event_provider)
 add_subdirectory(syscall_event_provider)
+add_subdirectory(rule_based_detection_listener)
