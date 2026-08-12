@@ -16,6 +16,8 @@
 // "xavcore/protection/proactive_protection/event_listener/anomalous_syscall_detection_listener/anomalous_syscall_detection_listener.h"
 #include "xavcore/protection/proactive_protection/event_listener/placeholder_event_listener/placeholder_event_listener.h"
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rule_based_detection_listener.h"
+#include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rule_interfaces.h"
+#include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/test_rule.h"
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event_provider.h"
 #include "xavcore/scan/exact_hash.h"
 #include "xavcore/scan/normal_scan_strategy.h"
@@ -78,6 +80,10 @@ void startup() {
     // HIPS monitor.
     auto hips_monitor = std::make_shared<xavcore::HipsMonitor>(*logger);
 
+    // Proactive protection rules.
+    std::shared_ptr<xavcore::IProactiveProtectionRule> test_rule =
+        std::make_shared<xavcore::proactive_protection_rule::TestRule>();
+
     // Start protection.
     ret = syscall_event_provider->start();
     if (!ret) {
@@ -92,6 +98,14 @@ void startup() {
     if (!ret) {
         logger->error("Failed to start HIPS monitor: {}",
                       ret.error().message());
+        return;
+    }
+    auto rule_based_detection_listener_downcasted =
+        std::dynamic_pointer_cast<xavcore::RuleBasedDetectionListener>(
+            rule_based_detection_listener);
+    ret = rule_based_detection_listener_downcasted->add_rule(*test_rule);
+    if (!ret) {
+        logger->error("Failed to add test rule: {}", ret.error().message());
         return;
     }
 
