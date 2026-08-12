@@ -7,5 +7,5 @@ add_library(
 target_link_libraries(
     rule_based_detection_listener
     PUBLIC
-        xavcore_includes outcome::hl
+    xavcore_includes outcome::hl spdlog::spdlog
 )
