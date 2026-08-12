@@ -1,2 +1,3 @@
 add_subdirectory(placeholder_event_listener)
 add_subdirectory(anomalous_syscall_detection_listener)
+add_subdirectory(rule_based_detection_listener)
