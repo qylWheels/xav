@@ -59,5 +59,4 @@ target_link_libraries(syscall_event_provider
     spdlog::spdlog
     pfs
     concurrentqueue::concurrentqueue
-    process_status_viewer
 )
