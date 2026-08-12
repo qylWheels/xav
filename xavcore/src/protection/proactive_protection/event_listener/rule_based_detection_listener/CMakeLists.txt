@@ -1,3 +1,6 @@
+# Subdirectories
+add_subdirectory(rules)
+
 add_library(
     rule_based_detection_listener
     SHARED
