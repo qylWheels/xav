@@ -30,10 +30,15 @@ int trace_sys_enter(struct trace_event_raw_sys_enter* ctx) {
     u32 pid = pid_tgid >> 32;
     u32 tid = pid_tgid & 0xFFFFFFFF;
 
+    // Get task_struct of the current process.
+    struct task_struct* task = bpf_get_current_task_btf();
+
     // Fill in the event fields.
     e.enter_captured = 1;
     e.exit_captured = 0;
+    e.timestamp = bpf_ktime_get_boot_ns();
     e.pid = pid;
+    e.proc_start_boottime = task->start_boottime;
     e.syscall_id = ctx->id;
     e.args[0] = ctx->args[0];
     e.args[1] = ctx->args[1];
@@ -58,7 +63,10 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
         struct RawSyscallEvent e2;
         e2.enter_captured = 0;
         e2.exit_captured = 1;
+        e2.timestamp = bpf_ktime_get_boot_ns();
         e2.pid = pid;
+        struct task_struct* task = bpf_get_current_task_btf();
+        e2.proc_start_boottime = task->start_boottime;
         e2.syscall_id = ctx->id;
         e2.ret = ctx->ret;
         bpf_ringbuf_output(&rb, &e2, sizeof(e2), 0);
