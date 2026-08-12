@@ -5,12 +5,13 @@
     "cpptrace",
     "cryptopp",
     "leveldb",
+    "mlpack",
     "nlohmann-json",
     "outcome",
     "protobuf",
     "rapidfuzz",
     "spdlog",
     "yara",
-    "mlpack"
+    "bext-sml"
   ]
 }
