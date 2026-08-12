@@ -39,7 +39,7 @@ outcome::result<void> RuleBasedDetectionListener::accept(const IEvent& event) {
             event_slice.begin(), event_slice.end());
         auto severity = rule->apply(event_ref_slice);
         if (severity.has_error()) {
-            this->logger_->error("Error when apply rule: {}", severity.error());
+            this->logger_->error("Error when apply rule");
         } else {
             this->logger_->info("Event sequence severity: {}",
                                 severity.value());
