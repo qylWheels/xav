@@ -40,12 +40,7 @@ void startup() {
 
     // Event providers.
     std::shared_ptr<xavcore::IEventProvider> syscall_event_provider =
-        std::make_shared<xavcore::SyscallEventProvider>(*process_status_viewer);
-    std::shared_ptr<xavcore::IEventProvider> process_lifecycle_event_provider =
-        std::make_shared<xavcore::ProcessLifecycleEventProvider>(*logger);
-    std::shared_ptr<xavcore::IEventProvider> fanotify_event_provider =
-        std::make_shared<xavcore::FanotifyEventProvider>(*process_status_viewer,
-                                                         *logger);
+        std::make_shared<xavcore::SyscallEventProvider>();
 
     // Event listeners.
     std::shared_ptr<xavcore::IEventListener> placeholder_event_listener =
