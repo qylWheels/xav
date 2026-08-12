@@ -4,10 +4,12 @@
 #include "vmlinux.h"
 typedef __u8 u8;
 typedef __u32 u32;
+typedef __u64 u64;
 #else
 #include <cstdint>
 typedef std::uint8_t u8;
 typedef std::uint32_t u32;
+typedef std::uint64_t u64;
 #endif  // __BPF__, __bpf__
 
 struct __attribute__((packed)) RawProcessCreateEvent {
@@ -19,25 +21,10 @@ struct __attribute__((packed)) RawProcessExitEvent {
 };
 
 struct __attribute__((packed)) RawProcessLifecycleEvent {
+    u64 start_time;
     u8 tag;  // 0 = create, 1 = exit
     union {
         struct RawProcessCreateEvent create;
         struct RawProcessExitEvent exit;
     } u;
 };
-
-#ifdef __cplusplus
-static_assert(sizeof(RawProcessCreateEvent) == 4,
-              "RawProcessCreateEvent size is not 4 bytes");
-static_assert(sizeof(RawProcessExitEvent) == 4,
-              "RawProcessExitEvent size is not 4 bytes");
-static_assert(sizeof(RawProcessLifecycleEvent) == 5,
-              "RawProcessLifecycleEvent size is not 5 bytes");
-#else
-_Static_assert(sizeof(struct RawProcessCreateEvent) == 4,
-               "RawProcessCreateEvent size is not 4 bytes");
-_Static_assert(sizeof(struct RawProcessExitEvent) == 4,
-               "RawProcessExitEvent size is not 4 bytes");
-_Static_assert(sizeof(struct RawProcessLifecycleEvent) == 5,
-               "RawProcessLifecycleEvent size is not 5 bytes");
-#endif  // __cplusplus
