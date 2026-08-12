@@ -37,8 +37,10 @@ outcome::result<void> AnomalousSyscallDetectionListener::accept(
 
     static int i = 0;
     i++;
-    std::cout << std::format("\rAdd {} syscall to training set", i)
-              << std::flush;
+    if (i % 1000 == 0) {
+        std::cout << std::format("\rAdd {} syscall to training set", i)
+                  << std::flush;
+    }
 
     return outcome::success();
 }
