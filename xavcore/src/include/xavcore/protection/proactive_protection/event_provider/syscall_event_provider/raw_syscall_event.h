@@ -20,7 +20,14 @@ struct __attribute__((packed)) RawSyscallEvent {
     u8 enter_captured;
     u8 exit_captured;
 
+    // Event timestamp.
+    u64 timestamp;
+
+    // Process information.
     u32 pid;
+    u64 proc_start_boottime;
+
+    // Syscall information.
     u32 syscall_id;
     u64 args[6];
     u64 ret;
