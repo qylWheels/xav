@@ -8,6 +8,7 @@
 #include <iostream>
 #include <memory>
 #include <thread>
+#include <vector>
 
 #include "xavcore/protection/hips/monitor/hips_monitor.h"
 #include "xavcore/protection/on_access_scanning/on_access_scanner.h"
@@ -17,6 +18,7 @@
 #include "xavcore/protection/proactive_protection/event_listener/placeholder_event_listener/placeholder_event_listener.h"
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rule_based_detection_listener.h"
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rule_interfaces.h"
+#include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/anti_debug_rule.h"
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/test_rule.h"
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event_provider.h"
 #include "xavcore/scan/exact_hash.h"
@@ -81,9 +83,12 @@ void startup() {
     auto hips_monitor = std::make_shared<xavcore::HipsMonitor>(*logger);
 
     // Proactive protection rules.
-    std::shared_ptr<xavcore::IRuleBasedDetectionListenerRule> test_rule =
-        std::make_shared<
-            xavcore::rule_based_detection_listener_rules::TestRule>();
+    std::vector<std::shared_ptr<xavcore::IRuleBasedDetectionListenerRule>>
+        rules{
+            std::make_shared<
+                xavcore::rule_based_detection_listener_rules::TestRule>(),
+            std::make_shared<
+                xavcore::rule_based_detection_listener_rules::AntiDebugRule>()};
 
     // Start protection.
     ret = syscall_event_provider->start();
@@ -104,10 +109,12 @@ void startup() {
     auto rule_based_detection_listener_downcasted =
         std::dynamic_pointer_cast<xavcore::RuleBasedDetectionListener>(
             rule_based_detection_listener);
-    ret = rule_based_detection_listener_downcasted->add_rule(*test_rule);
-    if (!ret) {
-        logger->error("Failed to add test rule: {}", ret.error().message());
-        return;
+    for (auto& rule : rules) {
+        ret = rule_based_detection_listener_downcasted->add_rule(*rule);
+        if (!ret) {
+            logger->error("Failed to add rule: {}", ret.error().message());
+            return;
+        }
     }
 
     // Configure API server.
