@@ -41,5 +41,7 @@ outcome::result<std::uint8_t> TestRule::apply(
     }
     return severity;
 }
+
+std::size_t TestRule::event_seq_size_hint() { return 5; }
 }  // namespace proactive_protection_rule
 }  // namespace xavcore

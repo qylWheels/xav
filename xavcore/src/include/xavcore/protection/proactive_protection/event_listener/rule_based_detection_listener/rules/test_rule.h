@@ -42,6 +42,8 @@ public:
     virtual outcome::result<std::uint8_t> apply(
         std::span<std::reference_wrapper<IEvent>> event_seq) override;
 
+    virtual std::size_t event_seq_size_hint() override;
+
 private:
     sml::sm<TestRuleFSM> fsm_;
 };
