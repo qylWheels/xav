@@ -5,6 +5,7 @@
 #include <functional>
 #include <outcome/outcome.hpp>
 #include <span>
+#include <string>
 
 #include "xavcore/protection/proactive_protection/event.h"
 
@@ -16,6 +17,10 @@ public:
     virtual ~IProactiveProtectionRule() = default;
 
 public:
+    virtual std::string name() = 0;
+
+    virtual std::string description() = 0;
+
     // Return severity(0-100) of the event sequence.
     // The higher the severity, the more the event sequence is like a threat.
     virtual outcome::result<std::uint8_t> apply(
