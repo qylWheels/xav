@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <outcome/outcome.hpp>
@@ -19,5 +20,8 @@ public:
     // The higher the severity, the more the event sequence is like a threat.
     virtual outcome::result<std::uint8_t> apply(
         std::span<std::reference_wrapper<IEvent>> event_seq) = 0;
+
+    // Return the hint of the event sequence size.
+    virtual std::size_t event_seq_size_hint() = 0;
 };
 }  // namespace xavcore
