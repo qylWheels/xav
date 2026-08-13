@@ -82,7 +82,8 @@ void startup() {
 
     // Proactive protection rules.
     std::shared_ptr<xavcore::IProactiveProtectionRule> test_rule =
-        std::make_shared<xavcore::proactive_protection_rule::TestRule>();
+        std::make_shared<
+            xavcore::rule_based_detection_listener_rules::TestRule>();
 
     // Start protection.
     ret = syscall_event_provider->start();
