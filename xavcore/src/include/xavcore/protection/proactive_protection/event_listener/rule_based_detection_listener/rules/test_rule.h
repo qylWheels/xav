@@ -8,7 +8,6 @@ namespace sml = boost::sml;
 
 namespace xavcore {
 namespace proactive_protection_rule {
-
 // FSM.
 struct TestRuleFSM {
     // States.

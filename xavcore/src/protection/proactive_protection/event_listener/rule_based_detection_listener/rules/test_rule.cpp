@@ -14,6 +14,9 @@ TestRule::~TestRule() = default;
 
 outcome::result<std::uint8_t> TestRule::apply(
     std::span<std::reference_wrapper<IEvent>> event_seq) {
+    // Reset FSM. i.e. renew it.
+    this->fsm_ = sml::sm<TestRuleFSM>();
+
     for (const auto event : event_seq) {
         try {
             const auto& syscall_event =
