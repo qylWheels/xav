@@ -7,7 +7,7 @@
 namespace sml = boost::sml;
 
 namespace xavcore {
-namespace proactive_protection_rule {
+namespace rule_based_detection_listener_rules {
 // FSM.
 struct TestRuleFSM {
     // States.
@@ -48,5 +48,5 @@ public:
 private:
     sml::sm<TestRuleFSM> fsm_;
 };
-}  // namespace proactive_protection_rule
+}  // namespace rule_based_detection_listener_rules
 }  // namespace xavcore

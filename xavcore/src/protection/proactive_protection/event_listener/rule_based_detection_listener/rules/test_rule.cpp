@@ -7,7 +7,7 @@
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event.h"
 
 namespace xavcore {
-namespace proactive_protection_rule {
+namespace rule_based_detection_listener_rules {
 TestRule::TestRule() = default;
 
 TestRule::~TestRule() = default;
@@ -49,5 +49,5 @@ outcome::result<std::uint8_t> TestRule::apply(
 }
 
 std::size_t TestRule::event_seq_size_hint() { return 5; }
-}  // namespace proactive_protection_rule
+}  // namespace rule_based_detection_listener_rules
 }  // namespace xavcore
