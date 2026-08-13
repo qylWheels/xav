@@ -12,6 +12,12 @@ TestRule::TestRule() = default;
 
 TestRule::~TestRule() = default;
 
+std::string TestRule::name() { return "test_rule"; }
+
+std::string TestRule::description() {
+    return "A test rule to detect process_vm_writev syscall";
+}
+
 outcome::result<std::uint8_t> TestRule::apply(
     std::span<std::reference_wrapper<IEvent>> event_seq) {
     // Reset FSM. i.e. renew it.
