@@ -1,7 +1,7 @@
 add_library(
     proactive_protection_rules
     SHARED
-    test_rule.cpp
+    test_rule.cpp anti_debug_rule.cpp
 )
 
 target_link_libraries(
