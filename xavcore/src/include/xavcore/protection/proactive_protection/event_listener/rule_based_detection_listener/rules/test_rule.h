@@ -29,7 +29,7 @@ struct TestRuleFSM {
     }
 };
 
-class TestRule : public IProactiveProtectionRule {
+class TestRule : public IRuleBasedDetectionListenerRule {
 public:
     TestRule();
     ~TestRule();

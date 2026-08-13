@@ -81,7 +81,7 @@ void startup() {
     auto hips_monitor = std::make_shared<xavcore::HipsMonitor>(*logger);
 
     // Proactive protection rules.
-    std::shared_ptr<xavcore::IProactiveProtectionRule> test_rule =
+    std::shared_ptr<xavcore::IRuleBasedDetectionListenerRule> test_rule =
         std::make_shared<
             xavcore::rule_based_detection_listener_rules::TestRule>();
 

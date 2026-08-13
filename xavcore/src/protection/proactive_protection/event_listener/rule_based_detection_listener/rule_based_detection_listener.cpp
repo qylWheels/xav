@@ -59,13 +59,13 @@ outcome::result<void> RuleBasedDetectionListener::accept(const IEvent& event) {
 }
 
 outcome::result<void> RuleBasedDetectionListener::add_rule(
-    IProactiveProtectionRule& rule) {
+    IRuleBasedDetectionListenerRule& rule) {
     this->rules_.insert(&rule);
     return outcome::success();
 }
 
 outcome::result<void> RuleBasedDetectionListener::remove_rule(
-    IProactiveProtectionRule& rule) {
+    IRuleBasedDetectionListenerRule& rule) {
     this->rules_.erase(&rule);
     return outcome::success();
 }

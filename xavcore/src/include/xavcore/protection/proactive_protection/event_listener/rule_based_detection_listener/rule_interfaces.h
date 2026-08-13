@@ -12,9 +12,9 @@
 namespace outcome = OUTCOME_V2_NAMESPACE;
 
 namespace xavcore {
-class IProactiveProtectionRule {
+class IRuleBasedDetectionListenerRule {
 public:
-    virtual ~IProactiveProtectionRule() = default;
+    virtual ~IRuleBasedDetectionListenerRule() = default;
 
 public:
     virtual std::string name() = 0;

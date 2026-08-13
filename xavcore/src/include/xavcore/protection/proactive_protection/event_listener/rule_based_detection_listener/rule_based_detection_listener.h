@@ -28,12 +28,12 @@ public:  // IEventListener interface methods.
     virtual outcome::result<void> accept(const IEvent& event) override;
 
 public:
-    outcome::result<void> add_rule(IProactiveProtectionRule& rule);
-    outcome::result<void> remove_rule(IProactiveProtectionRule& rule);
+    outcome::result<void> add_rule(IRuleBasedDetectionListenerRule& rule);
+    outcome::result<void> remove_rule(IRuleBasedDetectionListenerRule& rule);
 
 private:
     spdlog::logger* logger_;
-    std::unordered_set<IProactiveProtectionRule*> rules_;
+    std::unordered_set<IRuleBasedDetectionListenerRule*> rules_;
     std::unordered_map<Process, std::deque<SyscallEvent>> proc_syscall_events_;
 };
 }  // namespace xavcore
