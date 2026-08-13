@@ -32,7 +32,8 @@ outcome::result<void> RuleBasedDetectionListener::accept(const IEvent& event) {
     for (auto& rule : this->rules_) {
         const auto& proc_syscall_events =
             this->proc_syscall_events_[syscall_event.process];
-        std::size_t n = std::min(10ul, proc_syscall_events.size());
+        std::size_t n =
+            std::min(rule->event_seq_size_hint(), proc_syscall_events.size());
         std::vector<SyscallEvent> event_slice(proc_syscall_events.end() - n,
                                               proc_syscall_events.end());
         std::vector<std::reference_wrapper<IEvent>> event_ref_slice(
