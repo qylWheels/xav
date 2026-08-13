@@ -45,6 +45,9 @@ outcome::result<void> RuleBasedDetectionListener::accept(const IEvent& event) {
                 this->logger_->info("Event sequence severity of {}: {}",
                                     syscall_event.process.pid,
                                     severity.value());
+                this->logger_->info("Event count of {}: {}\n",
+                                    syscall_event.process.pid,
+                                    proc_syscall_events.size());
             }
         }
     }
