@@ -42,10 +42,12 @@ outcome::result<void> RuleBasedDetectionListener::accept(const IEvent& event) {
         if (severity.has_error()) {
             this->logger_->error("Error when apply rule");
         } else {
-            if (severity.value() > 0) {
-                this->logger_->info("Event sequence severity of {}: {}",
-                                    syscall_event.process.pid,
-                                    severity.value());
+            if (severity.value() > 20) {
+                this->logger_->info(
+                    "Event sequence severity of {}: {} (Rule {}, Description: "
+                    "{})",
+                    syscall_event.process.pid, severity.value(), rule->name(),
+                    rule->description());
                 this->logger_->info("Event count of {}: {}\n",
                                     syscall_event.process.pid,
                                     proc_syscall_events.size());
