@@ -1,13 +1,10 @@
-# Linux headers.
 execute_process(COMMAND uname -r OUTPUT_VARIABLE KERNEL_RELEASE OUTPUT_STRIP_TRAILING_WHITESPACE)
 set(KERNEL_DIR "/lib/modules/${KERNEL_RELEASE}/build")
 
-# Kernel module name, source file and object file.
 set(KERNEL_MODULE_NAME kfuncs)
 set(KERNEL_MODULE_SOURCES ${KERNEL_MODULE_NAME}.c)
 set(KERNEL_MODULE_OBJECTS ${KERNEL_MODULE_NAME}.o)
 
-# Target.
 add_custom_target(${KERNEL_MODULE_NAME} ALL
     # Temporary KBuild Makefile.
     COMMAND echo "obj-m += ${KERNEL_MODULE_OBJECTS}" > ${CMAKE_CURRENT_BINARY_DIR}/Makefile
@@ -22,4 +19,8 @@ add_custom_target(${KERNEL_MODULE_NAME} ALL
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     COMMENT "Building kernel module ${KERNEL_MODULE_NAME} using KBuild"
     VERBATIM
+)
+target_include_directories(
+    ${KERNEL_MODULE_NAME} PRIVATE
+    ${KERNEL_DIR}/include
 )
