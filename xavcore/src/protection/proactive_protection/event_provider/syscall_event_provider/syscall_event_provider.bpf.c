@@ -2,6 +2,7 @@
 
 // XXX: vmlinux.h must be at top.
 
+#include <bpf/bpf_core_read.h>
 #include <bpf/bpf_helpers.h>
 #include <bpf/bpf_tracing.h>
 
@@ -20,6 +21,50 @@ struct {
     __uint(type, BPF_MAP_TYPE_RINGBUF);
     __uint(max_entries, 1 * 1024 * 1024);  // 1MB
 } rb SEC(".maps");
+
+int print_path_of_write(int fd) {
+    if (fd < 3) {
+        return -1;
+    }
+
+    int result;
+
+    bpf_printk(PREFIX "[%s] entered", __func__);
+    bpf_printk(PREFIX "[%s] fd: %d", __func__, fd);
+
+    struct task_struct* task = bpf_get_current_task_btf();
+    struct file** files = BPF_CORE_READ(task, files, fdt, fd);
+    if (files == NULL) {
+        return -1;
+    }
+    bpf_printk(PREFIX "[%s] file *[]: %p", __func__, files);
+
+    struct file* file_struct_of_fd = NULL;
+    result = bpf_probe_read_kernel(&file_struct_of_fd,
+                                   sizeof(file_struct_of_fd), files + fd);
+    if (result != 0) {
+        return -1;
+    }
+    bpf_printk(PREFIX "[%s] file_struct_of_fd: %p", __func__,
+               file_struct_of_fd);
+
+    const unsigned char* name =
+        BPF_CORE_READ(file_struct_of_fd, f_path.dentry, d_name.name);
+    if (name == NULL) {
+        return -1;
+    }
+    bpf_printk(PREFIX "[%s] name ptr: %p", __func__, name);
+    bpf_printk(PREFIX "[%s] name: %s", __func__, name);
+
+    char path[256] = {0};
+    result = bpf_probe_read_kernel_str(path, sizeof(path), name);
+    if (result < 0) {
+        return -1;
+    }
+    bpf_printk(PREFIX "[%s] path: %s", __func__, path);
+
+    return 0;
+}
 
 SEC("tp/raw_syscalls/sys_enter")
 int trace_sys_enter(struct trace_event_raw_sys_enter* ctx) {
@@ -46,6 +91,10 @@ int trace_sys_enter(struct trace_event_raw_sys_enter* ctx) {
     e.args[3] = ctx->args[3];
     e.args[4] = ctx->args[4];
     e.args[5] = ctx->args[5];
+
+    if (e.syscall_id == 1) {
+        print_path_of_write(e.args[0]);
+    }
 
     // Store the event in the percpu map.
     bpf_map_update_elem(&raw_syscall_event_map, &tid, &e, BPF_ANY);
