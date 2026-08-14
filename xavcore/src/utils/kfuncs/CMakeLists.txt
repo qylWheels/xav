@@ -3,7 +3,7 @@ execute_process(COMMAND uname -r OUTPUT_VARIABLE KERNEL_RELEASE OUTPUT_STRIP_TRA
 set(KERNEL_DIR "/lib/modules/${KERNEL_RELEASE}/build")
 
 # Kernel module name, source file and object file.
-set(KERNEL_MODULE_NAME xav_kfuncs)
+set(KERNEL_MODULE_NAME kfuncs)
 set(KERNEL_MODULE_SOURCES ${KERNEL_MODULE_NAME}.c)
 set(KERNEL_MODULE_OBJECTS ${KERNEL_MODULE_NAME}.o)
 
