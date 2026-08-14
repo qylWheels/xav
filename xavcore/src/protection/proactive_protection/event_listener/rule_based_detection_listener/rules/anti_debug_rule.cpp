@@ -25,7 +25,7 @@ outcome::result<std::uint8_t> AntiDebugRule::apply(
                 dynamic_cast<const SyscallEvent&>(event.get());
             if (syscall_event.id == SYS_ptrace &&
                 syscall_event.args[0] == PTRACE_TRACEME) {
-                return 70;
+                return 40;
             }
         } catch (...) {
             continue;
