@@ -22,49 +22,7 @@ struct {
     __uint(max_entries, 1 * 1024 * 1024);  // 1MB
 } rb SEC(".maps");
 
-int print_path_of_write(int fd) {
-    if (fd < 3) {
-        return -1;
-    }
-
-    int result;
-
-    bpf_printk(PREFIX "[%s] entered", __func__);
-    bpf_printk(PREFIX "[%s] fd: %d", __func__, fd);
-
-    struct task_struct* task = bpf_get_current_task_btf();
-    struct file** files = BPF_CORE_READ(task, files, fdt, fd);
-    if (files == NULL) {
-        return -1;
-    }
-    bpf_printk(PREFIX "[%s] file *[]: %p", __func__, files);
-
-    struct file* file_struct_of_fd = NULL;
-    result = bpf_probe_read_kernel(&file_struct_of_fd,
-                                   sizeof(file_struct_of_fd), files + fd);
-    if (result != 0) {
-        return -1;
-    }
-    bpf_printk(PREFIX "[%s] file_struct_of_fd: %p", __func__,
-               file_struct_of_fd);
-
-    const unsigned char* name =
-        BPF_CORE_READ(file_struct_of_fd, f_path.dentry, d_name.name);
-    if (name == NULL) {
-        return -1;
-    }
-    bpf_printk(PREFIX "[%s] name ptr: %p", __func__, name);
-    bpf_printk(PREFIX "[%s] name: %s", __func__, name);
-
-    char path[256] = {0};
-    result = bpf_probe_read_kernel_str(path, sizeof(path), name);
-    if (result < 0) {
-        return -1;
-    }
-    bpf_printk(PREFIX "[%s] path: %s", __func__, path);
-
-    return 0;
-}
+extern int bpf_parse_path_struct(char* buf, u64 bufsz, const int* path) __ksym;
 
 SEC("tp/raw_syscalls/sys_enter")
 int trace_sys_enter(struct trace_event_raw_sys_enter* ctx) {
@@ -93,9 +51,28 @@ int trace_sys_enter(struct trace_event_raw_sys_enter* ctx) {
     e.args[5] = ctx->args[5];
 
     if (e.syscall_id == 1) {
-        print_path_of_write(e.args[0]);
+        struct task_struct* task = bpf_get_current_task_btf();
+
+        struct file** files = BPF_CORE_READ(task, files, fdt, fd);
+        if (!files) {
+            goto exit_if;
+        }
+
+        struct file* file;
+        int ret =
+            bpf_probe_read_kernel(&file, sizeof(file), files + ctx->args[0]);
+        if (ret < 0) {
+            goto exit_if;
+        }
+
+        struct path path = BPF_CORE_READ(file, f_path);
+
+        char buf[128] = {0};
+        ret = bpf_parse_path_struct(buf, sizeof(buf), (const int*)&path);
+        bpf_printk(PREFIX "ret: %d\n", ret);
     }
 
+exit_if:
     // Store the event in the percpu map.
     bpf_map_update_elem(&raw_syscall_event_map, &tid, &e, BPF_ANY);
 
