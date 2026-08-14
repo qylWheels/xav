@@ -10,13 +10,15 @@ MODULE_AUTHOR("qylWheels");
 MODULE_DESCRIPTION("Customized kfuncs for ebpf programs in xavcore");
 
 // kfunc prototype.
-__bpf_kfunc int bpf_parse_path_struct(char *buf, u64 bufsz, struct path *path);
+__bpf_kfunc int bpf_parse_path_struct(char *buf, u64 bufsz,
+                                      const struct path *path);
 
 // Begin kfunc definitions.
 __bpf_kfunc_start_defs();
 
 // Define bpf_parse_path_struct kfunc.
-__bpf_kfunc int bpf_parse_path_struct(char *buf, u64 bufsz, struct path *path) {
+__bpf_kfunc int bpf_parse_path_struct(char *buf, u64 bufsz,
+                                      const struct path *path) {
     return 114514;
 }
 
