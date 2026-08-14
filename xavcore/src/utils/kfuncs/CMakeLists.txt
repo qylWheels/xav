@@ -28,6 +28,7 @@ add_custom_command(
 
     # Call the kernel build system.
     COMMAND make
+    
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     COMMENT "Building kernel module ${KERNEL_MODULE_NAME} using KBuild"
     VERBATIM
