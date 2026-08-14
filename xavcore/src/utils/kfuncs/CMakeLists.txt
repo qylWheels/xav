@@ -1,7 +1,7 @@
 execute_process(COMMAND uname -r OUTPUT_VARIABLE KERNEL_RELEASE OUTPUT_STRIP_TRAILING_WHITESPACE)
 set(KERNEL_DIR "/lib/modules/${KERNEL_RELEASE}/build")
 
-set(KERNEL_MODULE_NAME kfuncs)
+set(KERNEL_MODULE_NAME xavcore_kfuncs)
 set(KERNEL_MODULE_SOURCE ${KERNEL_MODULE_NAME}.c)
 set(KERNEL_MODULE_OBJECT ${KERNEL_MODULE_NAME}.o)
 set(KERNEL_MODULE_KOBJECT ${KERNEL_MODULE_NAME}.ko)
@@ -28,7 +28,7 @@ add_custom_command(
 
     # Call the kernel build system.
     COMMAND make
-    
+
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     COMMENT "Building kernel module ${KERNEL_MODULE_NAME} using KBuild"
     VERBATIM
