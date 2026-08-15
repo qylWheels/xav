@@ -35,4 +35,8 @@ struct __attribute__((packed)) RawSyscallEvent {
     u32 syscall_id;
     u64 args[6];
     u64 ret;
+
+    // Additional strings.
+    u8 additional_str_count;
+    u8 additional_strs[];
 };
