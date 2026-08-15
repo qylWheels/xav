@@ -24,6 +24,7 @@ struct {
 
 extern int bpf_fd_to_path_str(char* buf, u64 buf__sz, struct task_struct* task,
                               int fd, u64* result_ptr_addr) __ksym;
+extern u64 bpf_xavcore_strlen(const char* str) __ksym;
 
 SEC("tp/raw_syscalls/sys_enter")
 int trace_sys_enter(struct trace_event_raw_sys_enter* ctx) {
@@ -57,8 +58,10 @@ int trace_sys_enter(struct trace_event_raw_sys_enter* ctx) {
         u64 result_ptr = 0;
         int ret = bpf_fd_to_path_str(buf, sizeof(buf), task, ctx->args[0],
                                      &result_ptr);
-        bpf_printk(PREFIX "ret: %d, result_ptr: %p, result: %s\n", ret,
-                   result_ptr, (char*)result_ptr);
+        u64 len = bpf_xavcore_strlen((char*)result_ptr);
+        bpf_printk(PREFIX
+                   "ret: %d, result_ptr: %p, result: %s, result len: %d\n",
+                   ret, result_ptr, (char*)result_ptr, len);
     }
 
 exit_if:
