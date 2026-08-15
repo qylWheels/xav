@@ -13,8 +13,8 @@ MODULE_AUTHOR("qylWheels");
 MODULE_DESCRIPTION("Customized kfuncs for ebpf programs in xavcore");
 
 // kfunc prototype.
-__bpf_kfunc int bpf_fd_to_path_str(char *buf, u64 buf__sz, int fd,
-                                   u64 *result_ptr_addr);
+__bpf_kfunc int bpf_xavcore_fd_to_path_str(char *buf, u64 buf__sz, int fd,
+                                           u64 *result_ptr_addr);
 __bpf_kfunc u64 bpf_xavcore_strlen(u64 str);
 
 // Begin kfunc definitions.
@@ -22,8 +22,8 @@ __bpf_kfunc_start_defs();
 
 // Define bpf_parse_path_struct kfunc.
 // Run in process context.
-__bpf_kfunc int bpf_fd_to_path_str(char *buf, u64 buf__sz, int fd,
-                                   u64 *result_ptr_addr) {
+__bpf_kfunc int bpf_xavcore_fd_to_path_str(char *buf, u64 buf__sz, int fd,
+                                           u64 *result_ptr_addr) {
     if (!buf || !result_ptr_addr) {
         return -EINVAL;
     }
@@ -52,7 +52,7 @@ __bpf_kfunc_end_defs();
 
 // Define BTF kfuncs IDs set.
 BTF_KFUNCS_START(xavcore_kfuncs_ids_set)
-BTF_ID_FLAGS(func, bpf_fd_to_path_str)
+BTF_ID_FLAGS(func, bpf_xavcore_fd_to_path_str)
 BTF_ID_FLAGS(func, bpf_xavcore_strlen)
 BTF_KFUNCS_END(xavcore_kfuncs_ids_set)
 

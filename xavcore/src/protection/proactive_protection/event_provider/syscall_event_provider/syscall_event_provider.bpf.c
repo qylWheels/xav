@@ -22,8 +22,8 @@ struct {
     __uint(max_entries, 1 * 1024 * 1024);  // 1MB
 } rb SEC(".maps");
 
-extern int bpf_fd_to_path_str(char* buf, u64 buf__sz, int fd,
-                              u64* result_ptr_addr) __ksym;
+extern int bpf_xavcore_fd_to_path_str(char* buf, u64 buf__sz, int fd,
+                                      u64* result_ptr_addr) __ksym;
 extern u64 bpf_xavcore_strlen(u64 str) __ksym;
 
 SEC("tp/raw_syscalls/sys_enter")
@@ -56,8 +56,8 @@ int trace_sys_enter(struct trace_event_raw_sys_enter* ctx) {
         struct task_struct* task = bpf_get_current_task_btf();
         char buf[128] = {0};
         u64 result_ptr = 0;
-        int ret =
-            bpf_fd_to_path_str(buf, sizeof(buf), ctx->args[0], &result_ptr);
+        int ret = bpf_xavcore_fd_to_path_str(buf, sizeof(buf), ctx->args[0],
+                                             &result_ptr);
         u64 len = bpf_xavcore_strlen(result_ptr);
         bpf_printk(PREFIX
                    "ret: %d, result_ptr: %p, result: %s, result len: %d\n",
