@@ -25,6 +25,7 @@ struct {
 extern int bpf_xavcore_fd_to_path_str(char* buf, u64 buf__sz, int fd,
                                       u64* result_ptr_addr) __ksym;
 extern u64 bpf_xavcore_strlen(u64 str) __ksym;
+extern u64 bpf_xavcore_strnlen_user(u64 str, u64 max_len) __ksym;
 
 SEC("tp/raw_syscalls/sys_enter")
 int trace_sys_enter(struct trace_event_raw_sys_enter* ctx) {
@@ -52,16 +53,28 @@ int trace_sys_enter(struct trace_event_raw_sys_enter* ctx) {
     e.args[4] = ctx->args[4];
     e.args[5] = ctx->args[5];
 
-    if (e.syscall_id == 1) {
-        struct task_struct* task = bpf_get_current_task_btf();
-        char buf[128] = {0};
-        u64 result_ptr = 0;
-        int ret = bpf_xavcore_fd_to_path_str(buf, sizeof(buf), ctx->args[0],
-                                             &result_ptr);
-        u64 len = bpf_xavcore_strlen(result_ptr);
-        bpf_printk(PREFIX
-                   "ret: %d, result_ptr: %p, result: %s, result len: %d\n",
-                   ret, result_ptr, result_ptr, len);
+    // if (e.syscall_id == 1) {
+    //     struct task_struct* task = bpf_get_current_task_btf();
+    //     char buf[128] = {0};
+    //     u64 result_ptr = 0;
+    //     int ret = bpf_xavcore_fd_to_path_str(buf, sizeof(buf), ctx->args[0],
+    //                                          &result_ptr);
+    //     u64 len = bpf_xavcore_strlen(result_ptr);
+    //     bpf_printk(PREFIX
+    //                "ret: %d, result_ptr: %p, result: %s, result len: %d\n",
+    //                ret, result_ptr, result_ptr, len);
+    // }
+    if (e.syscall_id == 82) {
+        u64 oldname_len = bpf_xavcore_strnlen_user(ctx->args[0], 4096);
+        u64 newname_len = bpf_xavcore_strnlen_user(ctx->args[1], 4096);
+        bpf_printk(PREFIX "oldname_len: %d, newname_len: %d\n", oldname_len,
+                   newname_len);
+    }
+    if (e.syscall_id == 264 || e.syscall_id == 316) {
+        u64 oldname_len = bpf_xavcore_strnlen_user(ctx->args[1], 4096);
+        u64 newname_len = bpf_xavcore_strnlen_user(ctx->args[3], 4096);
+        bpf_printk(PREFIX "oldname_len: %d, newname_len: %d\n", oldname_len,
+                   newname_len);
     }
 
 exit_if:
