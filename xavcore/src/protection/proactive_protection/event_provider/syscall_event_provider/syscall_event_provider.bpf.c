@@ -22,7 +22,8 @@ struct {
     __uint(max_entries, 1 * 1024 * 1024);  // 1MB
 } rb SEC(".maps");
 
-extern int bpf_parse_path_struct(char* buf, u64 bufsz, const int* path) __ksym;
+extern int bpf_fd_to_path_str(char* buf, u64 buf__sz, struct task_struct* task,
+                              int fd) __ksym;
 
 SEC("tp/raw_syscalls/sys_enter")
 int trace_sys_enter(struct trace_event_raw_sys_enter* ctx) {
@@ -52,23 +53,8 @@ int trace_sys_enter(struct trace_event_raw_sys_enter* ctx) {
 
     if (e.syscall_id == 1) {
         struct task_struct* task = bpf_get_current_task_btf();
-
-        struct file** files = BPF_CORE_READ(task, files, fdt, fd);
-        if (!files) {
-            goto exit_if;
-        }
-
-        struct file* file;
-        int ret =
-            bpf_probe_read_kernel(&file, sizeof(file), files + ctx->args[0]);
-        if (ret < 0) {
-            goto exit_if;
-        }
-
-        struct path path = BPF_CORE_READ(file, f_path);
-
         char buf[128] = {0};
-        ret = bpf_parse_path_struct(buf, sizeof(buf), (const int*)&path);
+        int ret = bpf_fd_to_path_str(buf, sizeof(buf), task, ctx->args[0]);
         bpf_printk(PREFIX "ret: %d\n", ret);
     }
 
