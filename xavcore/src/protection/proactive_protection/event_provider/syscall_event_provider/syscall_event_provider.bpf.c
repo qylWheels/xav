@@ -108,6 +108,7 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
                 break;
             }
             u64 len = bpf_xavcore_strlen((u64)result_ptr);
+            len = (len > MAX_PATH_LEN) ? MAX_PATH_LEN : len;
             struct bpf_dynptr dynptr;
             result = bpf_ringbuf_reserve_dynptr(&rb, sizeof(*e) + len + 5, 0,
                                                 &dynptr);
@@ -125,15 +126,15 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
                 bpf_ringbuf_discard_dynptr(&dynptr, 0);
                 break;
             }
-            len = (len > MAX_PATH_LEN) ? MAX_PATH_LEN : len;
             result = bpf_dynptr_write(&dynptr, sizeof(*e), (void*)pathbuf1,
-                                      (u64)(len + 1), 0);
+                                      len + 1, 0);
             if (result != 0) {
                 bpf_ringbuf_discard_dynptr(&dynptr, 0);
                 break;
             }
             bpf_ringbuf_submit_dynptr(&dynptr, 0);
-            break;
+            bpf_map_delete_elem(&raw_syscall_event_map, &tid);
+            return 0;
         }
         default:
             break;
