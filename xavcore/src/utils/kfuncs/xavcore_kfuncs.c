@@ -1,6 +1,7 @@
 #include <linux/bpf.h>
 #include <linux/btf.h>
 #include <linux/btf_ids.h>
+#include <linux/fdtable.h>
 #include <linux/init.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
@@ -21,7 +22,35 @@ __bpf_kfunc_start_defs();
 __bpf_kfunc int bpf_fd_to_path_str(char *buf, u64 buf__sz,
                                    struct task_struct *task, int fd,
                                    u64 *result_ptr_addr) {
-    return 114514;
+    if (!buf || !task || !result_ptr_addr) {
+        return -EINVAL;
+    }
+
+    struct files_struct *files = task->files;
+    if (!files) {
+        return -EFAULT;
+    }
+
+    struct fdtable *fdt = files->fdt;
+    if (!fdt) {
+        return -EFAULT;
+    }
+
+    struct file **fds = fdt->fd;
+    if (!fds) {
+        return -EFAULT;
+    }
+
+    struct file *file = fds[fd];
+    if (!file) {
+        return -EFAULT;
+    }
+
+    struct path *path = &file->f_path;
+
+    *result_ptr_addr = (u64)d_path(path, buf, buf__sz);
+
+    return 0;
 }
 
 // End kfunc definitions.
