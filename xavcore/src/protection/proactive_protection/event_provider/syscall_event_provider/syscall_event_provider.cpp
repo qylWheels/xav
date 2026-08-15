@@ -148,6 +148,20 @@ int SyscallEventProvider::event_callback(void* ctx, void* data,
     SyscallEventProvider* self = static_cast<SyscallEventProvider*>(ctx);
     RawSyscallEvent* raw_event = static_cast<RawSyscallEvent*>(data);
 
+    if (raw_event->syscall_id == 0) {
+        if (raw_event->additional_str_count == 1) {
+            std::uint64_t raw_event_addr =
+                reinterpret_cast<std::uint64_t>(raw_event);
+            std::string path((char*)(raw_event_addr + sizeof(*raw_event)));
+            std::uint64_t args[6] = {0};
+            std::memmove(args, raw_event->args, sizeof(args));
+            std::uint64_t ret;
+            std::memmove(&ret, (const void*)&raw_event->ret, sizeof(ret));
+            self->logger_->info("read({}, {:#x}, {}) = {}", path, args[1],
+                                args[2], ret);
+        }
+    }
+
     auto result = self->raw_events_to_handle_.enqueue(*raw_event);
     if (!result) {
         self->logger_->warn("Failed to enqueue raw event");
