@@ -6,6 +6,8 @@
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/rcupdate.h>
+#include <linux/string.h>
+#include <linux/types.h>
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("qylWheels");
@@ -15,6 +17,7 @@ MODULE_DESCRIPTION("Customized kfuncs for ebpf programs in xavcore");
 __bpf_kfunc int bpf_fd_to_path_str(char *buf, u64 buf__sz,
                                    struct task_struct *task, int fd,
                                    u64 *result_ptr_addr);
+__bpf_kfunc size_t bpf_xavcore_strlen(const char *str);
 
 // Begin kfunc definitions.
 __bpf_kfunc_start_defs();
@@ -58,12 +61,15 @@ __bpf_kfunc int bpf_fd_to_path_str(char *buf, u64 buf__sz,
     return 0;
 }
 
+__bpf_kfunc size_t bpf_xavcore_strlen(const char *str) { return strlen(str); }
+
 // End kfunc definitions.
 __bpf_kfunc_end_defs();
 
 // Define BTF kfuncs IDs set.
 BTF_KFUNCS_START(xavcore_kfuncs_ids_set)
 BTF_ID_FLAGS(func, bpf_fd_to_path_str)
+BTF_ID_FLAGS(func, bpf_xavcore_strlen)
 BTF_KFUNCS_END(xavcore_kfuncs_ids_set)
 
 // Register kfunc IDs set.
