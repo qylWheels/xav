@@ -23,7 +23,7 @@ struct {
 } rb SEC(".maps");
 
 extern int bpf_fd_to_path_str(char* buf, u64 buf__sz, struct task_struct* task,
-                              int fd) __ksym;
+                              int fd, u64* result_ptr_addr) __ksym;
 
 SEC("tp/raw_syscalls/sys_enter")
 int trace_sys_enter(struct trace_event_raw_sys_enter* ctx) {
@@ -54,8 +54,11 @@ int trace_sys_enter(struct trace_event_raw_sys_enter* ctx) {
     if (e.syscall_id == 1) {
         struct task_struct* task = bpf_get_current_task_btf();
         char buf[128] = {0};
-        int ret = bpf_fd_to_path_str(buf, sizeof(buf), task, ctx->args[0]);
-        bpf_printk(PREFIX "ret: %d\n", ret);
+        u64 result_ptr = 0;
+        int ret = bpf_fd_to_path_str(buf, sizeof(buf), task, ctx->args[0],
+                                     &result_ptr);
+        bpf_printk(PREFIX "ret: %d, result_ptr: %p, result: %s\n", ret,
+                   result_ptr, (char*)result_ptr);
     }
 
 exit_if:

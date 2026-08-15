@@ -11,14 +11,16 @@ MODULE_DESCRIPTION("Customized kfuncs for ebpf programs in xavcore");
 
 // kfunc prototype.
 __bpf_kfunc int bpf_fd_to_path_str(char *buf, u64 buf__sz,
-                                   struct task_struct *task, int fd);
+                                   struct task_struct *task, int fd,
+                                   u64 *result_ptr_addr);
 
 // Begin kfunc definitions.
 __bpf_kfunc_start_defs();
 
 // Define bpf_parse_path_struct kfunc.
 __bpf_kfunc int bpf_fd_to_path_str(char *buf, u64 buf__sz,
-                                   struct task_struct *task, int fd) {
+                                   struct task_struct *task, int fd,
+                                   u64 *result_ptr_addr) {
     return 114514;
 }
 
