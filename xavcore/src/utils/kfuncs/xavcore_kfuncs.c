@@ -5,6 +5,7 @@
 #include <linux/init.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
+#include <linux/rcupdate.h>
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("qylWheels");
@@ -31,12 +32,14 @@ __bpf_kfunc int bpf_fd_to_path_str(char *buf, u64 buf__sz,
         return -EFAULT;
     }
 
-    struct fdtable *fdt = files->fdt;
+    rcu_read_lock();
+
+    struct fdtable *fdt = rcu_dereference(files->fdt);
     if (!fdt) {
         return -EFAULT;
     }
 
-    struct file **fds = fdt->fd;
+    struct file **fds = rcu_dereference(fdt->fd);
     if (!fds) {
         return -EFAULT;
     }
@@ -45,6 +48,8 @@ __bpf_kfunc int bpf_fd_to_path_str(char *buf, u64 buf__sz,
     if (!file) {
         return -EFAULT;
     }
+
+    rcu_read_unlock();
 
     struct path *path = &file->f_path;
 
