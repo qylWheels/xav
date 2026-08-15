@@ -9,6 +9,7 @@
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/raw_syscall_event.h"
 
 #define PREFIX "xavcore syscall event provider: "
+#define MAX_PATH_LEN (4096)
 
 struct {
     __uint(type, BPF_MAP_TYPE_HASH);
@@ -26,6 +27,7 @@ extern int bpf_xavcore_fd_to_path_str(char* buf, u64 buf__sz, int fd,
                                       u64* result_ptr_addr) __ksym;
 extern u64 bpf_xavcore_strlen(u64 str) __ksym;
 extern u64 bpf_xavcore_strnlen_user(u64 str, u64 max_len) __ksym;
+extern s64 bpf_xavcore_strscpy(char* dest, u64 src, u64 dest__sz) __ksym;
 
 SEC("tp/raw_syscalls/sys_enter")
 int trace_sys_enter(struct trace_event_raw_sys_enter* ctx) {
@@ -60,6 +62,13 @@ exit_if:
     return 0;
 }
 
+struct {
+    __uint(type, BPF_MAP_TYPE_PERCPU_ARRAY);
+    __uint(max_entries, 4);
+    __type(key, u32);
+    __type(value, u8[MAX_PATH_LEN + 5]);
+} pathbufs SEC(".maps");
+
 SEC("tp/raw_syscalls/sys_exit")
 int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
     u32 pid = bpf_get_current_pid_tgid() >> 32;
@@ -76,11 +85,60 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
         e2.proc_start_boottime = task->start_boottime;
         e2.syscall_id = ctx->id;
         e2.ret = ctx->ret;
+        e2.additional_str_count = 0;
         bpf_ringbuf_output(&rb, &e2, sizeof(e2), 0);
         return 0;
     }
     e->exit_captured = 1;
     e->ret = ctx->ret;
+
+    switch (e->syscall_id) {
+        case 0: {  // read.
+            e->additional_str_count = 1;
+            u32 zero = 0, one = 1;
+            u8* pathbuf0 = (u8*)bpf_map_lookup_elem(&pathbufs, &zero);
+            u8* pathbuf1 = (u8*)bpf_map_lookup_elem(&pathbufs, &one);
+            if (!pathbuf0 || !pathbuf1) {
+                break;
+            }
+            u64 result_ptr = 0;
+            int result = bpf_xavcore_fd_to_path_str(
+                (char*)pathbuf0, MAX_PATH_LEN, e->args[0], &result_ptr);
+            if (result != 0) {
+                break;
+            }
+            u64 len = bpf_xavcore_strlen((u64)result_ptr);
+            struct bpf_dynptr dynptr;
+            result = bpf_ringbuf_reserve_dynptr(&rb, sizeof(*e) + len + 5, 0,
+                                                &dynptr);
+            if (result != 0) {
+                bpf_ringbuf_discard_dynptr(&dynptr, 0);
+                break;
+            }
+            result = bpf_dynptr_write(&dynptr, 0, e, sizeof(*e), 0);
+            if (result != 0) {
+                bpf_ringbuf_discard_dynptr(&dynptr, 0);
+                break;
+            }
+            result = bpf_xavcore_strscpy((char*)pathbuf1, result_ptr, len + 1);
+            if (result < 0) {
+                bpf_ringbuf_discard_dynptr(&dynptr, 0);
+                break;
+            }
+            len = (len > MAX_PATH_LEN) ? MAX_PATH_LEN : len;
+            result = bpf_dynptr_write(&dynptr, sizeof(*e), (void*)pathbuf1,
+                                      (u64)(len + 1), 0);
+            if (result != 0) {
+                bpf_ringbuf_discard_dynptr(&dynptr, 0);
+                break;
+            }
+            bpf_ringbuf_submit_dynptr(&dynptr, 0);
+            break;
+        }
+        default:
+            break;
+    }
+
     bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
     bpf_map_delete_elem(&raw_syscall_event_map, &tid);
     return 0;
