@@ -39,3 +39,13 @@ add_custom_target(
     ${KERNEL_MODULE_NAME} ALL DEPENDS
     ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL_MODULE_KOBJECT}
 )
+
+# Dummy target for IDE code check.
+add_library(${KERNEL_MODULE_NAME}_dummy OBJECT ${KERNEL_MODULE_SOURCE})
+target_include_directories(
+    ${KERNEL_MODULE_NAME}_dummy PRIVATE
+    /usr/local/include/myapp
+    /lib/modules/${KERNEL_RELEASE}/build/source/include
+)
+set_target_properties(${KERNEL_MODULE_NAME}_dummy PROPERTIES EXCLUDE_FROM_ALL TRUE)
+set_target_properties(${KERNEL_MODULE_NAME}_dummy PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD TRUE)
