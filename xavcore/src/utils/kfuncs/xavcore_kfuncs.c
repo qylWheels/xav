@@ -1,3 +1,4 @@
+#include <asm-generic/uaccess.h>
 #include <linux/bpf.h>
 #include <linux/btf.h>
 #include <linux/btf_ids.h>
@@ -16,6 +17,7 @@ MODULE_DESCRIPTION("Customized kfuncs for ebpf programs in xavcore");
 __bpf_kfunc int bpf_xavcore_fd_to_path_str(char *buf, u64 buf__sz, int fd,
                                            u64 *result_ptr_addr);
 __bpf_kfunc u64 bpf_xavcore_strlen(u64 str);
+__bpf_kfunc u64 bpf_xavcore_strnlen_user(u64 str, u64 max_len);
 
 // Begin kfunc definitions.
 __bpf_kfunc_start_defs();
@@ -47,6 +49,10 @@ __bpf_kfunc u64 bpf_xavcore_strlen(u64 str) {
     return strlen((const char *)str);
 }
 
+__bpf_kfunc u64 bpf_xavcore_strnlen_user(u64 str, u64 max_len) {
+    return strnlen_user((const char *)str, max_len);
+}
+
 // End kfunc definitions.
 __bpf_kfunc_end_defs();
 
@@ -54,6 +60,7 @@ __bpf_kfunc_end_defs();
 BTF_KFUNCS_START(xavcore_kfuncs_ids_set)
 BTF_ID_FLAGS(func, bpf_xavcore_fd_to_path_str)
 BTF_ID_FLAGS(func, bpf_xavcore_strlen)
+BTF_ID_FLAGS(func, bpf_xavcore_strnlen_user)
 BTF_KFUNCS_END(xavcore_kfuncs_ids_set)
 
 // Register kfunc IDs set.
