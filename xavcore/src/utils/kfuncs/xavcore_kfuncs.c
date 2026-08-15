@@ -1,4 +1,3 @@
-#include <asm-generic/uaccess.h>
 #include <linux/bpf.h>
 #include <linux/btf.h>
 #include <linux/btf_ids.h>
@@ -8,6 +7,7 @@
 #include <linux/module.h>
 #include <linux/string.h>
 #include <linux/types.h>
+#include <linux/uaccess.h>
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("qylWheels");
