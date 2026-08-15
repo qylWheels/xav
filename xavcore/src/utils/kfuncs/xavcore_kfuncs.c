@@ -1,11 +1,10 @@
 #include <linux/bpf.h>
 #include <linux/btf.h>
 #include <linux/btf_ids.h>
-#include <linux/fdtable.h>
+#include <linux/file.h>
 #include <linux/init.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
-#include <linux/rcupdate.h>
 #include <linux/string.h>
 #include <linux/types.h>
 
@@ -14,8 +13,7 @@ MODULE_AUTHOR("qylWheels");
 MODULE_DESCRIPTION("Customized kfuncs for ebpf programs in xavcore");
 
 // kfunc prototype.
-__bpf_kfunc int bpf_fd_to_path_str(char *buf, u64 buf__sz,
-                                   struct task_struct *task, int fd,
+__bpf_kfunc int bpf_fd_to_path_str(char *buf, u64 buf__sz, int fd,
                                    u64 *result_ptr_addr);
 __bpf_kfunc u64 bpf_xavcore_strlen(u64 str);
 
@@ -23,40 +21,24 @@ __bpf_kfunc u64 bpf_xavcore_strlen(u64 str);
 __bpf_kfunc_start_defs();
 
 // Define bpf_parse_path_struct kfunc.
-__bpf_kfunc int bpf_fd_to_path_str(char *buf, u64 buf__sz,
-                                   struct task_struct *task, int fd,
+// Run in process context.
+__bpf_kfunc int bpf_fd_to_path_str(char *buf, u64 buf__sz, int fd,
                                    u64 *result_ptr_addr) {
-    if (!buf || !task || !result_ptr_addr) {
+    if (!buf || !result_ptr_addr) {
         return -EINVAL;
     }
 
-    struct files_struct *files = task->files;
-    if (!files) {
-        return -EFAULT;
-    }
+    struct fd f = fdget(fd);
+    struct file *file = fd_file(f);
 
-    rcu_read_lock();
-
-    struct fdtable *fdt = rcu_dereference(files->fdt);
-    if (!fdt) {
-        return -EFAULT;
-    }
-
-    struct file **fds = rcu_dereference(fdt->fd);
-    if (!fds) {
-        return -EFAULT;
-    }
-
-    struct file *file = fds[fd];
     if (!file) {
         return -EFAULT;
     }
 
-    rcu_read_unlock();
-
     struct path *path = &file->f_path;
-
     *result_ptr_addr = (u64)d_path(path, buf, buf__sz);
+
+    fdput(f);
 
     return 0;
 }
