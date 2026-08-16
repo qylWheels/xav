@@ -107,6 +107,7 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
             }
             u64 len = bpf_xavcore_strlen((const char*)pathbuf0);
             len = (len > MAX_PATH_LEN) ? MAX_PATH_LEN : len;
+            e->additional_data_lens[0] = len + 1;
             struct bpf_dynptr dynptr;
             result = bpf_ringbuf_reserve_dynptr(&rb, sizeof(*e) + len + 5, 0,
                                                 &dynptr);
