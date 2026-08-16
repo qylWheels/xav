@@ -29,6 +29,16 @@ add_custom_target(
 )
 add_dependencies(syscall_event_provider_obj vmlinux_header)
 
+# eBPF dummy target for IDE code check.
+add_library(syscall_event_provider_obj_dummy OBJECT ${CMAKE_CURRENT_SOURCE_DIR}/syscall_event_provider.bpf.c)
+target_include_directories(
+    syscall_event_provider_obj_dummy PRIVATE
+    ${CMAKE_BINARY_DIR}/src/protection # vmlinux.h.
+    ${CMAKE_SOURCE_DIR}/src/include
+)
+set_target_properties(syscall_event_provider_obj_dummy PROPERTIES EXCLUDE_FROM_ALL TRUE)
+set_target_properties(syscall_event_provider_obj_dummy PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD TRUE)
+
 # Skeleton header.
 set(
     SKELETON_HEADER
