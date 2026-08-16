@@ -12,6 +12,7 @@
 #include <memory>
 #include <thread>
 #include <unordered_set>
+#include <vector>
 
 #include "syscall_event_provider.skel.h"
 #include "xavcore/protection/proactive_protection/behavior_monitor.h"
@@ -41,6 +42,12 @@ private:
 
 private:
     void handle_raw_event(const RawSyscallEvent& raw_event);
+
+private:
+    struct RawSyscallEventWrapper {
+        RawSyscallEvent raw_event;
+        std::vector<std::vector<std::uint8_t>> additional_data;
+    };
 
 private:
     enum class Status { Started, Stopped };
