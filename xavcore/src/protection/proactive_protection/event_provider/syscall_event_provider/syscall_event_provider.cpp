@@ -150,9 +150,9 @@ int SyscallEventProvider::event_callback(void* ctx, void* data,
     RawSyscallEvent* raw_event = static_cast<RawSyscallEvent*>(data);
 
     RawSyscallEventWrapper raw_event_wrapper;
-    switch (raw_event->syscall_id) {
-        case 0: {  // read().
-            raw_event_wrapper.raw_event = *raw_event;
+    raw_event_wrapper.raw_event = *raw_event;
+    switch (raw_event->syscall_id) {  // Handle additional data.
+        case 0: {                     // read().
             if (raw_event->additional_data_count == 1) {
                 std::uint64_t data_len = raw_event->additional_data_lens[0];
                 std::uint64_t raw_event_addr =
@@ -164,6 +164,10 @@ int SyscallEventProvider::event_callback(void* ctx, void* data,
                         (std::uint8_t*)(additional_data_addr),
                         (std::uint8_t*)(additional_data_addr + data_len)));
             }
+            break;
+        }
+        default: {
+            break;
         }
     }
 
