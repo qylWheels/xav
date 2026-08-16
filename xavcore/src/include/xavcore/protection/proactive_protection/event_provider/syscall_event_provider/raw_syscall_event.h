@@ -38,8 +38,9 @@ struct __attribute__((packed)) RawSyscallEvent {
     u64 args[6];
     u64 ret;
 
-    // Additional data.
+    // Additional data information.
     u8 additional_data_count;
     u64 additional_data_lens[MAX_DATA_COUNT];
-    u8 additional_data[];
+
+    // Additional data.
 };
