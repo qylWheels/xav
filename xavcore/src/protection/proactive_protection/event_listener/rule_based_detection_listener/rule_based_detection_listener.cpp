@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <variant>
 #include <vector>
 
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event.h"
@@ -27,6 +28,26 @@ outcome::result<void> RuleBasedDetectionListener::accept(const IEvent& event) {
     const SyscallEvent& syscall_event =
         dynamic_cast<const SyscallEvent&>(event);
     this->proc_syscall_events_[syscall_event.process].push_back(syscall_event);
+
+    // FIXME: Test print.
+    if (syscall_event.id == SYS_read &&
+        std::holds_alternative<ReadSyscallAdditionalData>(
+            syscall_event.additional_data)) {
+        auto& read_syscall_additional_data =
+            std::get<ReadSyscallAdditionalData>(syscall_event.additional_data);
+        static int i = 0;
+        while (i++ % 400 == 0) {
+            if (syscall_event.args.empty()) {
+                this->logger_->info("read() = {}", syscall_event.ret);
+            } else {
+                this->logger_->info(
+                    "read({}({}), {:#x}, {}) = {}", syscall_event.args[0],
+                    read_syscall_additional_data.fd_path.value_or("<unknown>"),
+                    syscall_event.args[1], syscall_event.args[2],
+                    syscall_event.ret);
+            }
+        }
+    }
 
     // Apply rules.
     for (auto& rule : this->rules_) {
