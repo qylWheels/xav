@@ -14,8 +14,7 @@ MODULE_AUTHOR("qylWheels");
 MODULE_DESCRIPTION("Customized kfuncs for ebpf programs in xavcore");
 
 // kfunc prototype.
-__bpf_kfunc int bpf_xavcore_fd_to_path_str(char *buf, u64 buf__sz, int fd,
-                                           u64 *result_ptr_addr);
+__bpf_kfunc int bpf_xavcore_fd_to_path_str(char *buf, u64 buf__sz, int fd);
 __bpf_kfunc u64 bpf_xavcore_strlen(u64 str);
 __bpf_kfunc u64 bpf_xavcore_strnlen_user(u64 str, u64 max_len);
 __bpf_kfunc s64 bpf_xavcore_strscpy(char *dest, u64 src, u64 dest__sz);
@@ -25,9 +24,8 @@ __bpf_kfunc_start_defs();
 
 // Define bpf_parse_path_struct kfunc.
 // Run in process context.
-__bpf_kfunc int bpf_xavcore_fd_to_path_str(char *buf, u64 buf__sz, int fd,
-                                           u64 *result_ptr_addr) {
-    if (!buf || !result_ptr_addr) {
+__bpf_kfunc int bpf_xavcore_fd_to_path_str(char *buf, u64 buf__sz, int fd) {
+    if (!buf) {
         return -EINVAL;
     }
 
@@ -39,9 +37,16 @@ __bpf_kfunc int bpf_xavcore_fd_to_path_str(char *buf, u64 buf__sz, int fd,
     }
 
     struct path *path = &file->f_path;
-    *result_ptr_addr = (u64)d_path(path, buf, buf__sz);
+    char *result = d_path(path, buf, buf__sz);
+    if (IS_ERR_OR_NULL(result)) {
+        return -EFAULT;
+    }
 
     fdput(f);
+
+    // Copy result string to the begin of the buffer.
+    // May overlapped.
+    memmove(buf, result, strlen(result) + 1);
 
     return 0;
 }
