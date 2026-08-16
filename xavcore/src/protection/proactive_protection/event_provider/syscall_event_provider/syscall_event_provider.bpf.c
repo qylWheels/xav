@@ -144,7 +144,7 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
             }
 
             bpf_ringbuf_submit_dynptr(&dynptr, 0);
-            return 0;
+            break;
         }
         default: {
             e->additional_data_count = 0;
