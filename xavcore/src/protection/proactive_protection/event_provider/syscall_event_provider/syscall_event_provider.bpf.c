@@ -91,6 +91,7 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
     e->exit_captured = 1;
     e->ret = ctx->ret;
 
+    // Handle specific syscalls who have additional data. i.e. read.
     switch (e->syscall_id) {
         case 0: {  // read.
             e->additional_data_count = 1;
@@ -106,7 +107,7 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
             }
             u64 len = bpf_xavcore_strlen((const char*)pathbuf0);
             len = (len > MAX_PATH_LEN) ? MAX_PATH_LEN : len;
-            e->additional_data_lens[0] = len + 1;
+            e->additional_data_lens[0] = 0;
             struct bpf_dynptr dynptr;
             result = bpf_ringbuf_reserve_dynptr(&rb, sizeof(*e) + len + 5, 0,
                                                 &dynptr);
@@ -125,6 +126,7 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
                 bpf_ringbuf_discard_dynptr(&dynptr, 0);
                 break;
             }
+            e->additional_data_lens[0] = len + 1;
             bpf_ringbuf_submit_dynptr(&dynptr, 0);
             bpf_map_delete_elem(&raw_syscall_event_map, &tid);
             return 0;
@@ -133,6 +135,7 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
             break;
     }
 
+    e->additional_data_count = 0;
     bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
     bpf_map_delete_elem(&raw_syscall_event_map, &tid);
     return 0;
