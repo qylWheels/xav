@@ -23,9 +23,8 @@ struct {
     __uint(max_entries, 1 * 1024 * 1024);  // 1MB
 } rb SEC(".maps");
 
-extern int bpf_xavcore_fd_to_path_str(char* buf, u64 buf__sz, int fd,
-                                      u64* result_ptr_addr) __ksym;
-extern u64 bpf_xavcore_strlen(u64 str) __ksym;
+extern int bpf_xavcore_fd_to_path_str(char* buf, u64 buf__sz, int fd) __ksym;
+extern u64 bpf_xavcore_strlen(const char* str) __ksym;
 extern u64 bpf_xavcore_strnlen_user(u64 str, u64 max_len) __ksym;
 extern s64 bpf_xavcore_strscpy(char* dest, u64 src, u64 dest__sz) __ksym;
 
@@ -101,13 +100,12 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
             if (!pathbuf0 || !pathbuf1) {
                 break;
             }
-            u64 result_ptr = 0;
-            int result = bpf_xavcore_fd_to_path_str(
-                (char*)pathbuf0, MAX_PATH_LEN, e->args[0], &result_ptr);
+            int result = bpf_xavcore_fd_to_path_str((char*)pathbuf0,
+                                                    MAX_PATH_LEN, e->args[0]);
             if (result != 0) {
                 break;
             }
-            u64 len = bpf_xavcore_strlen((u64)result_ptr);
+            u64 len = bpf_xavcore_strlen((const char*)pathbuf0);
             len = (len > MAX_PATH_LEN) ? MAX_PATH_LEN : len;
             struct bpf_dynptr dynptr;
             result = bpf_ringbuf_reserve_dynptr(&rb, sizeof(*e) + len + 5, 0,
@@ -121,12 +119,7 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
                 bpf_ringbuf_discard_dynptr(&dynptr, 0);
                 break;
             }
-            result = bpf_xavcore_strscpy((char*)pathbuf1, result_ptr, len + 1);
-            if (result < 0) {
-                bpf_ringbuf_discard_dynptr(&dynptr, 0);
-                break;
-            }
-            result = bpf_dynptr_write(&dynptr, sizeof(*e), (void*)pathbuf1,
+            result = bpf_dynptr_write(&dynptr, sizeof(*e), (void*)pathbuf0,
                                       len + 1, 0);
             if (result != 0) {
                 bpf_ringbuf_discard_dynptr(&dynptr, 0);
