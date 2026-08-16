@@ -96,8 +96,7 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
             e->additional_data_count = 1;
             u32 zero = 0, one = 1;
             u8* pathbuf0 = (u8*)bpf_map_lookup_elem(&pathbufs, &zero);
-            u8* pathbuf1 = (u8*)bpf_map_lookup_elem(&pathbufs, &one);
-            if (!pathbuf0 || !pathbuf1) {
+            if (!pathbuf0) {
                 break;
             }
             int result = bpf_xavcore_fd_to_path_str((char*)pathbuf0,
