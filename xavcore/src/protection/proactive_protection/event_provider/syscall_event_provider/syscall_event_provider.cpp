@@ -201,15 +201,18 @@ void SyscallEventProvider::handle_raw_event_wrapper(
     // FIXME: Test print.
     if (raw_event_wrapper.raw_event.syscall_id == SYS_read &&
         raw_event_wrapper.additional_data.size() == 1) {
-        std::string path(raw_event_wrapper.additional_data[0].begin(),
-                         raw_event_wrapper.additional_data[0].end());
-        std::uint64_t args[6] = {0};
-        std::memmove(args, raw_event_wrapper.raw_event.args, sizeof(args));
-        std::uint64_t ret;
-        std::memmove(&ret, (const void*)&raw_event_wrapper.raw_event.ret,
-                     sizeof(ret));
-        this->logger_->info("read({}({}), {:#x}, {}) = {}", args[0], path,
-                            args[1], args[2], ret);
+        static int i = 0;
+        while (i++ % 100 == 0) {
+            std::string path(raw_event_wrapper.additional_data[0].begin(),
+                             raw_event_wrapper.additional_data[0].end());
+            std::uint64_t args[6] = {0};
+            std::memmove(args, raw_event_wrapper.raw_event.args, sizeof(args));
+            std::uint64_t ret;
+            std::memmove(&ret, (const void*)&raw_event_wrapper.raw_event.ret,
+                         sizeof(ret));
+            this->logger_->info("read({}({}), {:#x}, {}) = {}", args[0], path,
+                                args[1], args[2], ret);
+        }
     }
 
     // if (event.args.empty()) {
