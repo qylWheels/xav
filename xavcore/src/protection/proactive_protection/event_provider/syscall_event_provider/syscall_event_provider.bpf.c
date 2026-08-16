@@ -84,7 +84,7 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
         e2.proc_start_boottime = task->start_boottime;
         e2.syscall_id = ctx->id;
         e2.ret = ctx->ret;
-        e2.additional_str_count = 0;
+        e2.additional_data_count = 0;
         bpf_ringbuf_output(&rb, &e2, sizeof(e2), 0);
         return 0;
     }
@@ -93,7 +93,7 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
 
     switch (e->syscall_id) {
         case 0: {  // read.
-            e->additional_str_count = 1;
+            e->additional_data_count = 1;
             u32 zero = 0, one = 1;
             u8* pathbuf0 = (u8*)bpf_map_lookup_elem(&pathbufs, &zero);
             u8* pathbuf1 = (u8*)bpf_map_lookup_elem(&pathbufs, &one);

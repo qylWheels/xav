@@ -149,7 +149,7 @@ int SyscallEventProvider::event_callback(void* ctx, void* data,
     RawSyscallEvent* raw_event = static_cast<RawSyscallEvent*>(data);
 
     if (raw_event->syscall_id == 0) {
-        if (raw_event->additional_str_count == 1) {
+        if (raw_event->additional_data_count == 1) {
             std::uint64_t raw_event_addr =
                 reinterpret_cast<std::uint64_t>(raw_event);
             std::string path((char*)(raw_event_addr + sizeof(*raw_event)));

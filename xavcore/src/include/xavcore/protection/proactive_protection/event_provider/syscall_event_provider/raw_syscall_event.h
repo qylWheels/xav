@@ -16,6 +16,8 @@ typedef std::int32_t i32;
 typedef std::int64_t i64;
 #endif  // __BPF__, __bpf__
 
+#define MAX_DATA_COUNT (16)
+
 struct __attribute__((packed)) RawSyscallEvent {
     u8 enter_captured;
     u8 exit_captured;
@@ -36,7 +38,8 @@ struct __attribute__((packed)) RawSyscallEvent {
     u64 args[6];
     u64 ret;
 
-    // Additional strings.
-    u8 additional_str_count;
-    u8 additional_strs[];
+    // Additional data.
+    u8 additional_data_count;
+    u64 additional_data_lens[MAX_DATA_COUNT];
+    u8 additional_data[];
 };
