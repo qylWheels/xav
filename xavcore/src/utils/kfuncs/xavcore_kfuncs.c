@@ -15,7 +15,7 @@ MODULE_DESCRIPTION("Customized kfuncs for ebpf programs in xavcore");
 
 // kfunc prototype.
 __bpf_kfunc int bpf_xavcore_fd_to_path_str(char *buf, u64 buf__sz, int fd);
-__bpf_kfunc u64 bpf_xavcore_strlen(u64 str);
+__bpf_kfunc u64 bpf_xavcore_strlen(const char *str);
 __bpf_kfunc u64 bpf_xavcore_strnlen_user(u64 str, u64 max_len);
 __bpf_kfunc s64 bpf_xavcore_strscpy(char *dest, u64 src, u64 dest__sz);
 
@@ -51,9 +51,7 @@ __bpf_kfunc int bpf_xavcore_fd_to_path_str(char *buf, u64 buf__sz, int fd) {
     return 0;
 }
 
-__bpf_kfunc u64 bpf_xavcore_strlen(u64 str) {
-    return strlen((const char *)str);
-}
+__bpf_kfunc u64 bpf_xavcore_strlen(const char *str) { return strlen(str); }
 
 __bpf_kfunc u64 bpf_xavcore_strnlen_user(u64 str, u64 max_len) {
     return strnlen_user((const char *)str, max_len);
