@@ -198,6 +198,26 @@ void SyscallEventProvider::handle_raw_event_wrapper(
         event.ret = raw_event_wrapper.raw_event.ret;
     }
 
+    // Parse additional data.
+    switch (raw_event_wrapper.raw_event.syscall_id) {
+        case SYS_read: {
+            ReadSyscallAdditionalData additional_data;
+            if (raw_event_wrapper.additional_data.size() == 1) {
+                additional_data.fd_path =
+                    std::string(raw_event_wrapper.additional_data[0].begin(),
+                                raw_event_wrapper.additional_data[0].end());
+            } else {
+                additional_data.fd_path = std::nullopt;
+            }
+            event.additional_data = additional_data;
+            break;
+        }
+        default: {
+            event.additional_data = std::monostate();
+            break;
+        }
+    }
+
     // FIXME: Test print.
     if (raw_event_wrapper.raw_event.syscall_id == SYS_read &&
         raw_event_wrapper.additional_data.size() == 1) {
