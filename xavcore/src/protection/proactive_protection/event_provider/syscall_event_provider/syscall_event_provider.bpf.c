@@ -94,7 +94,7 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
     switch (e->syscall_id) {
         case 0: {  // read.
             e->additional_data_count = 1;
-            u32 zero = 0, one = 1;
+            u32 zero = 0;
             u8* pathbuf0 = (u8*)bpf_map_lookup_elem(&pathbufs, &zero);
             if (!pathbuf0) {
                 break;
