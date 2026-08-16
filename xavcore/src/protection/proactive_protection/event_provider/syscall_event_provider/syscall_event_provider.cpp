@@ -76,9 +76,10 @@ outcome::result<void> SyscallEventProvider::start() {
     this->handle_raw_events_thread_ =
         std::jthread([this](std::stop_token stop) {
             while (!stop.stop_requested()) {
-                RawSyscallEvent raw_event;
-                if (this->raw_events_to_handle_.try_dequeue(raw_event)) {
-                    this->handle_raw_event(raw_event);
+                RawSyscallEventWrapper raw_event_wrapper;
+                if (this->raw_event_wrappers_to_handle_.try_dequeue(
+                        raw_event_wrapper)) {
+                    this->handle_raw_event_wrapper(raw_event_wrapper);
                 }
             }
         });
@@ -148,24 +149,26 @@ int SyscallEventProvider::event_callback(void* ctx, void* data,
     SyscallEventProvider* self = static_cast<SyscallEventProvider*>(ctx);
     RawSyscallEvent* raw_event = static_cast<RawSyscallEvent*>(data);
 
-    if (raw_event->syscall_id == 0) {
-        if (raw_event->additional_data_count == 1) {
-            std::uint64_t path_len =
-                raw_event->additional_data_lens[0];  // Include '\0'.
-            std::uint64_t raw_event_addr =
-                reinterpret_cast<std::uint64_t>(raw_event);
-            std::string path((char*)(raw_event_addr + sizeof(*raw_event)),
-                             path_len);
-            std::uint64_t args[6] = {0};
-            std::memmove(args, raw_event->args, sizeof(args));
-            std::uint64_t ret;
-            std::memmove(&ret, (const void*)&raw_event->ret, sizeof(ret));
-            self->logger_->info("read({}, {:#x}, {}) = {}", path, args[1],
-                                args[2], ret);
+    RawSyscallEventWrapper raw_event_wrapper;
+    switch (raw_event->syscall_id) {
+        case 0: {  // read().
+            raw_event_wrapper.raw_event = *raw_event;
+            if (raw_event->additional_data_count == 1) {
+                std::uint64_t data_len = raw_event->additional_data_lens[0];
+                std::uint64_t raw_event_addr =
+                    reinterpret_cast<std::uint64_t>(raw_event);
+                std::uint64_t additional_data_addr =
+                    raw_event_addr + sizeof(*raw_event);
+                raw_event_wrapper.additional_data.push_back(
+                    std::vector<std::uint8_t>(
+                        (std::uint8_t*)(additional_data_addr),
+                        (std::uint8_t*)(additional_data_addr + data_len)));
+            }
         }
     }
 
-    auto result = self->raw_events_to_handle_.enqueue(*raw_event);
+    auto result =
+        self->raw_event_wrappers_to_handle_.enqueue(raw_event_wrapper);
     if (!result) {
         self->logger_->warn("Failed to enqueue raw event");
         ++self->lost_event_count_;
@@ -174,22 +177,39 @@ int SyscallEventProvider::event_callback(void* ctx, void* data,
     return 0;
 }
 
-void SyscallEventProvider::handle_raw_event(const RawSyscallEvent& raw_event) {
+void SyscallEventProvider::handle_raw_event_wrapper(
+    const RawSyscallEventWrapper& raw_event_wrapper) {
     SyscallEvent event;
-    event.timestamp = this->sys_boot_time_point_ +
-                      std::chrono::nanoseconds(raw_event.timestamp);
-    event.process = {.pid = raw_event.pid,
-                     .start_time_point = this->sys_boot_time_point_ +
-                                         std::chrono::nanoseconds(
-                                             raw_event.proc_start_boottime)};
-    event.id = raw_event.syscall_id;
-    if (raw_event.enter_captured) {
+    event.timestamp =
+        this->sys_boot_time_point_ +
+        std::chrono::nanoseconds(raw_event_wrapper.raw_event.timestamp);
+    event.process = {.pid = raw_event_wrapper.raw_event.pid,
+                     .start_time_point =
+                         this->sys_boot_time_point_ +
+                         std::chrono::nanoseconds(
+                             raw_event_wrapper.raw_event.proc_start_boottime)};
+    event.id = raw_event_wrapper.raw_event.syscall_id;
+    if (raw_event_wrapper.raw_event.enter_captured) {
         std::uint64_t args[6];
-        std::memcpy(args, raw_event.args, sizeof(args));
+        std::memcpy(args, raw_event_wrapper.raw_event.args, sizeof(args));
         event.args = std::vector(std::begin(args), std::end(args));
     }
-    if (raw_event.exit_captured) {
-        event.ret = raw_event.ret;
+    if (raw_event_wrapper.raw_event.exit_captured) {
+        event.ret = raw_event_wrapper.raw_event.ret;
+    }
+
+    // FIXME: Test print.
+    if (raw_event_wrapper.raw_event.syscall_id == SYS_read &&
+        raw_event_wrapper.additional_data.size() == 1) {
+        std::string path(raw_event_wrapper.additional_data[0].begin(),
+                         raw_event_wrapper.additional_data[0].end());
+        std::uint64_t args[6] = {0};
+        std::memmove(args, raw_event_wrapper.raw_event.args, sizeof(args));
+        std::uint64_t ret;
+        std::memmove(&ret, (const void*)&raw_event_wrapper.raw_event.ret,
+                     sizeof(ret));
+        this->logger_->info("read({}({}), {:#x}, {}) = {}", args[0], path,
+                            args[1], args[2], ret);
     }
 
     // if (event.args.empty()) {

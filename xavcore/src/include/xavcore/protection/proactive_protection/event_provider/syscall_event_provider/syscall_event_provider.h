@@ -41,13 +41,14 @@ private:
     static int event_callback(void* ctx, void* data, std::size_t size);
 
 private:
-    void handle_raw_event(const RawSyscallEvent& raw_event);
-
-private:
     struct RawSyscallEventWrapper {
         RawSyscallEvent raw_event;
         std::vector<std::vector<std::uint8_t>> additional_data;
     };
+
+private:
+    void handle_raw_event_wrapper(
+        const RawSyscallEventWrapper& raw_event_wrapper);
 
 private:
     enum class Status { Started, Stopped };
@@ -60,7 +61,8 @@ private:
     std::unordered_set<IEventListener*> listeners_;
     std::atomic_uint64_t lost_event_count_;
     std::jthread monitor_thread_;
-    moodycamel::ConcurrentQueue<RawSyscallEvent> raw_events_to_handle_;
+    moodycamel::ConcurrentQueue<RawSyscallEventWrapper>
+        raw_event_wrappers_to_handle_;
     std::jthread handle_raw_events_thread_;
     std::chrono::time_point<std::chrono::system_clock> sys_boot_time_point_;
 };
