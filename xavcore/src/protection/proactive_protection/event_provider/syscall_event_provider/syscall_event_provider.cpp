@@ -151,24 +151,14 @@ int SyscallEventProvider::event_callback(void* ctx, void* data,
 
     RawSyscallEventWrapper raw_event_wrapper;
     raw_event_wrapper.raw_event = *raw_event;
-    switch (raw_event->syscall_id) {  // Handle additional data.
-        case 0: {                     // read().
-            if (raw_event->additional_data_count == 1) {
-                std::uint64_t data_len = raw_event->additional_data_lens[0];
-                std::uint64_t raw_event_addr =
-                    reinterpret_cast<std::uint64_t>(raw_event);
-                std::uint64_t additional_data_addr =
-                    raw_event_addr + sizeof(*raw_event);
-                raw_event_wrapper.additional_data.push_back(
-                    std::vector<std::uint8_t>(
-                        (std::uint8_t*)(additional_data_addr),
-                        (std::uint8_t*)(additional_data_addr + data_len)));
-            }
-            break;
-        }
-        default: {
-            break;
-        }
+    std::uint64_t raw_event_addr = reinterpret_cast<std::uint64_t>(raw_event);
+    std::uint64_t additional_data_addr = raw_event_addr + sizeof(*raw_event);
+    for (int i = 0; i < raw_event->additional_data_count; ++i) {
+        std::uint64_t data_len = raw_event->additional_data_lens[i];
+        raw_event_wrapper.additional_data.push_back(std::vector<std::uint8_t>(
+            (std::uint8_t*)(additional_data_addr),
+            (std::uint8_t*)(additional_data_addr + data_len)));
+        additional_data_addr += data_len;
     }
 
     auto result =
