@@ -196,7 +196,8 @@ void SyscallEventProvider::handle_raw_event_wrapper(
     switch (raw_event_wrapper.raw_event.syscall_id) {
         case SYS_read: {
             ReadSyscallAdditionalData additional_data;
-            if (raw_event_wrapper.additional_data.size() == 1) {
+            if (raw_event_wrapper.raw_event.enter_captured &&
+                raw_event_wrapper.additional_data.size() == 1) {
                 additional_data.fd_path =
                     std::string(raw_event_wrapper.additional_data[0].begin(),
                                 raw_event_wrapper.additional_data[0].end());
