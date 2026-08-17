@@ -1,13 +1,6 @@
 #pragma once
 
 #if defined(__BPF__) || defined(__bpf__)
-#include "vmlinux.h"
-typedef __u8 u8;
-typedef __u32 u32;
-typedef __u64 u64;
-typedef __s32 i32;
-typedef __s64 i64;
-
 // Syscall numbers.
 #if defined(__x86_64__) || defined(__amd64__)
 #define SYS_read (0)
