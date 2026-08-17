@@ -62,6 +62,21 @@ outcome::result<void> RuleBasedDetectionListener::accept(const IEvent& event) {
                     syscall_event.args[1], syscall_event.args[2],
                     syscall_event.ret);
             }
+        } else if (syscall_event.id == SYS_open &&
+                   std::holds_alternative<OpenSyscallAdditionalData>(
+                       syscall_event.additional_data)) {
+            auto& open_syscall_additional_data =
+                std::get<OpenSyscallAdditionalData>(
+                    syscall_event.additional_data);
+            if (syscall_event.args.empty()) {
+                this->logger_->info("open() = {}", syscall_event.ret);
+            } else {
+                this->logger_->info(
+                    "open({:#x}({}), {}, {}) = {}", syscall_event.args[0],
+                    open_syscall_additional_data.path.value_or("<unknown>"),
+                    syscall_event.args[1], syscall_event.args[2],
+                    syscall_event.ret);
+            }
         }
     }
 
