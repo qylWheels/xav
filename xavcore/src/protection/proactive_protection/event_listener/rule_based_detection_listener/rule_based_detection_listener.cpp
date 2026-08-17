@@ -91,6 +91,20 @@ outcome::result<void> RuleBasedDetectionListener::accept(const IEvent& event) {
                     close_syscall_additional_data.fd_path.value_or("<unknown>"),
                     syscall_event.ret);
             }
+        } else if (syscall_event.id == SYS_unlink &&
+                   std::holds_alternative<UnlinkSyscallAdditionalData>(
+                       syscall_event.additional_data)) {
+            auto& unlink_syscall_additional_data =
+                std::get<UnlinkSyscallAdditionalData>(
+                    syscall_event.additional_data);
+            if (syscall_event.args.empty()) {
+                this->logger_->info("unlink() = {}", syscall_event.ret);
+            } else {
+                this->logger_->info(
+                    "unlink({:#x}({})) = {}", syscall_event.args[0],
+                    unlink_syscall_additional_data.path.value_or("<unknown>"),
+                    syscall_event.ret);
+            }
         }
     }
 
