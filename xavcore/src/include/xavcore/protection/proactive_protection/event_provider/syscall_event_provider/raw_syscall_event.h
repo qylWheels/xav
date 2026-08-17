@@ -6,6 +6,8 @@
 #if defined(__TARGET_ARCH_x86_64)
 #define SYS_read (0)
 #define SYS_write (1)
+#define SYS_open (2)
+#define SYS_close (3)
 #endif  // __TARGET_ARCH_x86_64
 #else
 #include <cstdint>
