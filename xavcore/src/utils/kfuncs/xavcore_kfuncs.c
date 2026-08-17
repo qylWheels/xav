@@ -18,6 +18,8 @@ __bpf_kfunc int bpf_xavcore_fd_to_path_str(char *buf, u64 buf__sz, int fd);
 __bpf_kfunc u64 bpf_xavcore_strlen(const char *str);
 __bpf_kfunc u64 bpf_xavcore_strnlen_user(u64 str, u64 max_len);
 __bpf_kfunc s64 bpf_xavcore_strscpy(char *dest, u64 src, u64 dest__sz);
+__bpf_kfunc s64 bpf_xavcore_strncpy_from_user(char *dest, u64 unsafe_src,
+                                              u64 dest__sz);
 
 // Begin kfunc definitions.
 __bpf_kfunc_start_defs();
@@ -61,6 +63,11 @@ __bpf_kfunc s64 bpf_xavcore_strscpy(char *dest, u64 src, u64 dest__sz) {
     return strscpy(dest, (const char *)src, dest__sz);
 }
 
+__bpf_kfunc s64 bpf_xavcore_strncpy_from_user(char *dest, u64 unsafe_src,
+                                              u64 dest__sz) {
+    return strncpy_from_user(dest, (const char *)unsafe_src, dest__sz);
+}
+
 // End kfunc definitions.
 __bpf_kfunc_end_defs();
 
@@ -70,6 +77,7 @@ BTF_ID_FLAGS(func, bpf_xavcore_fd_to_path_str)
 BTF_ID_FLAGS(func, bpf_xavcore_strlen)
 BTF_ID_FLAGS(func, bpf_xavcore_strnlen_user)
 BTF_ID_FLAGS(func, bpf_xavcore_strscpy)
+BTF_ID_FLAGS(func, bpf_xavcore_strncpy_from_user)
 BTF_KFUNCS_END(xavcore_kfuncs_ids_set)
 
 // Register kfunc IDs set.
