@@ -64,19 +64,25 @@ int trace_sys_enter(struct trace_event_raw_sys_enter* ctx) {
     e.args[5] = ctx->args[5];
 
     // close() must be handled in sys_enter.
-    if (ctx->id == SYS_close) {
-        u32 zero = 0;
-        u8* pathbuf0 = (u8*)bpf_map_lookup_elem(&pathbufs, &zero);
-        if (!pathbuf0) {
-            e.additional_data_count = 0;
-            goto exit_if;
-        }
+    switch (ctx->id) {
+        case SYS_close: {
+            u32 zero = 0;
+            u8* pathbuf0 = (u8*)bpf_map_lookup_elem(&pathbufs, &zero);
+            if (!pathbuf0) {
+                e.additional_data_count = 0;
+                break;
+            }
 
-        int result = bpf_xavcore_fd_to_path_str((char*)pathbuf0, MAX_PATH_LEN,
-                                                e.args[0]);
-        if (result != 0) {
+            int result = bpf_xavcore_fd_to_path_str((char*)pathbuf0,
+                                                    MAX_PATH_LEN, e.args[0]);
+            if (result != 0) {
+                e.additional_data_count = 0;
+                break;
+            }
+        }
+        default: {
             e.additional_data_count = 0;
-            goto exit_if;
+            break;
         }
     }
 
