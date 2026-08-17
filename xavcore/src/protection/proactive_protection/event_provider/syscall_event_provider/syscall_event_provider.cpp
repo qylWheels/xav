@@ -149,6 +149,7 @@ int SyscallEventProvider::event_callback(void* ctx, void* data,
     SyscallEventProvider* self = static_cast<SyscallEventProvider*>(ctx);
     RawSyscallEvent* raw_event = static_cast<RawSyscallEvent*>(data);
 
+    // Construct RawSyscallEventWrapper by parsing additional data.
     RawSyscallEventWrapper raw_event_wrapper;
     raw_event_wrapper.raw_event = *raw_event;
     std::uint64_t raw_event_addr = reinterpret_cast<std::uint64_t>(raw_event);
