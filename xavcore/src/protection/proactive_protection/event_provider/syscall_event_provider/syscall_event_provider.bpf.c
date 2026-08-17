@@ -169,8 +169,8 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
                 break;
             }
 
-            result = bpf_dynptr_write(&dynptr, sizeof(*e), (void*)pathbuf0,
-                                      len + 1, 0);
+            result =
+                bpf_dynptr_write(&dynptr, sizeof(*e), (void*)pathbuf0, len, 0);
             if (result != 0) {
                 bpf_ringbuf_discard_dynptr(&dynptr, 0);
                 e->additional_data_count = 0;
@@ -179,7 +179,7 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
             }
 
             e->additional_data_count = 1;
-            e->additional_data_lens[0] = len + 1;  // Include '\0'.
+            e->additional_data_lens[0] = len;  // Not include '\0'.
             result = bpf_dynptr_write(&dynptr, 0, e, sizeof(*e), 0);
             if (result != 0) {
                 bpf_ringbuf_discard_dynptr(&dynptr, 0);
@@ -221,8 +221,8 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
                 break;
             }
 
-            result = bpf_dynptr_write(&dynptr, sizeof(*e), (void*)pathbuf0,
-                                      len + 1, 0);
+            result =
+                bpf_dynptr_write(&dynptr, sizeof(*e), (void*)pathbuf0, len, 0);
             if (result != 0) {
                 bpf_ringbuf_discard_dynptr(&dynptr, 0);
                 e->additional_data_count = 0;
@@ -231,7 +231,7 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
             }
 
             e->additional_data_count = 1;
-            e->additional_data_lens[0] = len + 1;  // Include '\0'.
+            e->additional_data_lens[0] = len;  // Not include '\0'.
             result = bpf_dynptr_write(&dynptr, 0, e, sizeof(*e), 0);
             if (result != 0) {
                 bpf_ringbuf_discard_dynptr(&dynptr, 0);
@@ -273,8 +273,8 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
                 break;
             }
 
-            result = bpf_dynptr_write(&dynptr, sizeof(*e), (void*)pathbuf0,
-                                      len + 1, 0);
+            result =
+                bpf_dynptr_write(&dynptr, sizeof(*e), (void*)pathbuf0, len, 0);
             if (result != 0) {
                 bpf_ringbuf_discard_dynptr(&dynptr, 0);
                 e->additional_data_count = 0;
@@ -283,7 +283,7 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
             }
 
             e->additional_data_count = 1;
-            e->additional_data_lens[0] = len + 1;  // Include '\0'.
+            e->additional_data_lens[0] = len;  // Not include '\0'.
             result = bpf_dynptr_write(&dynptr, 0, e, sizeof(*e), 0);
             if (result != 0) {
                 bpf_ringbuf_discard_dynptr(&dynptr, 0);
@@ -325,8 +325,8 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
                 break;
             }
 
-            result = bpf_dynptr_write(&dynptr, sizeof(*e), (void*)pathbuf0,
-                                      len + 1, 0);
+            result =
+                bpf_dynptr_write(&dynptr, sizeof(*e), (void*)pathbuf0, len, 0);
             if (result != 0) {
                 bpf_ringbuf_discard_dynptr(&dynptr, 0);
                 e->additional_data_count = 0;
@@ -335,7 +335,7 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
             }
 
             e->additional_data_count = 1;
-            e->additional_data_lens[0] = len + 1;  // Include '\0'.
+            e->additional_data_lens[0] = len;  // Not include '\0'.
             result = bpf_dynptr_write(&dynptr, 0, e, sizeof(*e), 0);
             if (result != 0) {
                 bpf_ringbuf_discard_dynptr(&dynptr, 0);
@@ -374,7 +374,7 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
                 break;
             }
 
-            if (bpf_dynptr_write(&dynptr, sizeof(*e), (void*)pathbuf0, len + 1,
+            if (bpf_dynptr_write(&dynptr, sizeof(*e), (void*)pathbuf0, len,
                                  0) != 0) {
                 bpf_ringbuf_discard_dynptr(&dynptr, 0);
                 e->additional_data_count = 0;
@@ -383,7 +383,7 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
             }
 
             e->additional_data_count = 1;
-            e->additional_data_lens[0] = len + 1;  // Include '\0'.
+            e->additional_data_lens[0] = len;  // Not include '\0'.
             if (bpf_dynptr_write(&dynptr, 0, e, sizeof(*e), 0) != 0) {
                 bpf_ringbuf_discard_dynptr(&dynptr, 0);
                 e->additional_data_count = 0;
