@@ -4,14 +4,16 @@
 
 namespace xavcore {
 namespace rule_based_detection_listener_rules {
-class CorePatternRule : public IRuleBasedDetectionListenerRule {
+class CorePatternModificationRule : public IRuleBasedDetectionListenerRule {
 public:
-    CorePatternRule();
-    ~CorePatternRule();
-    CorePatternRule(const CorePatternRule&) = delete;
-    CorePatternRule& operator=(const CorePatternRule&) = delete;
-    CorePatternRule(CorePatternRule&&) = delete;
-    CorePatternRule& operator=(CorePatternRule&&) = delete;
+    CorePatternModificationRule();
+    ~CorePatternModificationRule();
+    CorePatternModificationRule(const CorePatternModificationRule&) = delete;
+    CorePatternModificationRule& operator=(const CorePatternModificationRule&) =
+        delete;
+    CorePatternModificationRule(CorePatternModificationRule&&) = delete;
+    CorePatternModificationRule& operator=(CorePatternModificationRule&&) =
+        delete;
 
 public:  // IRuleBasedDetectionListenerRule methods.
     virtual std::string name() override;
