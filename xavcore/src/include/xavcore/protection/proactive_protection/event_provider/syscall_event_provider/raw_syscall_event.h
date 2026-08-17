@@ -7,6 +7,12 @@ typedef __u32 u32;
 typedef __u64 u64;
 typedef __s32 i32;
 typedef __s64 i64;
+
+// Syscall numbers.
+#if defined(__x86_64__) || defined(__amd64__)
+#define SYS_read (0)
+#define SYS_write (1)
+#endif  // __x86_64__, __amd64__
 #else
 #include <cstdint>
 typedef std::uint8_t u8;
