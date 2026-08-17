@@ -18,6 +18,10 @@ struct WriteSyscallAdditionalData {
     std::optional<std::string> fd_path;
 };
 
+struct OpenSyscallAdditionalData {
+    std::optional<std::string> path;
+};
+
 // Normal syscall event, for those who don't need to parse arguments.
 struct SyscallEvent : public IEvent {
     std::chrono::time_point<std::chrono::system_clock> timestamp;
@@ -28,7 +32,7 @@ struct SyscallEvent : public IEvent {
 
     // Additional data.
     std::variant<std::monostate, ReadSyscallAdditionalData,
-                 WriteSyscallAdditionalData>
+                 WriteSyscallAdditionalData, OpenSyscallAdditionalData>
         additional_data;
 };
 }  // namespace xavcore
