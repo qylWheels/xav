@@ -27,6 +27,8 @@ extern int bpf_xavcore_fd_to_path_str(char* buf, u64 buf__sz, int fd) __ksym;
 extern u64 bpf_xavcore_strlen(const char* str) __ksym;
 extern u64 bpf_xavcore_strnlen_user(u64 str, u64 max_len) __ksym;
 extern s64 bpf_xavcore_strscpy(char* dest, u64 src, u64 dest__sz) __ksym;
+extern s64 bpf_xavcore_strncpy_from_user(char* dest, u64 unsafe_src,
+                                         u64 dest__sz) __ksym;
 
 SEC("tp/raw_syscalls/sys_enter")
 int trace_sys_enter(struct trace_event_raw_sys_enter* ctx) {
@@ -157,6 +159,58 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
 
             int result = bpf_xavcore_fd_to_path_str((char*)pathbuf0,
                                                     MAX_PATH_LEN, e->args[0]);
+            if (result != 0) {
+                e->additional_data_count = 0;
+                bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
+                break;
+            }
+
+            u64 len = bpf_xavcore_strlen((const char*)pathbuf0);
+            len = (len > MAX_PATH_LEN) ? MAX_PATH_LEN : len;
+
+            struct bpf_dynptr dynptr;
+            result = bpf_ringbuf_reserve_dynptr(&rb, sizeof(*e) + len + 5, 0,
+                                                &dynptr);
+            if (result != 0) {
+                bpf_ringbuf_discard_dynptr(&dynptr, 0);
+                e->additional_data_count = 0;
+                bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
+                break;
+            }
+
+            result = bpf_dynptr_write(&dynptr, sizeof(*e), (void*)pathbuf0,
+                                      len + 1, 0);
+            if (result != 0) {
+                bpf_ringbuf_discard_dynptr(&dynptr, 0);
+                e->additional_data_count = 0;
+                bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
+                break;
+            }
+
+            e->additional_data_count = 1;
+            e->additional_data_lens[0] = len + 1;  // Include '\0'.
+            result = bpf_dynptr_write(&dynptr, 0, e, sizeof(*e), 0);
+            if (result != 0) {
+                bpf_ringbuf_discard_dynptr(&dynptr, 0);
+                e->additional_data_count = 0;
+                bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
+                break;
+            }
+
+            bpf_ringbuf_submit_dynptr(&dynptr, 0);
+            break;
+        }
+        case SYS_open: {
+            u32 zero = 0;
+            u8* pathbuf0 = (u8*)bpf_map_lookup_elem(&pathbufs, &zero);
+            if (!pathbuf0) {
+                e->additional_data_count = 0;
+                bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
+                break;
+            }
+
+            int result = bpf_xavcore_strncpy_from_user(
+                (char*)pathbuf0, e->args[0], MAX_PATH_LEN);
             if (result != 0) {
                 e->additional_data_count = 0;
                 bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
