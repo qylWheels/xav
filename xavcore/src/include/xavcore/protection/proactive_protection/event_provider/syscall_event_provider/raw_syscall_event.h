@@ -8,6 +8,7 @@
 #define SYS_write (1)
 #define SYS_open (2)
 #define SYS_close (3)
+#define SYS_unlink (87)
 #endif  // __TARGET_ARCH_x86_64
 #else
 #include <cstdint>
