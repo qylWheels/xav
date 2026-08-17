@@ -3,10 +3,10 @@
 #if defined(__BPF__) || defined(__bpf__)
 // Syscall numbers.
 #include "vmlinux.h"
-#if defined(__x86_64__) || defined(__amd64__)
+#if defined(__TARGET_ARCH_x86_64)
 #define SYS_read (0)
 #define SYS_write (1)
-#endif  // __x86_64__, __amd64__
+#endif  // __TARGET_ARCH_x86_64
 #else
 #include <cstdint>
 typedef std::uint8_t u8;
