@@ -79,6 +79,8 @@ int trace_sys_enter(struct trace_event_raw_sys_enter* ctx) {
                 e.additional_data_count = 0;
                 break;
             }
+
+            e.additional_data_count = 1;
         }
         default: {
             e.additional_data_count = 0;
@@ -277,6 +279,12 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
         }
         case SYS_close: {
             int result;
+
+            // Failed to get path of fd in trace_sys_enter().
+            if (e->additional_data_count == 0) {
+                bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
+                break;
+            }
 
             u32 zero = 0;
             char* pathbuf0 = (char*)bpf_map_lookup_elem(&pathbufs, &zero);
