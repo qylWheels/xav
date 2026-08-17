@@ -26,22 +26,4 @@ struct SyscallEvent : public IEvent {
     // Additional data.
     std::variant<std::monostate, ReadSyscallAdditionalData> additional_data;
 };
-
-struct ReadSyscallEventArgs {
-    std::uint32_t fd;
-    std::optional<std::filesystem::path> fd_path;
-
-    std::uint64_t buf;
-    std::uint64_t count;
-};
-
-// Specific syscall events, for those who need to parse arguments.
-struct SpecificSyscallEvent : public IEvent {
-    // When and who.
-    std::chrono::time_point<std::chrono::system_clock> timestamp;
-    Process process;
-
-    std::variant<ReadSyscallEventArgs> args;
-    std::uint64_t ret;
-};
 }  // namespace xavcore
