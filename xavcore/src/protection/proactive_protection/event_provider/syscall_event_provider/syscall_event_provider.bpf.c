@@ -81,6 +81,7 @@ int trace_sys_enter(struct trace_event_raw_sys_enter* ctx) {
             }
 
             e.additional_data_count = 1;
+            break;
         }
         default: {
             e.additional_data_count = 0;
