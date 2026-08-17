@@ -2,6 +2,7 @@
 
 #if defined(__BPF__) || defined(__bpf__)
 // Syscall numbers.
+#include "vmlinux.h"
 #if defined(__x86_64__) || defined(__amd64__)
 #define SYS_read (0)
 #define SYS_write (1)
