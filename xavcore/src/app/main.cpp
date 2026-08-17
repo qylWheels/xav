@@ -19,6 +19,7 @@
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rule_based_detection_listener.h"
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rule_interfaces.h"
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/anti_debug_rule.h"
+#include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/core_pattern_modification_rule.h"
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/test_rule.h"
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event_provider.h"
 #include "xavcore/scan/exact_hash.h"
@@ -88,7 +89,9 @@ void startup() {
             std::make_shared<
                 xavcore::rule_based_detection_listener_rules::TestRule>(),
             std::make_shared<
-                xavcore::rule_based_detection_listener_rules::AntiDebugRule>()};
+                xavcore::rule_based_detection_listener_rules::AntiDebugRule>(),
+            std::make_shared<xavcore::rule_based_detection_listener_rules::
+                                 CorePatternModificationRule>()};
 
     // Start protection.
     ret = syscall_event_provider->start();
