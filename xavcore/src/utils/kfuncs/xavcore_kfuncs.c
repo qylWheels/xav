@@ -33,14 +33,15 @@ __bpf_kfunc int bpf_xavcore_fd_to_path_str(char *buf, u64 buf__sz, int fd) {
 
     struct fd f = fdget(fd);
     struct file *file = fd_file(f);
-
     if (!file) {
+        fdput(f);
         return -EFAULT;
     }
 
     struct path *path = &file->f_path;
     char *result = d_path(path, buf, buf__sz);
     if (IS_ERR_OR_NULL(result)) {
+        fdput(f);
         return -EFAULT;
     }
 
