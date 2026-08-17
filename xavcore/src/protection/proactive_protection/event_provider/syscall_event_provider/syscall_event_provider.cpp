@@ -194,7 +194,6 @@ void SyscallEventProvider::handle_raw_event_wrapper(
     }
 
     // Parse additional data.
-    // Use end() - 1 to exclude the null terminator.
     switch (raw_event_wrapper.raw_event.syscall_id) {
         case SYS_read: {
             ReadSyscallAdditionalData additional_data;
@@ -202,7 +201,7 @@ void SyscallEventProvider::handle_raw_event_wrapper(
                 raw_event_wrapper.additional_data.size() == 1) {
                 additional_data.fd_path =
                     std::string(raw_event_wrapper.additional_data[0].begin(),
-                                raw_event_wrapper.additional_data[0].end() - 1);
+                                raw_event_wrapper.additional_data[0].end());
             } else {
                 additional_data.fd_path = std::nullopt;
             }
@@ -215,7 +214,7 @@ void SyscallEventProvider::handle_raw_event_wrapper(
                 raw_event_wrapper.additional_data.size() == 1) {
                 additional_data.fd_path =
                     std::string(raw_event_wrapper.additional_data[0].begin(),
-                                raw_event_wrapper.additional_data[0].end() - 1);
+                                raw_event_wrapper.additional_data[0].end());
             } else {
                 additional_data.fd_path = std::nullopt;
             }
@@ -228,7 +227,7 @@ void SyscallEventProvider::handle_raw_event_wrapper(
                 raw_event_wrapper.additional_data.size() == 1) {
                 additional_data.path =
                     std::string(raw_event_wrapper.additional_data[0].begin(),
-                                raw_event_wrapper.additional_data[0].end() - 1);
+                                raw_event_wrapper.additional_data[0].end());
             } else {
                 additional_data.path = std::nullopt;
             }
@@ -241,7 +240,7 @@ void SyscallEventProvider::handle_raw_event_wrapper(
                 raw_event_wrapper.additional_data.size() == 1) {
                 additional_data.fd_path =
                     std::string(raw_event_wrapper.additional_data[0].begin(),
-                                raw_event_wrapper.additional_data[0].end() - 1);
+                                raw_event_wrapper.additional_data[0].end());
             } else {
                 additional_data.fd_path = std::nullopt;
             }
@@ -254,7 +253,7 @@ void SyscallEventProvider::handle_raw_event_wrapper(
                 raw_event_wrapper.additional_data.size() == 1) {
                 additional_data.path =
                     std::string(raw_event_wrapper.additional_data[0].begin(),
-                                raw_event_wrapper.additional_data[0].end() - 1);
+                                raw_event_wrapper.additional_data[0].end());
             } else {
                 additional_data.path = std::nullopt;
             }
