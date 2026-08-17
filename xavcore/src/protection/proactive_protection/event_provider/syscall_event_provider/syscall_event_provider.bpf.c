@@ -23,6 +23,13 @@ struct {
     __uint(max_entries, 1 * 1024 * 1024);  // 1MB
 } rb SEC(".maps");
 
+struct {
+    __uint(type, BPF_MAP_TYPE_PERCPU_ARRAY);
+    __uint(max_entries, 4);
+    __type(key, u32);
+    __type(value, u8[MAX_PATH_LEN + 5]);
+} pathbufs SEC(".maps");
+
 extern int bpf_xavcore_fd_to_path_str(char* buf, u64 buf__sz, int fd) __ksym;
 extern u64 bpf_xavcore_strlen(const char* str) __ksym;
 extern u64 bpf_xavcore_strnlen_user(u64 str, u64 max_len) __ksym;
@@ -56,19 +63,29 @@ int trace_sys_enter(struct trace_event_raw_sys_enter* ctx) {
     e.args[4] = ctx->args[4];
     e.args[5] = ctx->args[5];
 
+    // close() must be handled in sys_enter.
+    if (ctx->id == SYS_close) {
+        u32 zero = 0;
+        u8* pathbuf0 = (u8*)bpf_map_lookup_elem(&pathbufs, &zero);
+        if (!pathbuf0) {
+            e.additional_data_count = 0;
+            goto exit_if;
+        }
+
+        int result = bpf_xavcore_fd_to_path_str((char*)pathbuf0, MAX_PATH_LEN,
+                                                e.args[0]);
+        if (result != 0) {
+            e.additional_data_count = 0;
+            goto exit_if;
+        }
+    }
+
 exit_if:
     // Store the event in the percpu map.
     bpf_map_update_elem(&raw_syscall_event_map, &tid, &e, BPF_ANY);
 
     return 0;
 }
-
-struct {
-    __uint(type, BPF_MAP_TYPE_PERCPU_ARRAY);
-    __uint(max_entries, 4);
-    __type(key, u32);
-    __type(value, u8[MAX_PATH_LEN + 5]);
-} pathbufs SEC(".maps");
 
 SEC("tp/raw_syscalls/sys_exit")
 int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
@@ -253,23 +270,17 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
             break;
         }
         case SYS_close: {
+            int result;
+
             u32 zero = 0;
-            u8* pathbuf0 = (u8*)bpf_map_lookup_elem(&pathbufs, &zero);
+            char* pathbuf0 = (char*)bpf_map_lookup_elem(&pathbufs, &zero);
             if (!pathbuf0) {
                 e->additional_data_count = 0;
                 bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
                 break;
             }
 
-            int result = bpf_xavcore_fd_to_path_str((char*)pathbuf0,
-                                                    MAX_PATH_LEN, e->args[0]);
-            if (result != 0) {
-                e->additional_data_count = 0;
-                bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
-                break;
-            }
-
-            u64 len = bpf_xavcore_strlen((const char*)pathbuf0);
+            u64 len = bpf_xavcore_strlen(pathbuf0);
             len = (len > MAX_PATH_LEN) ? MAX_PATH_LEN : len;
 
             struct bpf_dynptr dynptr;
