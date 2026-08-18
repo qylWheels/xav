@@ -273,6 +273,19 @@ void SyscallEventProvider::handle_raw_event_wrapper(
             event.additional_data = additional_data;
             break;
         }
+        case SYS_creat: {
+            CreatSyscallAdditionalData additional_data;
+            if (raw_event_wrapper.raw_event.enter_captured &&
+                raw_event_wrapper.additional_data.size() == 1) {
+                additional_data.path =
+                    std::string(raw_event_wrapper.additional_data[0].begin(),
+                                raw_event_wrapper.additional_data[0].end());
+            } else {
+                additional_data.path = std::nullopt;
+            }
+            event.additional_data = additional_data;
+            break;
+        }
         case SYS_unlink: {
             UnlinkSyscallAdditionalData additional_data;
             if (raw_event_wrapper.raw_event.enter_captured &&
