@@ -295,6 +295,67 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
             bpf_ringbuf_submit_dynptr(&dynptr, 0);
             break;
         }
+        case SYS_openat: {
+            u32 zero = 0, one = 1, two = 2;
+            char* pathbuf0 = (char*)bpf_map_lookup_elem(&pathbufs, &zero);
+            char* pathbuf1 = (char*)bpf_map_lookup_elem(&pathbufs, &one);
+            char* pathbuf2 = (char*)bpf_map_lookup_elem(&pathbufs, &two);
+            if (!pathbuf0 || !pathbuf1 || !pathbuf2) {
+                e->additional_data_count = 0;
+                bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
+                break;
+            }
+
+            // Path string from dirfd argument.
+            if (bpf_xavcore_fd_to_path_str(pathbuf0, MAX_PATH_LEN,
+                                           e->args[0]) != 0) {
+                e->additional_data_count = 0;
+                bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
+                break;
+            }
+
+            // Path string from pathname argument.
+            if (bpf_probe_read_user_str(pathbuf1, MAX_PATH_LEN,
+                                        (const void*)e->args[1]) < 0) {
+                e->additional_data_count = 0;
+                bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
+                break;
+            }
+
+            // Concatenate.
+            BPF_SNPRINTF(pathbuf2, MAX_PATH_LEN, "%s/%s", pathbuf0, pathbuf1);
+
+            u64 len = bpf_xavcore_strlen(pathbuf2);
+            len = (len > MAX_PATH_LEN) ? MAX_PATH_LEN : len;
+
+            struct bpf_dynptr dynptr;
+            if (bpf_ringbuf_reserve_dynptr(&rb, sizeof(*e) + len + 5, 0,
+                                           &dynptr) != 0) {
+                bpf_ringbuf_discard_dynptr(&dynptr, 0);
+                e->additional_data_count = 0;
+                bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
+                break;
+            }
+
+            if (bpf_dynptr_write(&dynptr, sizeof(*e), pathbuf2, len, 0) != 0) {
+                bpf_ringbuf_discard_dynptr(&dynptr, 0);
+                e->additional_data_count = 0;
+                bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
+                break;
+            }
+
+            e->additional_data_count = 1;
+            e->additional_data_lens[0] = len;  // Not include '\0'.
+            if (bpf_dynptr_write(&dynptr, 0, e, sizeof(*e), 0) != 0) {
+                bpf_ringbuf_discard_dynptr(&dynptr, 0);
+                e->additional_data_count = 0;
+                bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
+                break;
+            }
+
+            bpf_ringbuf_submit_dynptr(&dynptr, 0);
+            break;
+        }
         case SYS_close: {
             int result;
 
