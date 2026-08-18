@@ -86,6 +86,25 @@ outcome::result<void> RuleBasedDetectionListener::accept(const IEvent& event) {
                     syscall_event.ret);
             }
         }
+    } else if (syscall_event.id == SYS_openat &&
+               std::holds_alternative<OpenatSyscallAdditionalData>(
+                   syscall_event.additional_data)) {
+        auto& openat_syscall_additional_data =
+            std::get<OpenatSyscallAdditionalData>(
+                syscall_event.additional_data);
+        if (syscall_event.args.empty()) {
+            this->logger_->info("openat() = {}", syscall_event.ret);
+        } else {
+            if (openat_syscall_additional_data.path.has_value() &&
+                std::regex_match(openat_syscall_additional_data.path.value(),
+                                 xavcoretest_regex)) {
+                this->logger_->info(
+                    "openat(({}, {:#x})({}), {}) = {}", syscall_event.args[0],
+                    syscall_event.args[1],
+                    openat_syscall_additional_data.path.value_or("<unknown>"),
+                    syscall_event.args[2], syscall_event.ret);
+            }
+        }
     } else if (syscall_event.id == SYS_close &&
                std::holds_alternative<CloseSyscallAdditionalData>(
                    syscall_event.additional_data)) {
