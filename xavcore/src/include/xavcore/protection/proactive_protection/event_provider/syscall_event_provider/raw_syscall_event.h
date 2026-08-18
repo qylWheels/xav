@@ -15,6 +15,8 @@
 #define SYS_creat (85)
 #define SYS_unlink (87)
 #endif  // __TARGET_ARCH_x86_64
+
+#define AT_CWDFD (-100)
 #else
 #include <cstdint>
 typedef std::uint8_t u8;
