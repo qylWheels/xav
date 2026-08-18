@@ -2,9 +2,11 @@
 #include <linux/btf.h>
 #include <linux/btf_ids.h>
 #include <linux/file.h>
+#include <linux/fs_struct.h>
 #include <linux/init.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
+#include <linux/sched.h>
 #include <linux/string.h>
 #include <linux/types.h>
 #include <linux/uaccess.h>
@@ -14,6 +16,7 @@ MODULE_AUTHOR("qylWheels");
 MODULE_DESCRIPTION("Customized kfuncs for ebpf programs in xavcore");
 
 // kfunc prototype.
+__bpf_kfunc int bpf_xavcore_get_proc_cwd(char *buf, u64 buf__sz);
 __bpf_kfunc int bpf_xavcore_fd_to_path_str(char *buf, u64 buf__sz, int fd);
 __bpf_kfunc u64 bpf_xavcore_strlen(const char *str);
 __bpf_kfunc u64 bpf_xavcore_strnlen_user(u64 str, u64 max_len);
@@ -24,7 +27,28 @@ __bpf_kfunc s64 bpf_xavcore_strncpy_from_user(char *dest, u64 unsafe_src,
 // Begin kfunc definitions.
 __bpf_kfunc_start_defs();
 
-// Define bpf_parse_path_struct kfunc.
+// Run in process context.
+__bpf_kfunc int bpf_xavcore_get_proc_cwd(char *buf, u64 buf__sz) {
+    if (!buf) {
+        return -EINVAL;
+    }
+
+    if (!current->fs) {
+        return -EFAULT;
+    }
+
+    struct path pwd;
+    get_fs_pwd(current->fs, &pwd);
+    char *cwd_str = d_path(&pwd, buf, buf__sz);
+    if (IS_ERR(cwd_str)) {
+        return -EFAULT;
+    }
+    path_put(&pwd);
+    memmove(buf, cwd_str, strlen(cwd_str) + 1);
+
+    return 0;
+}
+
 // Run in process context.
 __bpf_kfunc int bpf_xavcore_fd_to_path_str(char *buf, u64 buf__sz, int fd) {
     if (!buf) {
@@ -74,6 +98,7 @@ __bpf_kfunc_end_defs();
 
 // Define BTF kfuncs IDs set.
 BTF_KFUNCS_START(xavcore_kfuncs_ids_set)
+BTF_ID_FLAGS(func, bpf_xavcore_get_proc_cwd)
 BTF_ID_FLAGS(func, bpf_xavcore_fd_to_path_str)
 BTF_ID_FLAGS(func, bpf_xavcore_strlen)
 BTF_ID_FLAGS(func, bpf_xavcore_strnlen_user)
