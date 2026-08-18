@@ -243,7 +243,8 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
             bpf_ringbuf_submit_dynptr(&dynptr, 0);
             break;
         }
-        case SYS_open: {
+        case SYS_open:
+        case SYS_creat: {
             u32 zero = 0;
             u8* pathbuf0 = (u8*)bpf_map_lookup_elem(&pathbufs, &zero);
             if (!pathbuf0) {
