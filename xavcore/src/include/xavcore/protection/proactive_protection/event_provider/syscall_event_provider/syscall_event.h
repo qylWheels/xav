@@ -34,6 +34,10 @@ struct CloseSyscallAdditionalData {
     std::optional<std::string> fd_path;
 };
 
+struct CreatSyscallAdditionalData {
+    std::optional<std::string> path;
+};
+
 struct UnlinkSyscallAdditionalData {
     std::optional<std::string> path;
 };
@@ -50,7 +54,8 @@ struct SyscallEvent : public IEvent {
     std::variant<std::monostate, ReadSyscallAdditionalData,
                  WriteSyscallAdditionalData, OpenSyscallAdditionalData,
                  OpenatSyscallAdditionalData, Openat2SyscallAdditionalData,
-                 CloseSyscallAdditionalData, UnlinkSyscallAdditionalData>
+                 CloseSyscallAdditionalData, CreatSyscallAdditionalData,
+                 UnlinkSyscallAdditionalData>
         additional_data;
 };
 }  // namespace xavcore
