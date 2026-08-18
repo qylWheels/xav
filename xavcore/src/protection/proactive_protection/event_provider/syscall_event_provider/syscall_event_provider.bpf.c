@@ -295,7 +295,8 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
             bpf_ringbuf_submit_dynptr(&dynptr, 0);
             break;
         }
-        case SYS_openat: {
+        case SYS_openat:
+        case SYS_openat2: {
             u32 zero = 0, one = 1, two = 2;
             char* pathbuf0 = (char*)bpf_map_lookup_elem(&pathbufs, &zero);
             char* pathbuf1 = (char*)bpf_map_lookup_elem(&pathbufs, &one);
