@@ -6,8 +6,13 @@
 #if defined(__TARGET_ARCH_x86_64)
 #define SYS_read (0)
 #define SYS_write (1)
+
 #define SYS_open (2)
+#define SYS_openat (257)
+#define SYS_openat2 (437)
 #define SYS_close (3)
+
+#define SYS_creat (85)
 #define SYS_unlink (87)
 #endif  // __TARGET_ARCH_x86_64
 #else
