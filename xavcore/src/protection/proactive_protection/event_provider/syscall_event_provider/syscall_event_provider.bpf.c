@@ -333,8 +333,13 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
                 break;
             }
 
-            // Concatenate.
-            BPF_SNPRINTF(pathbuf2, MAX_PATH_LEN, "%s/%s", pathbuf0, pathbuf1);
+            // Concatenate only if path is relative path.
+            if (pathbuf1[0] != '/') {
+                BPF_SNPRINTF(pathbuf2, MAX_PATH_LEN, "%s/%s", pathbuf0,
+                             pathbuf1);
+            } else {
+                BPF_SNPRINTF(pathbuf2, MAX_PATH_LEN, "%s", pathbuf1);
+            }
 
             u64 len = bpf_xavcore_strlen(pathbuf2);
             len = (len > MAX_PATH_LEN) ? MAX_PATH_LEN : len;
