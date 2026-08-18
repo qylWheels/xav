@@ -1,6 +1,7 @@
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rule_based_detection_listener.h"
 
 #include <spdlog/spdlog.h>
+#include <sys/syscall.h>
 
 #include <algorithm>
 #include <cstddef>
@@ -103,6 +104,26 @@ outcome::result<void> RuleBasedDetectionListener::accept(const IEvent& event) {
                     syscall_event.args[1],
                     openat_syscall_additional_data.path.value_or("<unknown>"),
                     syscall_event.args[2], syscall_event.ret);
+            }
+        }
+    } else if (syscall_event.id == SYS_openat2 &&
+               std::holds_alternative<Openat2SyscallAdditionalData>(
+                   syscall_event.additional_data)) {
+        auto& openat2_syscall_additional_data =
+            std::get<Openat2SyscallAdditionalData>(
+                syscall_event.additional_data);
+        if (syscall_event.args.empty()) {
+            this->logger_->info("openat2() = {}", syscall_event.ret);
+        } else {
+            if (openat2_syscall_additional_data.path.has_value() &&
+                std::regex_match(openat2_syscall_additional_data.path.value(),
+                                 xavcoretest_regex)) {
+                this->logger_->info(
+                    "openat2(({}, {:#x})({}), {}, {}) = {}",
+                    syscall_event.args[0], syscall_event.args[1],
+                    openat2_syscall_additional_data.path.value_or("<unknown>"),
+                    syscall_event.args[2], syscall_event.args[3],
+                    syscall_event.ret);
             }
         }
     } else if (syscall_event.id == SYS_close &&
