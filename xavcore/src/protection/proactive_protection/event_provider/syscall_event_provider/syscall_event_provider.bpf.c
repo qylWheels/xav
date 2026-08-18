@@ -30,6 +30,7 @@ struct {
     __type(value, u8[MAX_PATH_LEN + 5]);
 } pathbufs SEC(".maps");
 
+extern int bpf_xavcore_get_proc_cwd(char* buf, u64 buf__sz) __ksym;
 extern int bpf_xavcore_fd_to_path_str(char* buf, u64 buf__sz, int fd) __ksym;
 extern u64 bpf_xavcore_strlen(const char* str) __ksym;
 extern u64 bpf_xavcore_strnlen_user(u64 str, u64 max_len) __ksym;
@@ -309,11 +310,19 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
             }
 
             // Path string from dirfd argument.
-            if (bpf_xavcore_fd_to_path_str(pathbuf0, MAX_PATH_LEN,
-                                           e->args[0]) != 0) {
-                e->additional_data_count = 0;
-                bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
-                break;
+            if (e->args[0] == AT_CWDFD) {
+                if (bpf_xavcore_get_proc_cwd(pathbuf0, MAX_PATH_LEN) != 0) {
+                    e->additional_data_count = 0;
+                    bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
+                    break;
+                }
+            } else {
+                if (bpf_xavcore_fd_to_path_str(pathbuf0, MAX_PATH_LEN,
+                                               e->args[0]) != 0) {
+                    e->additional_data_count = 0;
+                    bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
+                    break;
+                }
             }
 
             // Path string from pathname argument.
