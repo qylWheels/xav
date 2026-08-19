@@ -30,7 +30,7 @@ function App() {
               </a>
             </li>
           ))}
-          <span className="mt-auto self-center mb-4">{majorVersion}.{minorVersion}.{patchVersion}</span>
+          <div className="badge badge-soft badge-success mt-auto self-center mb-4">{majorVersion}.{minorVersion}.{patchVersion}</div>
         </ul>
         <div data-tauri-drag-region className="w-full h-1/9 flex justify-end items-center p-4">
           <button className="btn btn-ghost btn-sm"><Minus size={16} /></button>
