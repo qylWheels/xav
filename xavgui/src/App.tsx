@@ -1,4 +1,3 @@
-import "@/index.css"
 import "@/App.css"
 import Overview from "@/views/Overview";
 import Scan from "@/views/Scan";
