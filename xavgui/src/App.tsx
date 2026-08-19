@@ -3,13 +3,14 @@ import "@/App.css"
 import Overview from "@/views/Overview";
 import Scan from "@/views/Scan";
 import { Shield, Search, LayoutDashboard, Bolt, Minus, X } from "lucide-react";
+import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom';
 
 function App() {
   const menuItems = [
-    { icon: LayoutDashboard, text: "Overview" },
-    { icon: Search, text: "Scan" },
-    { icon: Shield, text: "Protection" },
-    { icon: Bolt, text: "Settings" }
+    { icon: LayoutDashboard, text: "Overview", to: "/overview" },
+    { icon: Search, text: "Scan", to: "/scan" },
+    { icon: Shield, text: "Protection", to: "/protection" },
+    { icon: Bolt, text: "Settings", to: "/settings" }
   ]
   const majorVersion = "0"
   const minorVersion = "1"
@@ -18,31 +19,37 @@ function App() {
   return (
     <div className="w-screen h-screen bg-transparent p-2 overflow-hidden">
       <div className="w-full h-full bg-white rounded-xl shadow-lg flex">
-        <ul className="menu menu-md rounded-l-xl bg-base-200 w-48 h-full">
-          <div data-tauri-drag-region className="flex items-center justify-center py-8">
-            <Shield data-tauri-drag-region size={36} className="pointer-events-none" />
+        <BrowserRouter>
+          <ul className="menu menu-md rounded-l-xl bg-base-200 w-48 h-full">
+            <div data-tauri-drag-region className="flex items-center justify-center py-8">
+              <Shield data-tauri-drag-region size={36} className="pointer-events-none" />
+            </div>
+            {menuItems.map((item) => (
+              <li key={item.text} className="my-2">
+                <NavLink className="flex items-center" to={item.to}>
+                  <item.icon />
+                  {item.text}
+                </NavLink>
+              </li>
+            ))}
+            <div className="badge badge-soft badge-success mt-auto self-center mb-4">{majorVersion}.{minorVersion}.{patchVersion}</div>
+          </ul>
+          <div className="w-full h-full flex-col">
+            <div data-tauri-drag-region className="w-full h-1/9 flex justify-end items-center p-4">
+              <button className="btn btn-ghost btn-sm"><Minus size={16} /></button>
+              <button className="btn btn-ghost btn-sm"><X size={16} /></button>
+            </div>
+            <div className="w-full h-auto">
+              <Routes>
+                <Route path="/" element={<Overview />} />
+                <Route path="/overview" element={<Overview />} />
+                <Route path="/scan" element={<Scan />} />
+              </Routes>
+            </div>
           </div>
-          {menuItems.map((item) => (
-            <li key={item.text} className="my-2">
-              <a className="flex items-center">
-                <item.icon />
-                {item.text}
-              </a>
-            </li>
-          ))}
-          <div className="badge badge-soft badge-success mt-auto self-center mb-4">{majorVersion}.{minorVersion}.{patchVersion}</div>
-        </ul>
-        <div className="w-full h-full flex-col">
-          <div data-tauri-drag-region className="w-full h-1/9 flex justify-end items-center p-4">
-            <button className="btn btn-ghost btn-sm"><Minus size={16} /></button>
-            <button className="btn btn-ghost btn-sm"><X size={16} /></button>
-          </div>
-          <div className="w-full h-auto">
-            <Overview />
-          </div>
-        </div>
+        </BrowserRouter>
       </div>
-    </div>
+    </div >
   );
 }
 
