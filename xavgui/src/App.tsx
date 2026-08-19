@@ -2,9 +2,12 @@ import "@/App.css"
 import Overview from "@/views/Overview";
 import Scan from "@/views/Scan";
 import Protection from "@/views/Protection";
+import ProcessTree from "@/views/ProcessTree";
 import { Shield, Search, LayoutDashboard, Bolt, Minus, X } from "lucide-react";
 import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom';
 import { useState } from "react";
+import MainSidebar from "@/components/MainSidebar";
+import TitleBar from "@/components/TitleBar";
 
 function App() {
   return (
@@ -20,11 +23,12 @@ function App() {
                 <Route path="/overview" element={<Overview />} />
                 <Route path="/scan" element={<Scan />} />
                 <Route path="/protection" element={<Protection />} />
+                <Route path="/process-tree" element={<ProcessTree />} />
               </Routes>
             </div>
           </div>
         </BrowserRouter>
-      </div>
+      </div >
     </div >
   );
 }
