@@ -7,39 +7,11 @@ import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom';
 import { useState } from "react";
 
 function App() {
-  const menuItems = [
-    { icon: LayoutDashboard, text: "Overview", to: "/overview" },
-    { icon: Search, text: "Scan", to: "/scan" },
-    { icon: Shield, text: "Protection", to: "/protection" },
-    { icon: Bolt, text: "Settings", to: "/settings" }
-  ]
-  const [activeIndex, setActiveIndex] = useState(0)
-
-  const majorVersion = "0"
-  const minorVersion = "1"
-  const patchVersion = "0"
-
   return (
     <div className="w-screen h-screen bg-transparent p-2 overflow-hidden">
       <div className="w-full h-full bg-white rounded-xl shadow-lg flex">
         <BrowserRouter>
-          <ul className="menu menu-md rounded-l-xl bg-base-200 w-48 h-full">
-            <div data-tauri-drag-region className="flex items-center justify-center py-8">
-              <Shield data-tauri-drag-region size={36} className="pointer-events-none" />
-            </div>
-            {menuItems.map((item) => (
-              <li key={item.text} className="my-2">
-                <NavLink
-                  className={`flex items-center ${activeIndex === menuItems.indexOf(item) ? 'menu-active' : ''}`}
-                  to={item.to}
-                  onClick={() => setActiveIndex(menuItems.indexOf(item))}>
-                  <item.icon />
-                  {item.text}
-                </NavLink>
-              </li>
-            ))}
-            <div className="badge badge-soft badge-success mt-auto self-center mb-4">{majorVersion}.{minorVersion}.{patchVersion}</div>
-          </ul>
+          <MainSidebar />
           <div className="w-full h-full flex-col">
             <div data-tauri-drag-region className="w-full h-1/9 flex justify-end items-center p-4">
               <button className="btn btn-ghost btn-sm"><Minus size={16} /></button>
