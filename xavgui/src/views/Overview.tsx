@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp, ShieldCheck } from "lucide-react";
+import { Biohazard, ChevronDown, ChevronUp, Database, Dock, ShieldCheck, TextSearch } from "lucide-react";
 
 function Overview() {
     return (
@@ -16,6 +16,9 @@ function Overview() {
                 <div className="stat">
                     <div className="stat-title">Software Version</div>
                     <div className="stat-value">0.1.0</div>
+                    <div className="stat-figure">
+                        <Database />
+                    </div>
                     <div className="stat-actions">
                         <button className="btn btn-soft btn-xs btn-success">Update</button>
                     </div>
@@ -23,6 +26,9 @@ function Overview() {
                 <div className="stat">
                     <div className="stat-title">Database Version</div>
                     <div className="stat-value">2026.08.19.001</div>
+                    <div className="stat-figure">
+                        <Dock />
+                    </div>
                     <div className="stat-actions">
                         <button className="btn btn-soft btn-xs btn-success">Update</button>
                     </div>
@@ -33,6 +39,9 @@ function Overview() {
                 <div className="stat">
                     <div className="stat-title">Scanned Object(s)</div>
                     <div className="stat-value">29,882</div>
+                    <div className="stat-figure">
+                        <TextSearch />
+                    </div>
                     <div className="stat-desc flex">
                         <ChevronUp size={16} className="mr-1" color="var(--color-error)" />
                         <span className="text-error">21%</span>
@@ -45,6 +54,9 @@ function Overview() {
                         <div className="text-error">
                             4
                         </div>
+                    </div>
+                    <div className="stat-figure">
+                        <Biohazard />
                     </div>
                     <div className="stat-desc flex">
                         <ChevronDown size={16} className="mr-1" color="var(--color-success)" />
