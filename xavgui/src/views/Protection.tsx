@@ -1,6 +1,20 @@
 import { AppWindow, SquareChartGantt } from "lucide-react";
+import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
 
 function Protection() {
+    const onViewProcessTreeBtnClick = async () => {
+        new WebviewWindow('process-tree-window', {
+            url: '/process-tree',
+            width: 800,
+            height: 600,
+            decorations: false,
+            transparent: true,
+            shadow: false,
+            maximizable: false,
+            resizable: false
+        });
+    };
+
     return (
         <div className="w-full flex flex-col">
             <div className="card border mx-4">
@@ -23,7 +37,7 @@ function Protection() {
                             </div>
                         </div>
                     </div>
-                    <button className="btn mt-2">View Process Tree</button>
+                    <button className="btn mt-2" onClick={onViewProcessTreeBtnClick}>View Process Tree</button>
                 </div>
             </div>
             <div className="card border mx-4 mt-4">
