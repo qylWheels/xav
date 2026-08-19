@@ -4,6 +4,7 @@ import Overview from "@/views/Overview";
 import Scan from "@/views/Scan";
 import { Shield, Search, LayoutDashboard, Bolt, Minus, X } from "lucide-react";
 import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom';
+import { useState } from "react";
 
 function App() {
   const menuItems = [
@@ -12,6 +13,8 @@ function App() {
     { icon: Shield, text: "Protection", to: "/protection" },
     { icon: Bolt, text: "Settings", to: "/settings" }
   ]
+  const [activeIndex, setActiveIndex] = useState(0)
+
   const majorVersion = "0"
   const minorVersion = "1"
   const patchVersion = "0"
@@ -26,7 +29,10 @@ function App() {
             </div>
             {menuItems.map((item) => (
               <li key={item.text} className="my-2">
-                <NavLink className="flex items-center" to={item.to}>
+                <NavLink
+                  className={`flex items-center ${activeIndex === menuItems.indexOf(item) ? 'menu-active' : ''}`}
+                  to={item.to}
+                  onClick={() => setActiveIndex(menuItems.indexOf(item))}>
                   <item.icon />
                   {item.text}
                 </NavLink>
