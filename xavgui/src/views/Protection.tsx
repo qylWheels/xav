@@ -39,7 +39,7 @@ function Protection() {
                         </div>
                     </div>
                     {/* <button className="btn mt-2" onClick={onOpenProcessViewerBtnClick}>Open Process Viewer</button> */}
-                    <div className="flex justify-end">
+                    <div className="flex justify-center">
                         <button className="btn btn-link pl-0">Settings</button>
                     </div>
                 </div>
@@ -71,7 +71,7 @@ function Protection() {
                             </div>
                         </div>
                     </div>
-                    <div className="flex justify-end">
+                    <div className="flex justify-center">
                         <button className="btn btn-link pl-0">Settings</button>
                     </div>
                 </div>
