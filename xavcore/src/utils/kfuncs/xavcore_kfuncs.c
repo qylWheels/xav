@@ -99,7 +99,9 @@ __bpf_kfunc s64 bpf_xavcore_strncpy_from_user(char *dest, u64 unsafe_src,
 __bpf_kfunc void bpf_xavcore_msleep_if_streq(const char *s1, const char *s2,
                                              u32 ms) {
     if (strcmp(s1, s2) == 0) {
+        printk(KERN_INFO "bpf_xavcore_msleep_if_streq: sleep %d ms\n", ms);
         msleep(ms);
+        printk(KERN_INFO "bpf_xavcore_msleep_if_streq: end sleep\n");
     }
     return;
 }
