@@ -2,6 +2,9 @@ function Settings() {
     const proactiveProtectionStrategies = [
         "Rule Based Strategy", "Anomaly-Based Detection Strategy"
     ]
+    const actionWhenDetectedMaliciousActivity = [
+        "Kill Process", "Notify Only",
+    ]
 
     return (
         <div className="flex flex-col mx-6">
@@ -23,6 +26,18 @@ function Settings() {
                                         </label>
                                     </fieldset>
                                 ))}
+                            </div>
+                        </div>
+                        <div className="collapse collapse-arrow border border-base-300 mt-2">
+                            <input type="checkbox" />
+                            <div className="collapse-title">Action When Detected Malicious Activity</div>
+                            <div className="collapse-content">
+                                <select defaultValue="Choose an action" className="select">
+                                    <option disabled={true}>Choose an action</option>
+                                    {actionWhenDetectedMaliciousActivity.map((action, _index) => (
+                                        <option>{action}</option>
+                                    ))}
+                                </select>
                             </div>
                         </div>
                     </ul>
