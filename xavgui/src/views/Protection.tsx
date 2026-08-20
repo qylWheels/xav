@@ -16,7 +16,7 @@ function Protection() {
     // };
 
     return (
-        <div className="w-full flex flex-col">
+        <div className="w-full flex flex-col mb-8">
             <div className="card border mx-4">
                 <div className="card-body">
                     <h2 className="card-title">Proactive Protection</h2>
