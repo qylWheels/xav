@@ -9,7 +9,7 @@ function MainWindowLayout() {
                 <MainSidebar />
                 <div className="w-full h-full flex flex-col">
                     <TitleBar />
-                    <div className="w-full h-auto">
+                    <div className="w-full h-full overflow-y-auto">
                         <Outlet />
                     </div>
                 </div>
