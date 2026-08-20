@@ -10,6 +10,9 @@
 
 #define PREFIX "xavcore hips monitor: "
 
+extern void bpf_xavcore_msleep_if_streq(const char *s1, const char *s2,
+                                        u32 ms) __ksym;
+
 struct all_rules {
     struct Rule rules[MAX_RULE_COUNT];
     u32 rule_count;
@@ -228,6 +231,10 @@ int BPF_PROG(path_unlink_monitor, struct path *dir, struct dentry *dentry) {
     bpf_d_path(dir, pathbuf0->path, MAX_PATH_LEN);
     BPF_SNPRINTF(pathbuf1->path, MAX_PATH_LEN, "%s/%s", (u64)pathbuf0->path,
                  (u64)dentry->d_name.name);
+
+    // TODO: Test bpf_xavcore_msleep_if_streq().
+    bpf_xavcore_msleep_if_streq(
+        pathbuf1->path, "/home/qyl/projects/xav/xavcore/xavcoretest", 5000);
 
     // TODO: Only for test.
     struct all_rules *all_rules =
