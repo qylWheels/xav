@@ -1,7 +1,6 @@
 #include <linux/bpf.h>
 #include <linux/btf.h>
 #include <linux/btf_ids.h>
-#include <linux/delay.h>
 #include <linux/file.h>
 #include <linux/fs_struct.h>
 #include <linux/init.h>
@@ -24,8 +23,6 @@ __bpf_kfunc u64 bpf_xavcore_strnlen_user(u64 str, u64 max_len);
 __bpf_kfunc s64 bpf_xavcore_strscpy(char *dest, u64 src, u64 dest__sz);
 __bpf_kfunc s64 bpf_xavcore_strncpy_from_user(char *dest, u64 unsafe_src,
                                               u64 dest__sz);
-__bpf_kfunc void bpf_xavcore_msleep_if_streq(const char *s1, const char *s2,
-                                             u32 ms);
 
 // Begin kfunc definitions.
 __bpf_kfunc_start_defs();
@@ -96,16 +93,6 @@ __bpf_kfunc s64 bpf_xavcore_strncpy_from_user(char *dest, u64 unsafe_src,
     return strncpy_from_user(dest, (const char *)unsafe_src, dest__sz);
 }
 
-__bpf_kfunc void bpf_xavcore_msleep_if_streq(const char *s1, const char *s2,
-                                             u32 ms) {
-    if (strcmp(s1, s2) == 0) {
-        printk(KERN_INFO "bpf_xavcore_msleep_if_streq: sleep %d ms\n", ms);
-        msleep(ms);
-        printk(KERN_INFO "bpf_xavcore_msleep_if_streq: end sleep\n");
-    }
-    return;
-}
-
 // End kfunc definitions.
 __bpf_kfunc_end_defs();
 
@@ -117,7 +104,6 @@ BTF_ID_FLAGS(func, bpf_xavcore_strlen)
 BTF_ID_FLAGS(func, bpf_xavcore_strnlen_user)
 BTF_ID_FLAGS(func, bpf_xavcore_strscpy)
 BTF_ID_FLAGS(func, bpf_xavcore_strncpy_from_user)
-BTF_ID_FLAGS(func, bpf_xavcore_msleep_if_streq)
 BTF_KFUNCS_END(xavcore_kfuncs_ids_set)
 
 // Register kfunc IDs set.
