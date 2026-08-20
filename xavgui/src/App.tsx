@@ -2,7 +2,7 @@ import "@/App.css"
 import Overview from "@/views/Overview";
 import Scan from "@/views/Scan";
 import Protection from "@/views/Protection";
-import ProcessTree from "@/views/ProcessTree";
+import ProcessViewer from "@/views/ProcessViewer";
 import { Routes, Route } from 'react-router-dom';
 import MainWindowLayout from "@/components/MainWindowLayout";
 import Settings from "@/views/Settings";
@@ -18,8 +18,8 @@ function App() {
         <Route path="/protection" element={<Protection />} />
         <Route path="/settings" element={<Settings />} />
       </Route>
-      <Route path="/process-tree" element={<StandAloneWindowLayout />}>
-        <Route index element={<ProcessTree />} />
+      <Route path="/process-viewer" element={<StandAloneWindowLayout />}>
+        <Route index element={<ProcessViewer />} />
       </Route>
     </Routes>
   );

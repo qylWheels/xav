@@ -3,8 +3,8 @@ import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
 
 function Protection() {
     const onViewProcessTreeBtnClick = async () => {
-        new WebviewWindow('process-tree-window', {
-            url: '/#/process-tree',
+        new WebviewWindow('process-viewer', {
+            url: '/#/process-viewer',
             width: 800,
             height: 600,
             decorations: false,
