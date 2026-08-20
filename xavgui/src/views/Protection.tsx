@@ -1,4 +1,4 @@
-import { AppWindow, SquareChartGantt } from "lucide-react";
+import { AppWindow, Boxes, LayoutList, ShieldBan, SquareChartGantt } from "lucide-react";
 // import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
 
 function Protection() {
@@ -47,8 +47,31 @@ function Protection() {
                 <div className="card-body">
                     <h2 className="card-title">HIPS</h2>
                     <p>HIPS (Host Intrusion Prevention System) blocks malicious behaviors to mitigate the risk of malware attacks</p>
-                    <div className="card-actions justify-end">
-                        <button className="btn btn-primary">Buy Now</button>
+                    <div className="flex items-center">
+                        <div className="stat flex-1">
+                            <div className="stat-title">Total Rule Groups</div>
+                            <div className="stat-value">12</div>
+                            <div className="stat-figure">
+                                <Boxes />
+                            </div>
+                        </div>
+                        <div className="stat flex-1">
+                            <div className="stat-title">Total Rules</div>
+                            <div className="stat-value">291</div>
+                            <div className="stat-figure">
+                                <LayoutList />
+                            </div>
+                        </div>
+                        <div className="stat flex-1">
+                            <div className="stat-title">Blocked Behavior(s)</div>
+                            <div className="stat-value text-error">71</div>
+                            <div className="stat-figure">
+                                <ShieldBan />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex justify-end">
+                        <button className="btn btn-link pl-0">Settings</button>
                     </div>
                 </div>
             </div>
