@@ -8,10 +8,19 @@
 #include <thread>
 
 #include "xavcore/scan/scan_interfaces.h"
+#include "xavcore/types/malware_info.h"
 
 namespace outcome = OUTCOME_V2_NAMESPACE;
 
 namespace xavcore {
+class IOnAccessScannerEventListener {
+public:
+    virtual ~IOnAccessScannerEventListener() = default;
+
+public:
+    virtual void on_event(const MalwareInfo& info) = 0;
+};
+
 class OnAccessScanner {
 public:
     OnAccessScanner(spdlog::logger& logger, IScanStrategy& scan_strategy);
