@@ -85,7 +85,6 @@ outcome::result<void> OnAccessScanner::start_monitoring() {
                             struct fanotify_response resp = {.fd =
                                                                  metadata->fd};
 
-                            // TODO: Report when detected malware.
                             auto result = this->scan_strategy_->scan(path);
                             if (result.has_value()) {
                                 auto alarm = std::ranges::any_of(
@@ -96,6 +95,12 @@ outcome::result<void> OnAccessScanner::start_monitoring() {
                                 if (alarm) {
                                     resp.response = FAN_DENY;
                                     this->blocked_object_count_++;
+                                    // TODO: This is only a placeholder.
+                                    for (auto& listener :
+                                         this->event_listeners_) {
+                                        listener->on_event(MalwareInfoTemp{
+                                            .path = path, .family = "Generic"});
+                                    }
                                 } else {
                                     resp.response = FAN_ALLOW;
                                 }
