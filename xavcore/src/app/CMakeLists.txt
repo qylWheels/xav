@@ -20,5 +20,11 @@ target_sources(
 target_link_libraries(
     xavcore_proactive_protection_module
     PRIVATE
-    Boost::beast
+    xavcore_includes syscall_event_provider anomalous_syscall_detection_listener
+    rule_based_detection_listener proactive_protection_rules
+)
+target_link_libraries(
+    xavcore_proactive_protection_module
+    PRIVATE
+    Boost::beast cpptrace::cpptrace spdlog::spdlog
 )
