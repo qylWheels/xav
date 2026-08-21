@@ -3,7 +3,8 @@ function Settings() {
         "Rule Based Strategy", "Anomaly-Based Detection Strategy"
     ]
     const actionWhenDetectedMaliciousActivity = [
-        "Kill Process", "Notify Only",
+        { action: "Kill Process", status: "" },
+        { action: "Notify Only", status: "selected" },
     ]
 
     return (
@@ -35,7 +36,7 @@ function Settings() {
                                 <select defaultValue="Choose an action" className="select">
                                     <option disabled={true}>Choose an action</option>
                                     {actionWhenDetectedMaliciousActivity.map((action, _index) => (
-                                        <option>{action}</option>
+                                        <option selected={action.status === "selected"}>{action.action}</option>
                                     ))}
                                 </select>
                             </div>
