@@ -1,5 +1,6 @@
 {
   "dependencies": [
+    "bext-sml",
     "concurrentqueue",
     "cpp-httplib",
     "cpptrace",
@@ -12,6 +13,6 @@
     "rapidfuzz",
     "spdlog",
     "yara",
-    "bext-sml"
+    "boost-beast"
   ]
 }
