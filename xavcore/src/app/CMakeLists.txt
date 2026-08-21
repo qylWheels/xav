@@ -16,7 +16,7 @@ target_link_libraries(
     xavcore_on_access_scanning_module
     PRIVATE
     xavcore_includes
-    on_access_scanning
+    on_access_scanning scan
 )
 target_link_libraries(
     xavcore_on_access_scanning_module
