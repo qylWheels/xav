@@ -50,6 +50,8 @@ void startup(spdlog::logger& logger) {
         return;
     }
 
+    logger.info("Xavcore On-Access Scanning Module started");
+
     // Handle messages from the client
     while (true) {
         ws.write(net::buffer("Hello, World!"));
