@@ -11,6 +11,19 @@ target_link_libraries(xavcore PRIVATE scan)
 target_link_libraries(xavcore PRIVATE cpptrace::cpptrace)
 target_link_libraries(xavcore PRIVATE spdlog::spdlog)
 
+add_executable(xavcore_on_access_scanning_module on_access_scanning_module.cpp)
+target_link_libraries(
+    xavcore_on_access_scanning_module
+    PRIVATE
+    xavcore_includes
+    on_access_scanning
+)
+target_link_libraries(
+    xavcore_on_access_scanning_module
+    PRIVATE
+    Boost::beast cpptrace::cpptrace spdlog::spdlog
+)
+
 add_executable(xavcore_proactive_protection_module)
 target_sources(
     xavcore_proactive_protection_module
