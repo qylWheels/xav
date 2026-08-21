@@ -149,4 +149,14 @@ void OnAccessScanner::set_scan_strategy(IScanStrategy& scan_strategy) {
 IScanStrategy* OnAccessScanner::get_scan_strategy() const {
     return this->scan_strategy_;
 }
+
+void OnAccessScanner::add_event_listener(
+    IOnAccessScannerEventListener& listener) {
+    this->event_listeners_.insert(&listener);
+}
+
+void OnAccessScanner::remove_event_listener(
+    IOnAccessScannerEventListener& listener) {
+    this->event_listeners_.erase(&listener);
+}
 }  // namespace xavcore

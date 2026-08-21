@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <outcome/config.hpp>
 #include <thread>
+#include <unordered_set>
 
 #include "xavcore/scan/scan_interfaces.h"
 #include "xavcore/types/malware_info.h"
@@ -59,6 +60,7 @@ private:
     IScanStrategy* scan_strategy_;
     Status status_;
     std::jthread monitoring_thread_;
+    std::unordered_set<IOnAccessScannerEventListener*> event_listeners_;
 
     // Statistics.
     std::atomic_uint64_t scanned_object_count_;
