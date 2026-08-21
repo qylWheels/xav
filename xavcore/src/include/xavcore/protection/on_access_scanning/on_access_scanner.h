@@ -35,6 +35,8 @@ public:
     outcome::result<void> stop_monitoring();
     void set_scan_strategy(IScanStrategy& scan_strategy);
     IScanStrategy* get_scan_strategy() const;
+    void set_event_listener(IOnAccessScannerEventListener& listener);
+    IOnAccessScannerEventListener* get_event_listener() const;
 
 public:
     std::uint64_t scanned_object_count() const {
