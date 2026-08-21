@@ -39,9 +39,6 @@ function Protection() {
                         </div>
                     </div>
                     {/* <button className="btn mt-2" onClick={onOpenProcessViewerBtnClick}>Open Process Viewer</button> */}
-                    <div className="flex justify-center">
-                        <button className="btn btn-link pl-0">Settings</button>
-                    </div>
                 </div>
             </div>
             <div className="card border mt-6">
@@ -70,9 +67,6 @@ function Protection() {
                                 <ShieldBan />
                             </div>
                         </div>
-                    </div>
-                    <div className="flex justify-center">
-                        <button className="btn btn-link pl-0">Settings</button>
                     </div>
                 </div>
             </div>
