@@ -20,6 +20,20 @@ namespace websocket = beast::websocket;
 namespace net = boost::asio;
 using tcp = boost::asio::ip::tcp;
 
+class EventListener : public xavcore::IOnAccessScannerEventListener {
+public:
+    EventListener(spdlog::logger& logger) : logger_(&logger) {}
+
+public:
+    virtual void on_event(const xavcore::MalwareInfo& malware_info) override {
+        logger_->info("Path: {}, Threat: {}", malware_info.path,
+                      malware_info.family.value_or("Unknown"));
+    }
+
+private:
+    spdlog::logger* logger_;
+};
+
 void startup(spdlog::logger& logger) {
     // I/O context.
     net::io_context ioc{1};
@@ -49,6 +63,8 @@ void startup(spdlog::logger& logger) {
                      on_access_scanner.start_monitoring().error().message());
         return;
     }
+    EventListener listener(logger);
+    on_access_scanner.add_event_listener(listener);
 
     logger.info("Xavcore On-Access Scanning Module started");
 
