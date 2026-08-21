@@ -13,8 +13,10 @@
 #define BUFSIZE (8 * 1024)  // 8KB
 
 namespace xavcore {
-OnAccessScanner::OnAccessScanner(IScanStrategy& scan_strategy)
-    : scan_strategy_(&scan_strategy),
+OnAccessScanner::OnAccessScanner(spdlog::logger& logger,
+                                 IScanStrategy& scan_strategy)
+    : logger_(&logger),
+      scan_strategy_(&scan_strategy),
       scanned_object_count_(0),
       blocked_object_count_(0) {
     // Initialize the fanotify descriptor.

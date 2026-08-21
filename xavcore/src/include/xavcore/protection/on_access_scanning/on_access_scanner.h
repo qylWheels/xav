@@ -1,5 +1,7 @@
 #pragma once
 
+#include <spdlog/spdlog.h>
+
 #include <atomic>
 #include <cstdint>
 
@@ -8,7 +10,7 @@
 namespace xavcore {
 class OnAccessScanner {
 public:
-    OnAccessScanner(IScanStrategy& scan_strategy);
+    OnAccessScanner(spdlog::logger& logger, IScanStrategy& scan_strategy);
     ~OnAccessScanner();
     OnAccessScanner(const OnAccessScanner&) = delete;
     OnAccessScanner& operator=(const OnAccessScanner&) = delete;
@@ -32,6 +34,7 @@ public:
 private:
     int fanfd_;
     char* buf_;
+    spdlog::logger* logger_;
     IScanStrategy* scan_strategy_;
 
     // Statistics.
