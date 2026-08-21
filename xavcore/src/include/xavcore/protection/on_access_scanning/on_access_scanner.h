@@ -4,8 +4,12 @@
 
 #include <atomic>
 #include <cstdint>
+#include <outcome/config.hpp>
+#include <thread>
 
 #include "xavcore/scan/scan_interfaces.h"
+
+namespace outcome = OUTCOME_V2_NAMESPACE;
 
 namespace xavcore {
 class OnAccessScanner {
@@ -18,8 +22,8 @@ public:
     OnAccessScanner& operator=(OnAccessScanner&&) = delete;
 
 public:
-    void start_monitoring();
-    void stop_monitoring();
+    outcome::result<void> start_monitoring();
+    outcome::result<void> stop_monitoring();
     void set_scan_strategy(IScanStrategy& scan_strategy);
     IScanStrategy* get_scan_strategy() const;
 
@@ -32,10 +36,18 @@ public:
     }
 
 private:
+    enum class Status {
+        Stopped,
+        Running,
+    };
+
+private:
     int fanfd_;
     char* buf_;
     spdlog::logger* logger_;
     IScanStrategy* scan_strategy_;
+    Status status_;
+    std::jthread monitoring_thread_;
 
     // Statistics.
     std::atomic_uint64_t scanned_object_count_;
