@@ -25,7 +25,8 @@ public:
     EventListener(spdlog::logger& logger) : logger_(&logger) {}
 
 public:
-    virtual void on_event(const xavcore::MalwareInfo& malware_info) override {
+    virtual void on_event(
+        const xavcore::MalwareInfoTemp& malware_info) override {
         logger_->info("Path: {}, Threat: {}", malware_info.path,
                       malware_info.family.value_or("Unknown"));
     }

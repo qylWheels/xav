@@ -19,7 +19,7 @@ public:
     virtual ~IOnAccessScannerEventListener() = default;
 
 public:
-    virtual void on_event(const MalwareInfo& info) = 0;
+    virtual void on_event(const MalwareInfoTemp& info) = 0;
 };
 
 class OnAccessScanner {
