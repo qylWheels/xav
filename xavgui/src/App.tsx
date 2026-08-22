@@ -9,16 +9,17 @@ import Settings from "@/views/Settings";
 import StandAloneWindowLayout from "@/components/StandAloneWindowLayout";
 import WebSocket from '@tauri-apps/plugin-websocket';
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
+import OnAccessScanningAlert from "@/views/OnAccessScanningAlert";
 
 function App() {
   const wsconnection = async () => {
     const ws = await WebSocket.connect('ws://0.0.0.0:8000');
     const removeListener = ws.addListener((msg) => {
       console.log('Received Message:', msg);
-      new WebviewWindow('process-viewer', {
-        url: '/#/process-viewer',
-        width: 800,
-        height: 600,
+      new WebviewWindow('on-access-scanning-alert', {
+        url: '/#/on-access-scanning-alert',
+        width: 450,
+        height: 250,
         decorations: false,
         transparent: true,
         shadow: false,
@@ -41,7 +42,10 @@ function App() {
       <Route path="/process-viewer" element={<StandAloneWindowLayout />}>
         <Route index element={<ProcessViewer />} />
       </Route>
-    </Routes>
+      <Route path="/on-access-scanning-alert" element={<StandAloneWindowLayout />}>
+        <Route index element={<OnAccessScanningAlert />} />
+      </Route>
+    </Routes >
   );
 }
 
