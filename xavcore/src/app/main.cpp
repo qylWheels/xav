@@ -100,9 +100,6 @@ void startup() {
                       ret.error().message());
         return;
     }
-    xavcore::OnAccessScanner on_access_scanner(*normal_scan_strategy);
-    std::jthread on_access_scanner_thread(
-        [&on_access_scanner]() { on_access_scanner.start_monitoring(); });
     ret = hips_monitor->start();
     if (!ret) {
         logger->error("Failed to start HIPS monitor: {}",
