@@ -24,21 +24,3 @@ target_link_libraries(
     Boost::beast cpptrace::cpptrace spdlog::spdlog
     Boost::asio
 )
-
-add_executable(xavcore_proactive_protection_module)
-target_sources(
-    xavcore_proactive_protection_module
-    PRIVATE
-    proactive_protection_module.cpp
-)
-target_link_libraries(
-    xavcore_proactive_protection_module
-    PRIVATE
-    xavcore_includes syscall_event_provider anomalous_syscall_detection_listener
-    rule_based_detection_listener proactive_protection_rules
-)
-target_link_libraries(
-    xavcore_proactive_protection_module
-    PRIVATE
-    Boost::beast cpptrace::cpptrace spdlog::spdlog
-)
