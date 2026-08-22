@@ -1,7 +1,6 @@
 {
   "dependencies": [
     "bext-sml",
-    "boost-beast",
     "concurrentqueue",
     "cpp-httplib",
     "cpptrace",

@@ -21,6 +21,5 @@ target_link_libraries(
 target_link_libraries(
     xavcore_on_access_scanning_module
     PRIVATE
-    Boost::beast cpptrace::cpptrace spdlog::spdlog
-    Boost::asio
+    Boost::asio cpptrace::cpptrace spdlog::spdlog
 )
