@@ -22,6 +22,7 @@ target_link_libraries(
     xavcore_on_access_scanning_module
     PRIVATE
     Boost::beast cpptrace::cpptrace spdlog::spdlog
+    Boost::asio
 )
 
 add_executable(xavcore_proactive_protection_module)

@@ -22,6 +22,7 @@ find_package(httplib CONFIG REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(concurrentqueue CONFIG REQUIRED)
 find_package(boost_beast CONFIG REQUIRED)
+find_package(boost_asio CONFIG REQUIRED)
 pkg_check_modules(YARA REQUIRED IMPORTED_TARGET yara)
 
 # Packages from cmake.
