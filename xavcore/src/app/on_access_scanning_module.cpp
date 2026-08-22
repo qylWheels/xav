@@ -6,6 +6,7 @@
 #include <boost/beast/websocket/stream.hpp>
 #include <cpptrace/cpptrace.hpp>
 #include <csignal>
+#include <format>
 #include <iostream>
 #include <utility>
 
@@ -22,17 +23,20 @@ using tcp = boost::asio::ip::tcp;
 
 class EventListener : public xavcore::IOnAccessScannerEventListener {
 public:
-    EventListener(spdlog::logger& logger) : logger_(&logger) {}
+    EventListener(spdlog::logger& logger, websocket::stream<tcp::socket>& ws)
+        : logger_(&logger), ws_(&ws) {}
 
 public:
     virtual void on_event(
         const xavcore::MalwareInfoTemp& malware_info) override {
-        logger_->info("Path: {}, Threat: {}", malware_info.path,
-                      malware_info.family.value_or("Unknown"));
+        this->ws_->write(
+            net::buffer(std::format("Path: {}, Threat: {}", malware_info.path,
+                                    malware_info.family.value_or("Unknown"))));
     }
 
 private:
     spdlog::logger* logger_;
+    websocket::stream<tcp::socket>* ws_;
 };
 
 void startup(spdlog::logger& logger) {
@@ -64,14 +68,12 @@ void startup(spdlog::logger& logger) {
                      on_access_scanner.start_monitoring().error().message());
         return;
     }
-    EventListener listener(logger);
+    EventListener listener(logger, ws);
     on_access_scanner.add_event_listener(listener);
 
     logger.info("Xavcore On-Access Scanning Module started");
 
-    // Handle messages from the client
     while (true) {
-        ws.write(net::buffer("Hello, World!"));
     }
 }
 
