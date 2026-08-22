@@ -20,6 +20,7 @@ function App() {
         url: '/#/on-access-scanning-alert',
         width: 450,
         height: 250,
+        center: true,
         decorations: false,
         transparent: true,
         shadow: false,
