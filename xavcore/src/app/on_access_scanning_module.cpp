@@ -1,60 +1,53 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
+#include <unistd.h>
 
 #include <boost/asio.hpp>
-#include <boost/beast.hpp>
-#include <boost/beast/websocket/stream.hpp>
 #include <cpptrace/cpptrace.hpp>
 #include <csignal>
-#include <format>
 #include <iostream>
-#include <utility>
 
 #include "xavcore/protection/on_access_scanning/on_access_scanner.h"
 #include "xavcore/scan/exact_hash.h"
 #include "xavcore/scan/normal_scan_strategy.h"
 #include "xavcore/scan/yara_static_heuristic_engine.h"
 
-namespace beast = boost::beast;
-namespace http = beast::http;
-namespace websocket = beast::websocket;
-namespace net = boost::asio;
-using tcp = boost::asio::ip::tcp;
+namespace asio = boost::asio;
 
 class EventListener : public xavcore::IOnAccessScannerEventListener {
 public:
-    EventListener(spdlog::logger& logger, websocket::stream<tcp::socket>& ws)
-        : logger_(&logger), ws_(&ws) {}
+    EventListener(spdlog::logger& logger,
+                  asio::local::seq_packet_protocol::socket& sock)
+        : logger_(&logger), sock_(&sock) {}
 
 public:
     virtual void on_event(
         const xavcore::MalwareInfoTemp& malware_info) override {
-        this->ws_->write(
-            net::buffer(std::format("Path: {}, Threat: {}", malware_info.path,
-                                    malware_info.family.value_or("Unknown"))));
+        asio::write(*sock_, asio::buffer(malware_info.path));
     }
 
 private:
     spdlog::logger* logger_;
-    websocket::stream<tcp::socket>* ws_;
+    asio::local::seq_packet_protocol::socket* sock_;
 };
 
 void startup(spdlog::logger& logger) {
     // I/O context.
-    net::io_context ioc{1};
+    asio::io_context ioc{1};
 
-    // TCP connection.
-    tcp::acceptor acceptor{
-        ioc, tcp::endpoint(net::ip::make_address("0.0.0.0"), 8000)};
-    tcp::socket socket = acceptor.accept();
+    // Endpoint.
+    std::string socket_path = "/tmp/xavcore_on_access_scanning_module_socket";
+    ::unlink(socket_path.c_str());
+    asio::local::seq_packet_protocol::endpoint ep(socket_path);
 
-    // WebSocket connection.
-    websocket::stream<tcp::socket> ws(std::move(socket));
-    ws.set_option(
-        websocket::stream_base::decorator([](websocket::response_type& res) {
-            res.set(http::field::server, "Xavcore On-Access Scanning Module");
-        }));
-    ws.accept();
+    // Acceptor.
+    asio::local::seq_packet_protocol::acceptor acceptor(ioc, ep);
+
+    // Socket.
+    asio::local::seq_packet_protocol::socket sock(ioc);
+
+    // Accept connection.
+    acceptor.accept(sock);
 
     // Start on-access scanning.
     xavcore::ExactHashEngine exact_hash_engine;
@@ -68,7 +61,7 @@ void startup(spdlog::logger& logger) {
                      on_access_scanner.start_monitoring().error().message());
         return;
     }
-    EventListener listener(logger, ws);
+    EventListener listener(logger, sock);
     on_access_scanner.add_event_listener(listener);
 
     logger.info("Xavcore On-Access Scanning Module started");
