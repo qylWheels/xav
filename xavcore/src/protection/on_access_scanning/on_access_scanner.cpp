@@ -37,6 +37,7 @@ OnAccessScanner::OnAccessScanner(spdlog::logger& logger,
 }
 
 OnAccessScanner::~OnAccessScanner() {
+    (void)this->stop_monitoring();
     close(this->fanfd_);
     delete[] this->buf_;
     this->buf_ = nullptr;
