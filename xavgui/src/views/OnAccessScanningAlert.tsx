@@ -10,7 +10,7 @@ function OnAccessScanningAlert() {
                     <div>Xav has just blocked a threat</div>
                     <div className="mt-4 flex items-center">
                         <div>Location:</div>
-                        <button className="btn btn-link text-neutral font-normal p-0 ml-2">/usr/bin/bash</button>
+                        <div className="link ml-2 text-blue-500">/usr/bin/bash</div>
                     </div>
                     <div className="flex items-center">
                         <div>Threat:</div>
