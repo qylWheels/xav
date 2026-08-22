@@ -33,7 +33,7 @@ private:
 
 void startup(spdlog::logger& logger) {
     // I/O context.
-    asio::io_context ioc{1};
+    asio::io_context ioc;
 
     // Endpoint.
     std::string socket_path = "/tmp/xavcore_on_access_scanning_module_socket";
