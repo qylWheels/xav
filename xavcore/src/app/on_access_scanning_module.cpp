@@ -48,7 +48,7 @@ void startup(spdlog::logger& logger) {
     websocket::stream<tcp::socket> ws(std::move(socket));
     ws.set_option(
         websocket::stream_base::decorator([](websocket::response_type& res) {
-            res.set(http::field::server, "Xavcore Proactive Protection Module");
+            res.set(http::field::server, "Xavcore On-Access Scanning Module");
         }));
     ws.accept();
 
