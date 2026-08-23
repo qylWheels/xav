@@ -11,14 +11,15 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![greet])
         .setup(|app| {
-            use tokio_seqpacket::UnixSeqpacket;
             use tauri::async_runtime;
             use tauri::Emitter;
+            use tokio_seqpacket::UnixSeqpacket;
 
             let app_handle = app.handle().clone();
             println!("ready to start async task");
             async_runtime::spawn(async move {
-                let mut socket = UnixSeqpacket::connect("\0xavcore_on_access_scanning_module_socket").await;
+                let mut socket =
+                    UnixSeqpacket::connect("\0xavcore_on_access_scanning_module_socket").await;
                 if let Err(e) = socket {
                     println!("error while connecting to socket: {}", e);
                     return Ok(());
@@ -28,7 +29,9 @@ pub fn run() {
                 loop {
                     let msg = socket.recv(&mut buffer).await?;
                     let len = msg.bytes_read();
-                    println!("{}", String::from_utf8_lossy(&buffer[..len]));
+                    let path = String::from_utf8_lossy(&buffer[..len]);
+                    println!("len: {}, content: {}", len, path);
+                    app_handle.emit("threat-detected", path);
                 }
                 Ok::<(), std::io::Error>(())
             });
