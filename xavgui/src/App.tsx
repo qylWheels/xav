@@ -7,29 +7,24 @@ import { Routes, Route } from 'react-router-dom';
 import MainWindowLayout from "@/components/MainWindowLayout";
 import Settings from "@/views/Settings";
 import StandAloneWindowLayout from "@/components/StandAloneWindowLayout";
-import WebSocket from '@tauri-apps/plugin-websocket';
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
 import OnAccessScanningAlert from "@/views/OnAccessScanningAlert";
+import { listen } from '@tauri-apps/api/event';
 
 function App() {
-  const wsconnection = async () => {
-    const ws = await WebSocket.connect('ws://0.0.0.0:8000');
-    const removeListener = ws.addListener((msg) => {
-      console.log('Received Message:', msg);
-      new WebviewWindow('on-access-scanning-alert', {
-        url: '/#/on-access-scanning-alert',
-        width: 450,
-        height: 250,
-        center: true,
-        decorations: false,
-        transparent: true,
-        shadow: false,
-        maximizable: false,
-        resizable: false
-      });
+  const unlisten = listen('threat-detected', (payload) => {
+    new WebviewWindow('on-access-scanning-alert', {
+      url: '/#/on-access-scanning-alert',
+      width: 450,
+      height: 250,
+      center: true,
+      decorations: false,
+      transparent: true,
+      shadow: false,
+      maximizable: false,
+      resizable: false
     });
-  }
-  wsconnection();
+  })
 
   return (
     <Routes>
