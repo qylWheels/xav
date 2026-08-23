@@ -6,6 +6,7 @@
 #include <cpptrace/cpptrace.hpp>
 #include <csignal>
 #include <iostream>
+#include <string>
 
 #include "xavcore/protection/on_access_scanning/on_access_scanner.h"
 #include "xavcore/scan/exact_hash.h"
@@ -36,8 +37,9 @@ void startup(spdlog::logger& logger) {
     asio::io_context ioc;
 
     // Endpoint.
-    std::string socket_path = "\0xavcore_on_access_scanning_module_socket";
-    ::unlink(socket_path.c_str());
+    std::string socket_path =
+        std::string("\0", 1) + "xavcore_on_access_scanning_module_socket";
+    logger.info("path len: {}", socket_path.size());
     asio::local::seq_packet_protocol::endpoint ep(socket_path);
 
     // Acceptor.
