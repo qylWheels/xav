@@ -12,9 +12,9 @@ import OnAccessScanningAlert from "@/views/OnAccessScanningAlert";
 import { listen } from '@tauri-apps/api/event';
 
 function App() {
-  const unlisten = listen('threat-detected', (payload) => {
+  const unlisten = listen('threat-detected', (event) => {
     new WebviewWindow('on-access-scanning-alert', {
-      url: '/#/on-access-scanning-alert',
+      url: '/#/on-access-scanning-alert?payload=' + encodeURIComponent(event.payload as string),
       width: 450,
       height: 250,
       center: true,
