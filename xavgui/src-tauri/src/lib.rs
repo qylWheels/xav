@@ -18,7 +18,7 @@ pub fn run() {
             let app_handle = app.handle().clone();
             println!("ready to start async task");
             async_runtime::spawn(async move {
-                let mut socket =
+                let socket =
                     UnixSeqpacket::connect("\0xavcore_on_access_scanning_module_socket").await;
                 if let Err(e) = socket {
                     println!("error while connecting to socket: {}", e);
@@ -31,7 +31,10 @@ pub fn run() {
                     let len = msg.bytes_read();
                     let path = String::from_utf8_lossy(&buffer[..len]);
                     println!("len: {}, content: {}", len, path);
-                    app_handle.emit("threat-detected", path);
+                    let result = app_handle.emit("threat-detected", path);
+                    if result.is_err() {
+                        println!("error while emitting event: {:?}", result);
+                    }
                 }
                 Ok::<(), std::io::Error>(())
             });
