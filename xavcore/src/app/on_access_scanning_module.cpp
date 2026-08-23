@@ -36,7 +36,7 @@ void startup(spdlog::logger& logger) {
     asio::io_context ioc;
 
     // Endpoint.
-    std::string socket_path = "/tmp/xavcore_on_access_scanning_module_socket";
+    std::string socket_path = "\0xavcore_on_access_scanning_module_socket";
     ::unlink(socket_path.c_str());
     asio::local::seq_packet_protocol::endpoint ep(socket_path);
 

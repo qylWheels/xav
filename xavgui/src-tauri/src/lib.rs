@@ -18,7 +18,7 @@ pub fn run() {
             let app_handle = app.handle().clone();
             println!("ready to start async task");
             async_runtime::spawn(async move {
-                let mut socket = UnixSeqpacket::connect("/tmp/xavcore_on_access_scanning_module_socket").await;
+                let mut socket = UnixSeqpacket::connect("\0xavcore_on_access_scanning_module_socket").await;
                 if let Err(e) = socket {
                     println!("error while connecting to socket: {}", e);
                     return Ok(());
