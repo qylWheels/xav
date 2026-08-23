@@ -24,7 +24,7 @@ pub fn run() {
                     return Ok(());
                 }
                 let socket = socket.unwrap();
-                let mut buffer = vec![];
+                let mut buffer = vec![0u8; 1024];
                 loop {
                     let msg = socket.recv(&mut buffer).await?;
                     let len = msg.bytes_read();
