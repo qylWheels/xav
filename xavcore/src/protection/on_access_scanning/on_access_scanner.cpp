@@ -99,7 +99,7 @@ outcome::result<void> OnAccessScanner::start_monitoring() {
                                     // TODO: This is only a placeholder.
                                     for (auto& listener :
                                          this->event_listeners_) {
-                                        listener->on_event(MalwareInfoTemp{
+                                        listener->on_event(types::MalwareInfo{
                                             .path = path, .family = "Generic"});
                                     }
                                 } else {
