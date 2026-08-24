@@ -43,7 +43,6 @@ void startup(spdlog::logger& logger) {
     // Endpoint.
     std::string socket_path =
         std::string("\0", 1) + "xavcore_on_access_scanning_module_socket";
-    logger.info("path len: {}", socket_path.size());
     asio::local::seq_packet_protocol::endpoint ep(socket_path);
 
     // Acceptor.
