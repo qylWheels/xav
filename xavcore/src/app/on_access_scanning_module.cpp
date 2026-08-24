@@ -23,7 +23,7 @@ public:
 
 public:
     virtual void on_event(
-        const xavcore::MalwareInfoTemp& malware_info) override {
+        const xavcore::types::MalwareInfo& malware_info) override {
         try {
             this->sock_->send(asio::buffer(malware_info.path), 0);
         } catch (std::exception& e) {
