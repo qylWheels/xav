@@ -22,4 +22,5 @@ target_link_libraries(
     xavcore_on_access_scanning_module
     PRIVATE
     Boost::asio cpptrace::cpptrace spdlog::spdlog
+    nlohmann_json::nlohmann_json
 )
