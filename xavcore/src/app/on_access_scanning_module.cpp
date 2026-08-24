@@ -6,6 +6,7 @@
 #include <cpptrace/cpptrace.hpp>
 #include <csignal>
 #include <iostream>
+#include <nlohmann/json.hpp>
 #include <string>
 
 #include "xavcore/protection/on_access_scanning/on_access_scanner.h"
@@ -25,7 +26,10 @@ public:
     virtual void on_event(
         const xavcore::types::MalwareInfo& malware_info) override {
         try {
-            this->sock_->send(asio::buffer(malware_info.path), 0);
+            nlohmann::json j = {
+                {"path", malware_info.path},
+            };
+            this->sock_->send(asio::buffer(j.dump()), 0);
         } catch (std::exception& e) {
             logger_->warn("Failed to send malware info: {}", e.what());
         }

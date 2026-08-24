@@ -5,6 +5,7 @@ function OnAccessScanningAlert() {
     const [searchParams] = useSearchParams();
     const payload =
         decodeURIComponent(searchParams.get('payload') || '{}')
+    const j = JSON.parse(payload);
 
     return (
         <div className="flex flex-col">
@@ -15,7 +16,7 @@ function OnAccessScanningAlert() {
                     <div>Xav has just blocked a threat</div>
                     <div className="mt-4 flex items-center">
                         <div>Location:</div>
-                        <div className="link ml-2 text-blue-500 truncate max-w-64">{payload}</div>
+                        <div className="link ml-2 text-blue-500 truncate max-w-64">{j.path}</div>
                     </div>
                     <div className="flex items-center">
                         <div>Threat:</div>
