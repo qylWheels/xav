@@ -16,7 +16,7 @@ function App() {
     new WebviewWindow('on-access-scanning-alert', {
       url: '/#/on-access-scanning-alert?payload=' + encodeURIComponent(event.payload as string),
       width: 450,
-      height: 250,
+      height: 230,
       center: true,
       decorations: false,
       transparent: true,
