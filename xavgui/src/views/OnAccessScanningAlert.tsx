@@ -15,11 +15,11 @@ function OnAccessScanningAlert() {
                     <div>Xav has just blocked a threat</div>
                     <div className="mt-4 flex items-center">
                         <div>Location:</div>
-                        <div className="link ml-2 text-blue-500">{payload}</div>
+                        <div className="link ml-2 text-blue-500 truncate max-w-64">{payload}</div>
                     </div>
                     <div className="flex items-center">
                         <div>Threat:</div>
-                        <div className="ml-2 text-error">哈牛魔</div>
+                        <div className="ml-2 text-error truncate max-w-64">哈牛魔</div>
                     </div>
                 </div>
             </div>
