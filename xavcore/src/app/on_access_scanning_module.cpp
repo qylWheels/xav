@@ -52,9 +52,6 @@ void startup(spdlog::logger& logger) {
     // Socket.
     asio::local::seq_packet_protocol::socket sock(ioc);
 
-    // Accept connection.
-    acceptor.accept(sock);
-
     // Start on-access scanning.
     xavcore::ExactHashEngine exact_hash_engine;
     xavcore::YaraStaticHeuristicEngine yara_static_heuristic_engine;
@@ -70,10 +67,20 @@ void startup(spdlog::logger& logger) {
     EventListener listener(logger, sock);
     on_access_scanner.add_event_listener(listener);
 
+    // Accept connection asynchronously.
+    acceptor.async_accept(sock, [&](boost::system::error_code ec) {
+        if (ec) {
+            logger.warn("Accept error: {}", ec.message());
+        } else {
+            logger.info("Client connected");
+        }
+    });
+
     logger.info("Xavcore On-Access Scanning Module started");
 
-    while (true) {
-    }
+    ioc.run();
+
+    while (true);
 }
 
 void sigsegv_handler(int signum) {
