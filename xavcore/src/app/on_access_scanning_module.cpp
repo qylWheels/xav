@@ -24,7 +24,11 @@ public:
 public:
     virtual void on_event(
         const xavcore::MalwareInfoTemp& malware_info) override {
-        this->sock_->send(asio::buffer(malware_info.path), 0);
+        try {
+            this->sock_->send(asio::buffer(malware_info.path), 0);
+        } catch (std::exception& e) {
+            logger_->warn("Failed to send malware info: {}", e.what());
+        }
     }
 
 private:
