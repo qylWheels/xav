@@ -8,6 +8,7 @@
 
 #include <format>
 #include <system_error>
+#include <tuple>
 #include <utility>
 
 namespace xavcore {
@@ -69,7 +70,7 @@ outcome::result<std::optional<std::pair<std::string, types::MalwareInfo>>>
 YaraStaticHeuristicEngine::scan(const std::filesystem::path& path) {
     std::optional<std::pair<std::string, types::MalwareInfo>> result =
         std::nullopt;
-    auto user_data = std::make_pair(this, &result);
+    auto user_data = std::make_tuple(this, path.string(), &result);
     int ret = yr_rules_scan_file(
         this->yara_rules_, path.c_str(),
         SCAN_FLAGS_REPORT_RULES_MATCHING | SCAN_FLAGS_FAST_MODE,
@@ -77,7 +78,6 @@ YaraStaticHeuristicEngine::scan(const std::filesystem::path& path) {
     if (ret != ERROR_SUCCESS) {
         return std::make_error_code(std::errc::io_error);
     }
-    result->first = path.string();
     return result;
 }
 
@@ -87,12 +87,13 @@ int YaraStaticHeuristicEngine::yara_scan_callback(YR_SCAN_CONTEXT* context,
                                                   void* user_data) {
     if (message == CALLBACK_MSG_RULE_MATCHING) {
         // Get the user data.
-        auto user_data_pair = static_cast<std::pair<
-            YaraStaticHeuristicEngine*,
+        auto user_data_tuple = static_cast<std::tuple<
+            YaraStaticHeuristicEngine*, std::string,
             std::optional<std::pair<std::string, types::MalwareInfo>>*>*>(
             user_data);
-        auto self = user_data_pair->first;
-        auto result = user_data_pair->second;
+        auto self = std::get<0>(*user_data_tuple);
+        auto path = std::get<1>(*user_data_tuple);
+        auto result = std::get<2>(*user_data_tuple);
 
         // Get the score from rule.
         YR_RULE* rule = (YR_RULE*)message_data;
@@ -112,7 +113,7 @@ int YaraStaticHeuristicEngine::yara_scan_callback(YR_SCAN_CONTEXT* context,
         malware_info.threat_name = rule->identifier;
         malware_info.likelihood = score;
         malware_info.severity = score;
-        *result = std::make_pair("", malware_info);
+        *result = std::make_pair(path, malware_info);
 
         return CALLBACK_CONTINUE;
     }
