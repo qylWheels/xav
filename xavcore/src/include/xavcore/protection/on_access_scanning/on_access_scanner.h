@@ -5,6 +5,7 @@
 #include <atomic>
 #include <cstdint>
 #include <outcome/config.hpp>
+#include <string_view>
 #include <thread>
 #include <unordered_set>
 
@@ -19,7 +20,8 @@ public:
     virtual ~IOnAccessScannerEventListener() = default;
 
 public:
-    virtual void on_event(const types::MalwareInfo& info) = 0;
+    virtual void on_event(const std::string_view path,
+                          const types::MalwareInfo& info) = 0;
 };
 
 class OnAccessScanner {
