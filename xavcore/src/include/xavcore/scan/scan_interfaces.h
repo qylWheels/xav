@@ -5,6 +5,7 @@
 #include <outcome.hpp>
 #include <outcome/config.hpp>
 #include <outcome/result.hpp>
+#include <utility>
 #include <vector>
 
 #include "xavcore/types/malware_info.h"
@@ -17,8 +18,9 @@ public:
     virtual ~IScanEngine() = default;
 
 public:
-    virtual outcome::result<std::optional<types::MalwareInfo>> scan(
-        const std::filesystem::path& path) = 0;
+    virtual outcome::result<
+        std::optional<std::pair<std::string, types::MalwareInfo>>>
+    scan(const std::filesystem::path& path) = 0;
 };
 
 class IScanStrategy {
@@ -28,8 +30,8 @@ public:
 public:
     // Might return multiple result if strategy is constructed by multiple
     // scan engines.
-    virtual outcome::result<
-        std::vector<outcome::result<std::optional<types::MalwareInfo>>>>
+    virtual outcome::result<std::vector<outcome::result<
+        std::optional<std::pair<std::string, types::MalwareInfo>>>>>
     scan(const std::filesystem::path& path) = 0;
 };
 }  // namespace xavcore
