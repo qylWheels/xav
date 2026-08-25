@@ -9,9 +9,6 @@
 #include <thread>
 #include <vector>
 
-#include "msg.pb.h"
-#include "scan_status.pb.h"
-
 #define MAX_FILES_IN_QUEUE 8192
 
 namespace xavcore {
@@ -151,20 +148,7 @@ void Scanner::set_scan_strategy(IScanStrategy& scan_strategy) {
 IScanStrategy* Scanner::get_scan_strategy() { return this->scan_strategy_; }
 
 void Scanner::ws_send_scan_status() {
-    // Construct ScanStatus.
-    scan_status::ScanStatus scan_status;
-    scan_status.set_scan_status(
-        static_cast<scan_status::ScanStatusEnum>(this->scan_status_));
-    scan_status.set_total_file_count(this->total_file_count_);
-    scan_status.set_scanned_file_count(this->scanned_file_count_);
-    for (const auto& info : this->malware_infos_) {
-        auto new_malware_info = scan_status.add_malware_infos();
-        *new_malware_info = info.malware_info;
-    }
-    scan_status.set_curr_scanning_file(this->curr_scanning_file_);
-
-    // Construct Message.
-    msg::Message msg;
-    *msg.mutable_scan_status() = scan_status;
+    // void.
+    return;
 }
 }  // namespace xavcore
