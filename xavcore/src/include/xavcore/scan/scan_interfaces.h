@@ -5,8 +5,9 @@
 #include <outcome.hpp>
 #include <outcome/config.hpp>
 #include <outcome/result.hpp>
+#include <vector>
 
-#include "malware_info.pb.h"
+#include "xavcore/types/malware_info.h"
 
 namespace outcome = OUTCOME_V2_NAMESPACE;
 
@@ -16,7 +17,7 @@ public:
     virtual ~IScanEngine() = default;
 
 public:
-    virtual outcome::result<std::optional<malware_info::MalwareInfo>> scan(
+    virtual outcome::result<std::optional<types::MalwareInfo>> scan(
         const std::filesystem::path& path) = 0;
 };
 
@@ -28,7 +29,7 @@ public:
     // Might return multiple result if strategy is constructed by multiple
     // scan engines.
     virtual outcome::result<
-        std::vector<outcome::result<std::optional<malware_info::MalwareInfo>>>>
+        std::vector<outcome::result<std::optional<types::MalwareInfo>>>>
     scan(const std::filesystem::path& path) = 0;
 };
 }  // namespace xavcore
