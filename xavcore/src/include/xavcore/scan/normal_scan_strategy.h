@@ -10,8 +10,8 @@ public:
     ~NormalScanStrategy() = default;
 
 public:
-    virtual outcome::result<
-        std::vector<outcome::result<std::optional<types::MalwareInfo>>>>
+    virtual outcome::result<std::vector<outcome::result<
+        std::optional<std::pair<std::string, types::MalwareInfo>>>>>
     scan(const std::filesystem::path &path) override;
 
 private:
