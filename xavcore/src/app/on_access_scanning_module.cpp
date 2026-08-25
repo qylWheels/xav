@@ -24,10 +24,12 @@ public:
 
 public:
     virtual void on_event(
+        const std::string_view path,
         const xavcore::types::MalwareInfo& malware_info) override {
         try {
             nlohmann::json j = {
-                {"path", malware_info.path},
+                {"path", path},
+                {"threat_name", malware_info.threat_name},
             };
             this->sock_->send(asio::buffer(j.dump()), 0);
         } catch (std::exception& e) {
