@@ -10,8 +10,6 @@
 #include <system_error>
 #include <utility>
 
-#include "malware_info.pb.h"
-
 namespace xavcore {
 #define YARA_RULES_FILE \
     "/home/qyl/projects/xav/xavdb/db/yara-rules-extended.yar"
@@ -67,9 +65,10 @@ YaraStaticHeuristicEngine::~YaraStaticHeuristicEngine() {
     yr_finalize();
 }
 
-outcome::result<std::optional<malware_info::MalwareInfo>>
+outcome::result<std::optional<std::pair<std::string, types::MalwareInfo>>>
 YaraStaticHeuristicEngine::scan(const std::filesystem::path& path) {
-    std::optional<malware_info::MalwareInfo> result = std::nullopt;
+    std::optional<std::pair<std::string, types::MalwareInfo>> result =
+        std::nullopt;
     auto user_data = std::make_pair(this, &result);
     int ret = yr_rules_scan_file(
         this->yara_rules_, path.c_str(),
@@ -78,6 +77,7 @@ YaraStaticHeuristicEngine::scan(const std::filesystem::path& path) {
     if (ret != ERROR_SUCCESS) {
         return std::make_error_code(std::errc::io_error);
     }
+    result->first = path.string();
     return result;
 }
 
@@ -87,10 +87,10 @@ int YaraStaticHeuristicEngine::yara_scan_callback(YR_SCAN_CONTEXT* context,
                                                   void* user_data) {
     if (message == CALLBACK_MSG_RULE_MATCHING) {
         // Get the user data.
-        auto user_data_pair =
-            static_cast<std::pair<YaraStaticHeuristicEngine*,
-                                  std::optional<malware_info::MalwareInfo>*>*>(
-                user_data);
+        auto user_data_pair = static_cast<std::pair<
+            YaraStaticHeuristicEngine*,
+            std::optional<std::pair<std::string, types::MalwareInfo>>*>*>(
+            user_data);
         auto self = user_data_pair->first;
         auto result = user_data_pair->second;
 
@@ -106,14 +106,13 @@ int YaraStaticHeuristicEngine::yara_scan_callback(YR_SCAN_CONTEXT* context,
         }
 
         // Set the result.
-        malware_info::MalwareInfo malware_info;
-        malware_info.set_engine(malware_info::DetectionEngine::StaticHeuristic);
-        malware_info.set_dbvendor(malware_info::DatabaseVendor::YaraForge);
-        malware_info.set_type(malware_info::MalwareType::Generic);
-        malware_info.clear_family();
-        malware_info.clear_variant();
-        malware_info.set_score(score);
-        *result = malware_info;
+        types::MalwareInfo malware_info;
+        malware_info.vendor = "YaraForge";
+        malware_info.engine = "Static Heuristic Detection Engine";
+        malware_info.threat_name = rule->identifier;
+        malware_info.likelihood = score;
+        malware_info.severity = score;
+        *result = std::make_pair("", malware_info);
 
         return CALLBACK_CONTINUE;
     }

@@ -7,17 +7,19 @@
 #include <iostream>
 #include <memory>
 
-#include "xavcore/scan/scan_interfaces.h"
+#include "xavcore/scan/static_heuristic.h"
+#include "xavcore/types/malware_info.h"
 
 namespace xavcore {
-class YaraStaticHeuristicEngine : public IScanEngine {
+class YaraStaticHeuristicEngine : public IStaticHeuristicEngine {
 public:
     YaraStaticHeuristicEngine();
     ~YaraStaticHeuristicEngine();
 
 public:
-    virtual outcome::result<std::optional<malware_info::MalwareInfo>> scan(
-        const std::filesystem::path& path) override;
+    virtual outcome::result<
+        std::optional<std::pair<std::string, types::MalwareInfo>>>
+    scan(const std::filesystem::path& path) override;
 
 private:
     static void yara_err_callback(int error_level, const char* file_name,
