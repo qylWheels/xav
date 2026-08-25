@@ -11,5 +11,5 @@ target_link_libraries(scan PUBLIC PkgConfig::YARA)
 target_link_libraries(scan PUBLIC xavcore_includes)
 target_link_libraries(scan
     PUBLIC
-    spdlog::spdlog leveldb::leveldb
+    spdlog::spdlog leveldb::leveldb ZLIB::ZLIB
 )
