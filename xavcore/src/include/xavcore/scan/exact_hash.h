@@ -9,7 +9,6 @@
 #include <optional>
 #include <string>
 
-#include "malware_info.pb.h"
 #include "xavcore/scan/scan_interfaces.h"
 
 // FIXME: Only for tests.
@@ -41,9 +40,9 @@ public:
     ExactHashEngine& operator=(ExactHashEngine&&) = delete;
 
 public:
-    outcome::result<std::optional<malware_info::MalwareInfo>> scan(
+    outcome::result<std::optional<types::MalwareInfo>> scan(
         const std::string& path);
-    outcome::result<std::optional<malware_info::MalwareInfo>> scan(
+    outcome::result<std::optional<types::MalwareInfo>> scan(
         const std::filesystem::path& path) override;
 
 private:

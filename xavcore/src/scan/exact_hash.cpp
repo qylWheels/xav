@@ -3,12 +3,15 @@
 #include <cryptopp/filters.h>
 #include <cryptopp/hex.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
+#include <zconf.h>
+#include <zlib.h>
 
+#include <cstddef>
 #include <format>
+#include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 #include <outcome/success_failure.hpp>
 #include <stdexcept>
-
-#include "malware_info.pb.h"
 
 namespace xavcore {
 ExactHashEngineDatabase::~ExactHashEngineDatabase() { delete this->db; }
@@ -34,12 +37,12 @@ ExactHashEngine::ExactHashEngine() {
 
 ExactHashEngine::~ExactHashEngine() {}
 
-outcome::result<std::optional<malware_info::MalwareInfo>> ExactHashEngine::scan(
+outcome::result<std::optional<types::MalwareInfo>> ExactHashEngine::scan(
     const std::string& path) {
     return this->scan(std::filesystem::path{path});
 }
 
-outcome::result<std::optional<malware_info::MalwareInfo>> ExactHashEngine::scan(
+outcome::result<std::optional<types::MalwareInfo>> ExactHashEngine::scan(
     const std::filesystem::path& path) {
     std::string sha256;
     try {
@@ -55,14 +58,29 @@ outcome::result<std::optional<malware_info::MalwareInfo>> ExactHashEngine::scan(
     if (!status.ok()) {
         return outcome::failure(std::make_error_code(std::errc::io_error));
     } else {
-        malware_info::MalwareInfo malware_info;
-        auto result = malware_info.ParseFromString(raw_malware_info);
-        if (!result) {
+        // Uncompress.
+        std::size_t decompressed_size_hint = 4096;
+        std::vector<std::uint8_t> buf(decompressed_size_hint);
+        int ret = ::uncompress(
+            buf.data(), &decompressed_size_hint,
+            reinterpret_cast<const Bytef*>(raw_malware_info.data()),
+            raw_malware_info.size());
+        if (ret != Z_OK) {
+            this->logger_->warn(std::format("failed to uncompress: {}", ret));
             return outcome::failure(
                 std::make_error_code(std::errc::invalid_argument));
-        } else {
-            return outcome::success(malware_info);
         }
+
+        // Deserialize.
+        types::MalwareInfo malware_info;
+        nlohmann::json j = nlohmann::json::parse(buf);
+        malware_info.vendor = j["vendor"].get<std::string>();
+        malware_info.engine = j["engine"].get<std::string>();
+        malware_info.threat_name = j["threat_name"].get<std::string>();
+        malware_info.likelihood = j["likelihood"].get<double>();
+        malware_info.severity = j["severity"].get<double>();
+
+        return outcome::success(malware_info);
     }
 }
 
