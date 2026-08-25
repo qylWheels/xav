@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <outcome/success_failure.hpp>
+#include <ranges>
 #include <stdexcept>
 #include <stop_token>
 #include <system_error>
@@ -88,19 +89,30 @@ outcome::result<void> OnAccessScanner::start_monitoring() {
 
                             auto result = this->scan_strategy_->scan(path);
                             if (result.has_value()) {
-                                auto alarm = std::ranges::any_of(
+                                auto valid_result = std::ranges::filter_view(
                                     result.value(), [](const auto& r) {
                                         return r.has_value() &&
                                                r.value().has_value();
                                     });
+                                auto valid_result_mapped =
+                                    std::ranges::transform_view(
+                                        valid_result, [](const auto& r) {
+                                            return r.value().value();
+                                        });
+                                auto alarm = !valid_result_mapped.empty();
                                 if (alarm) {
                                     resp.response = FAN_DENY;
                                     this->blocked_object_count_++;
-                                    // TODO: This is only a placeholder.
+                                    auto most_likely = std::ranges::max(
+                                        valid_result_mapped,
+                                        [](const auto& a, const auto& b) {
+                                            return a.second.likelihood >
+                                                   b.second.likelihood;
+                                        });
                                     for (auto& listener :
                                          this->event_listeners_) {
-                                        listener->on_event(types::MalwareInfo{
-                                            .path = path, .family = "Generic"});
+                                        listener->on_event(most_likely.first,
+                                                           most_likely.second);
                                     }
                                 } else {
                                     resp.response = FAN_ALLOW;
