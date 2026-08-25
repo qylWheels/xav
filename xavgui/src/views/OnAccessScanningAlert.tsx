@@ -20,7 +20,7 @@ function OnAccessScanningAlert() {
                     </div>
                     <div className="flex items-center">
                         <div>Threat:</div>
-                        <div className="ml-2 text-error truncate max-w-64">哈牛魔</div>
+                        <div className="ml-2 text-error truncate max-w-64">{j.threat_name}</div>
                     </div>
                 </div>
             </div>
