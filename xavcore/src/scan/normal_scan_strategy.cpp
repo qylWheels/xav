@@ -8,11 +8,9 @@ NormalScanStrategy::NormalScanStrategy(
     : exact_hash_engine_(&exact_hash_engine),
       yara_static_heuristic_engine_(&yara_static_heuristic_engine) {}
 
-outcome::result<
-    std::vector<outcome::result<std::optional<malware_info::MalwareInfo>>>>
+outcome::result<std::vector<outcome::result<std::optional<types::MalwareInfo>>>>
 NormalScanStrategy::scan(const std::filesystem::path& path) {
-    std::vector<outcome::result<std::optional<malware_info::MalwareInfo>>>
-        results;
+    std::vector<outcome::result<std::optional<types::MalwareInfo>>> results;
 
     auto result_from_exact_hash_engine = this->exact_hash_engine_->scan(path);
     results.push_back(result_from_exact_hash_engine);

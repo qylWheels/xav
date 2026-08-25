@@ -11,7 +11,7 @@ public:
 
 public:
     virtual outcome::result<
-        std::vector<outcome::result<std::optional<malware_info::MalwareInfo>>>>
+        std::vector<outcome::result<std::optional<types::MalwareInfo>>>>
     scan(const std::filesystem::path &path) override;
 
 private:
