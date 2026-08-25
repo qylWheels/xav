@@ -9,7 +9,6 @@
 #include <thread>
 #include <vector>
 
-#include "malware_info.pb.h"
 #include "msg.pb.h"
 #include "scan_status.pb.h"
 
@@ -67,11 +66,12 @@ void Scanner::scan(const std::filesystem::path& path, int nthreads) {
                     });
                 auto highest_score_alarm =
                     std::ranges::max(engine_alarms, [](auto& a, auto& b) {
-                        return a.value().value().score() >
-                               b.value().value().score();
+                        return a.value().value().second.likelihood >
+                               b.value().value().second.likelihood;
                     });
                 this->malware_infos_.push_back(
-                    {file, highest_score_alarm.value().value()});
+                    {file.string(),
+                     highest_score_alarm.value().value().second});
             }
 
             this->scanned_file_count_++;

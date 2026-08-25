@@ -10,15 +10,10 @@
 #include <string>
 #include <vector>
 
-#include "malware_info.pb.h"
 #include "xavcore/scan/scan_interfaces.h"
+#include "xavcore/types/malware_info.h"
 
 namespace xavcore {
-struct MalwareInfo {
-    std::filesystem::path file_path;
-    malware_info::MalwareInfo malware_info;
-};
-
 enum class ScanStatus {
     Scanning,
     Paused,
@@ -58,7 +53,7 @@ public:  // Scan information getters.
         return scanned_file_count;
     }
 
-    std::vector<MalwareInfo> malware_infos() {
+    std::vector<std::pair<std::string, types::MalwareInfo>> malware_infos() {
         std::unique_lock<std::mutex> lock(this->mutex_);
         auto malware_infos = this->malware_infos_;
         lock.unlock();
@@ -93,7 +88,7 @@ private:
     ScanStatus scan_status_;
     std::uint32_t total_file_count_;
     std::uint32_t scanned_file_count_;
-    std::vector<MalwareInfo> malware_infos_;
+    std::vector<std::pair<std::string, types::MalwareInfo>> malware_infos_;
     std::filesystem::path curr_scanning_file_;
 };
 }  // namespace xavcore
