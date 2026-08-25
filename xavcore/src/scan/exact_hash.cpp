@@ -37,13 +37,13 @@ ExactHashEngine::ExactHashEngine() {
 
 ExactHashEngine::~ExactHashEngine() {}
 
-outcome::result<std::optional<types::MalwareInfo>> ExactHashEngine::scan(
-    const std::string& path) {
+outcome::result<std::optional<std::pair<std::string, types::MalwareInfo>>>
+ExactHashEngine::scan(const std::string& path) {
     return this->scan(std::filesystem::path{path});
 }
 
-outcome::result<std::optional<types::MalwareInfo>> ExactHashEngine::scan(
-    const std::filesystem::path& path) {
+outcome::result<std::optional<std::pair<std::string, types::MalwareInfo>>>
+ExactHashEngine::scan(const std::filesystem::path& path) {
     std::string sha256;
     try {
         sha256 = this->calc_sha256_of_file(path.c_str());
@@ -80,7 +80,7 @@ outcome::result<std::optional<types::MalwareInfo>> ExactHashEngine::scan(
         malware_info.likelihood = j["likelihood"].get<double>();
         malware_info.severity = j["severity"].get<double>();
 
-        return outcome::success(malware_info);
+        return outcome::success(std::make_pair(path.string(), malware_info));
     }
 }
 

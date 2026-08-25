@@ -40,10 +40,10 @@ public:
     ExactHashEngine& operator=(ExactHashEngine&&) = delete;
 
 public:
-    outcome::result<std::optional<types::MalwareInfo>> scan(
-        const std::string& path);
-    outcome::result<std::optional<types::MalwareInfo>> scan(
-        const std::filesystem::path& path) override;
+    outcome::result<std::optional<std::pair<std::string, types::MalwareInfo>>>
+    scan(const std::string& path);
+    outcome::result<std::optional<std::pair<std::string, types::MalwareInfo>>>
+    scan(const std::filesystem::path& path) override;
 
 private:
     std::string calc_sha256_of_file(const char* path) const;
