@@ -6,18 +6,15 @@
 #include <outcome/outcome.hpp>
 #include <vector>
 
-#include "malware_info.pb.h"
+#include "xavcore/scan/scan_interfaces.h"
+#include "xavcore/types/malware_info.h"
 
 namespace outcome = OUTCOME_V2_NAMESPACE;
 
 namespace xavcore {
-class IStaticHeuristicEngine {
+class IStaticHeuristicEngine : public IScanEngine {
 public:
     virtual ~IStaticHeuristicEngine() = default;
-
-public:
-    virtual outcome::result<std::optional<malware_info::MalwareInfo>> scan(
-        const std::filesystem::path& path) = 0;
 };
 
 class StaticHeuristicEngineManager {
@@ -32,8 +29,9 @@ public:
         delete;
 
 public:
-    std::vector<outcome::result<std::optional<malware_info::MalwareInfo>>> scan(
-        const std::filesystem::path& path);
+    outcome::result<std::vector<outcome::result<
+        std::optional<std::pair<std::string, types::MalwareInfo>>>>>
+    scan(const std::filesystem::path& path);
     void add_engine(std::shared_ptr<IStaticHeuristicEngine> engine);
 
 private:

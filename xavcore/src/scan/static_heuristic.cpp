@@ -10,9 +10,11 @@ StaticHeuristicEngineManager::StaticHeuristicEngineManager() {}
 
 StaticHeuristicEngineManager::~StaticHeuristicEngineManager() {}
 
-std::vector<outcome::result<std::optional<malware_info::MalwareInfo>>>
+outcome::result<std::vector<
+    outcome::result<std::optional<std::pair<std::string, types::MalwareInfo>>>>>
 StaticHeuristicEngineManager::scan(const std::filesystem::path& path) {
-    std::vector<outcome::result<std::optional<malware_info::MalwareInfo>>>
+    std::vector<outcome::result<
+        std::optional<std::pair<std::string, types::MalwareInfo>>>>
         results;
 
     // Scan the file with all static heuristic engines.
@@ -20,7 +22,7 @@ StaticHeuristicEngineManager::scan(const std::filesystem::path& path) {
         results.push_back(engine->scan(path));
     }
 
-    return results;
+    return outcome::success(results);
 }
 
 void StaticHeuristicEngineManager::add_engine(
