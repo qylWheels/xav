@@ -16,11 +16,11 @@ function OnAccessScanningAlert() {
                     <div>Xav has just blocked a threat</div>
                     <div className="mt-4 flex items-center">
                         <div>Location:</div>
-                        <div className="link ml-2 text-blue-500 truncate max-w-64">{j.path}</div>
+                        <div className="link ml-2 text-blue-500 max-w-64 truncate" title={j.path}>{j.path}</div>
                     </div>
                     <div className="flex items-center">
                         <div>Threat:</div>
-                        <div className="ml-2 text-error truncate max-w-64">{j.threat_name}</div>
+                        <div className="ml-2 text-error max-w-64 truncate" title={j.threat_name}>{j.threat_name}</div>
                     </div>
                 </div>
             </div>
@@ -31,7 +31,7 @@ function OnAccessScanningAlert() {
                     <button className="btn btn-success justify-self-end">Quarantine</button>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
 
