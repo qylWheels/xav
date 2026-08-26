@@ -13,7 +13,7 @@ function Protection() {
                     <div className="flex items-center">
                         <h2 className="card-title">On-Access Scanning</h2>
                         <label className="label text-base-content ml-auto">
-                            <input type="checkbox" className="toggle" defaultChecked onClick={onOnAccessScanningSwitch} />
+                            <input type="checkbox" className="toggle checked:toggle-success" defaultChecked onClick={onOnAccessScanningSwitch} />
                             {onAccessScanning ? "On" : "Off"}
                         </label>
                     </div>
