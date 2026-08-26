@@ -1,9 +1,22 @@
+import { useState } from "react";
+
 function Protection() {
+    const [onAccessScanning, setOnAccessScanning] = useState(true);
+    const onOnAccessScanningSwitch = () => {
+        setOnAccessScanning(!onAccessScanning);
+    }
+
     return (
         <div>
             <div className="card border mt-4">
                 <div className="card-body">
-                    <h2 className="card-title">On-Access Scanning</h2>
+                    <div className="flex items-center">
+                        <h2 className="card-title">On-Access Scanning</h2>
+                        <label className="label text-base-content ml-auto">
+                            <input type="checkbox" className="toggle" defaultChecked onClick={onOnAccessScanningSwitch} />
+                            {onAccessScanning ? "On" : "Off"}
+                        </label>
+                    </div>
 
                     <div className="divider divider-start font-bold">Timing</div>
                     <div className="flex flex-col">
