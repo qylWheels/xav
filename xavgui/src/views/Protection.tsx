@@ -1,4 +1,4 @@
-import { AppWindow, Boxes, LayoutList, ShieldBan, SquareChartGantt } from "lucide-react";
+import { AppWindow, Boxes, File, LayoutList, ShieldBan, SquareChartGantt } from "lucide-react";
 // import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
 
 function Protection() {
@@ -19,6 +19,29 @@ function Protection() {
         <div className="flex flex-col mb-8 mx-6">
             <h1 className="text-2xl font-bold">Protection</h1>
             <div className="card border mt-4">
+                <div className="card-body">
+                    <h2 className="card-title">On-Access Scanning</h2>
+                    <p>Monitor file access events to detect and prevent threats</p>
+                    <div className="flex items-center">
+                        <div className="stat flex-1">
+                            <div className="stat-title">Scanned Objects</div>
+                            <div className="stat-value">1204</div>
+                            <div className="stat-figure">
+                                <File />
+                            </div>
+                        </div>
+                        <div className="stat flex-1">
+                            <div className="stat-title">Blocked Objects</div>
+                            <div className="stat-value text-error">2</div>
+                            <div className="stat-figure">
+                                <ShieldBan />
+                            </div>
+                        </div>
+                    </div>
+                    {/* <button className="btn mt-2" onClick={onOpenProcessViewerBtnClick}>Open Process Viewer</button> */}
+                </div>
+            </div>
+            <div className="card border mt-6">
                 <div className="card-body">
                     <h2 className="card-title">Proactive Protection</h2>
                     <p>Monitor and analyze process behaviors to detect and prevent potential/unknown threats</p>
