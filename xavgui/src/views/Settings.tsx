@@ -1,48 +1,16 @@
-function Settings() {
-    const proactiveProtectionStrategies = [
-        "Rule Based Strategy", "Anomaly-Based Detection Strategy"
-    ]
-    const actionWhenDetectedMaliciousActivity = [
-        { action: "Kill Process", status: "" },
-        { action: "Notify Only", status: "selected" },
-    ]
+import Protection from '@/views/settings/Protection';
 
+function Settings() {
     return (
         <div className="flex flex-col mx-6">
             <h1 className="text-2xl font-bold">Settings</h1>
-            <div className="card border mt-4">
-                <div className="card-body">
-                    <h2 className="card-title">Protection</h2>
-                    <div className="divider divider-start font-bold">Proactive Protection</div>
-                    <ul className="list">
-                        <div className="collapse collapse-arrow bg-base-100 border border-base-300">
-                            <input type="checkbox" />
-                            <div className="collapse-title">Proactive Protection Strategy</div>
-                            <div className="collapse-content">
-                                {proactiveProtectionStrategies.map((strategy, _index) => (
-                                    <fieldset className="fieldset">
-                                        <label className="label">
-                                            <input type="checkbox" defaultChecked className="checkbox" />
-                                            {strategy}
-                                        </label>
-                                    </fieldset>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="collapse collapse-arrow border border-base-300 mt-2">
-                            <input type="checkbox" />
-                            <div className="collapse-title">Action When Detected Malicious Activity</div>
-                            <div className="collapse-content">
-                                <select defaultValue="Choose an action" className="select">
-                                    <option disabled={true}>Choose an action</option>
-                                    {actionWhenDetectedMaliciousActivity.map((action, _index) => (
-                                        <option selected={action.status === "selected"}>{action.action}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
-                    </ul>
-                    <div className="divider divider-start font-bold">HIPS</div>
+            <div className="tabs tabs-border mt-2">
+                <input type="radio" name="settings_tab" className="tab" aria-label="General" defaultChecked />
+                <input type="radio" name="settings_tab" className="tab" aria-label="Scan" />
+
+                <input type="radio" name="settings_tab" className="tab" aria-label="Protection" />
+                <div className="tab-content">
+                    <Protection />
                 </div>
             </div>
         </div>
