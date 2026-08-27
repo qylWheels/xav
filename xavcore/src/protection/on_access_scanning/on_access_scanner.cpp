@@ -86,81 +86,80 @@ outcome::result<void> OnAccessScanner::start_monitoring() {
 
                     // TODO: Handle the case where we can't read the path.
                     // I.e. implement scan function on fd.
-                    if (path_len > 0) {
-                        struct fanotify_response resp = {.fd = metadata->fd};
+                    struct fanotify_response resp = {.fd = metadata->fd};
 
-                        bool cache_hit = false;
+                    if (path_len < 0) {
+                        resp.response = FAN_ALLOW;
+                        ::write(metadata->fd, &resp, sizeof(resp));
+                        ::close(metadata->fd);
+                        continue;
+                    }
 
-                        // Lookup the cache first.
-                        auto info =
-                            this->cache_->get(types::FileFingerprint(path));
-                        if (info.has_value()) {  // Cache hit.
-                            cache_hit = true;
-                            if (info.value().has_value()) {
+                    bool cache_hit = false;
+
+                    // Lookup the cache first.
+                    auto info = this->cache_->get(types::FileFingerprint(path));
+                    if (info.has_value()) {  // Cache hit.
+                        cache_hit = true;
+                        if (info.value().has_value()) {
+                            resp.response = FAN_DENY;
+                            for (auto& listener : this->event_listeners_) {
+                                listener->on_event(path, info.value().value());
+                            }
+                        } else {
+                            resp.response = FAN_ALLOW;
+                        }
+                    } else {  // Cache miss.
+                        auto result = this->scan_strategy_->scan(path);
+                        if (result.has_value()) {
+                            auto valid_result = std::ranges::filter_view(
+                                result.value(), [](const auto& r) {
+                                    return r.has_value() &&
+                                           r.value().has_value();
+                                });
+                            auto valid_result_mapped =
+                                std::ranges::transform_view(
+                                    valid_result, [](const auto& r) {
+                                        return r.value().value();
+                                    });
+                            auto alarm = !valid_result_mapped.empty();
+                            if (alarm) {
                                 resp.response = FAN_DENY;
+                                this->blocked_object_count_++;
+                                auto most_likely = std::ranges::max(
+                                    valid_result_mapped,
+                                    [](const auto& a, const auto& b) {
+                                        return a.second.likelihood >
+                                               b.second.likelihood;
+                                    });
+
+                                // Cache the result.
+                                this->cache_->add(types::FileFingerprint(path),
+                                                  most_likely.second);
+
                                 for (auto& listener : this->event_listeners_) {
-                                    listener->on_event(path,
-                                                       info.value().value());
+                                    listener->on_event(most_likely.first,
+                                                       most_likely.second);
                                 }
                             } else {
                                 resp.response = FAN_ALLOW;
+
+                                // Cache the result.
+                                this->cache_->add(types::FileFingerprint(path),
+                                                  std::nullopt);
                             }
-                        } else {  // Cache miss.
-                            auto result = this->scan_strategy_->scan(path);
-                            if (result.has_value()) {
-                                auto valid_result = std::ranges::filter_view(
-                                    result.value(), [](const auto& r) {
-                                        return r.has_value() &&
-                                               r.value().has_value();
-                                    });
-                                auto valid_result_mapped =
-                                    std::ranges::transform_view(
-                                        valid_result, [](const auto& r) {
-                                            return r.value().value();
-                                        });
-                                auto alarm = !valid_result_mapped.empty();
-                                if (alarm) {
-                                    resp.response = FAN_DENY;
-                                    this->blocked_object_count_++;
-                                    auto most_likely = std::ranges::max(
-                                        valid_result_mapped,
-                                        [](const auto& a, const auto& b) {
-                                            return a.second.likelihood >
-                                                   b.second.likelihood;
-                                        });
+                        } else {  // Scan result is an error.
+                            resp.response = FAN_ALLOW;
 
-                                    // Cache the result.
-                                    this->cache_->add(
-                                        types::FileFingerprint(path),
-                                        most_likely.second);
-
-                                    for (auto& listener :
-                                         this->event_listeners_) {
-                                        listener->on_event(most_likely.first,
-                                                           most_likely.second);
-                                    }
-                                } else {
-                                    resp.response = FAN_ALLOW;
-
-                                    // Cache the result.
-                                    this->cache_->add(
-                                        types::FileFingerprint(path),
-                                        std::nullopt);
-                                }
-                            } else {  // Scan result is an error.
-                                resp.response = FAN_ALLOW;
-
-                                // DON'T CACHE THE RESULT!
-                                // Because the scan result is an error!
-                            }
+                            // DON'T CACHE THE RESULT!
+                            // Because the scan result is an error!
                         }
-
-                        this->scanned_object_count_++;
-
-                        write(this->fanfd_, &resp, sizeof(resp));
                     }
 
-                    close(metadata->fd);
+                    this->scanned_object_count_++;
+
+                    ::write(this->fanfd_, &resp, sizeof(resp));
+                    ::close(metadata->fd);
                 }
 
                 metadata = FAN_EVENT_NEXT(metadata, len);
