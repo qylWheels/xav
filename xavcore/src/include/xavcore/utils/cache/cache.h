@@ -18,18 +18,17 @@ public:
     Cache(Cache&&) = delete;
     Cache& operator=(Cache&&) = delete;
 
-public:
-    // Return old malware info if the map already exists.
-    std::optional<types::MalwareInfo> add(types::FileFingerprint fp,
-                                          types::MalwareInfo mi);
-    void remove(const types::FileFingerprint& fp);
-    std::optional<types::MalwareInfo> get(const types::FileFingerprint& fp);
-    void clear();
-
 private:
     std::unordered_map<types::FileFingerprint, types::MalwareInfo,
                        types::FileFingerprintHash>
         cache_;
+
+public:
+    auto add(types::FileFingerprint fp, types::MalwareInfo mi)
+        -> decltype(cache_.insert({fp, mi}));
+    void remove(const types::FileFingerprint& fp);
+    std::optional<types::MalwareInfo> get(const types::FileFingerprint& fp);
+    void clear();
 };
 }  // namespace cache
 }  // namespace utils
