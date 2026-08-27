@@ -4,3 +4,8 @@ target_link_libraries(cache
     PUBLIC
     xavcore_includes
 )
+target_include_directories(
+    cache
+    PUBLIC
+    ${Boost_INCLUDE_DIRS}
+)
