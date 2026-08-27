@@ -11,6 +11,7 @@
 
 #include "xavcore/scan/scan_interfaces.h"
 #include "xavcore/types/malware_info.h"
+#include "xavcore/utils/cache/cache.h"
 
 namespace outcome = OUTCOME_V2_NAMESPACE;
 
@@ -26,7 +27,8 @@ public:
 
 class OnAccessScanner {
 public:
-    OnAccessScanner(spdlog::logger& logger, IScanStrategy& scan_strategy);
+    OnAccessScanner(spdlog::logger& logger, IScanStrategy& scan_strategy,
+                    utils::cache::Cache& cache);
     ~OnAccessScanner();
     OnAccessScanner(const OnAccessScanner&) = delete;
     OnAccessScanner& operator=(const OnAccessScanner&) = delete;
@@ -63,6 +65,7 @@ private:
     Status status_;
     std::jthread monitoring_thread_;
     std::unordered_set<IOnAccessScannerEventListener*> event_listeners_;
+    utils::cache::Cache* cache_;
 
     // Statistics.
     std::atomic_uint64_t scanned_object_count_;

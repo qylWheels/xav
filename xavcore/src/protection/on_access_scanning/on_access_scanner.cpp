@@ -19,10 +19,12 @@
 
 namespace xavcore {
 OnAccessScanner::OnAccessScanner(spdlog::logger& logger,
-                                 IScanStrategy& scan_strategy)
+                                 IScanStrategy& scan_strategy,
+                                 utils::cache::Cache& cache)
     : logger_(&logger),
       scan_strategy_(&scan_strategy),
       status_(Status::Stopped),
+      cache_(&cache),
       scanned_object_count_(0),
       blocked_object_count_(0) {
     // Initialize the fanotify descriptor.
