@@ -9,4 +9,8 @@ target_link_libraries(
     spdlog::spdlog
     outcome::hl
 )
-target_link_libraries(on_access_scanning PUBLIC xavcore_includes)
+target_link_libraries(
+    on_access_scanning
+    PUBLIC
+    xavcore_includes xavcore::utils::cache
+)
