@@ -13,6 +13,7 @@
 #include "xavcore/scan/exact_hash.h"
 #include "xavcore/scan/normal_scan_strategy.h"
 #include "xavcore/scan/yara_static_heuristic_engine.h"
+#include "xavcore/utils/cache/cache.h"
 
 namespace asio = boost::asio;
 
@@ -63,7 +64,9 @@ void startup(spdlog::logger& logger) {
     std::unique_ptr<xavcore::IScanStrategy> normal_scan_strategy =
         std::make_unique<xavcore::NormalScanStrategy>(
             exact_hash_engine, yara_static_heuristic_engine);
-    xavcore::OnAccessScanner on_access_scanner(logger, *normal_scan_strategy);
+    xavcore::utils::cache::Cache cache;
+    xavcore::OnAccessScanner on_access_scanner(logger, *normal_scan_strategy,
+                                               cache);
     if (on_access_scanner.start_monitoring().has_error()) {
         logger.error("Failed to start on-access scanning: {}",
                      on_access_scanner.start_monitoring().error().message());
