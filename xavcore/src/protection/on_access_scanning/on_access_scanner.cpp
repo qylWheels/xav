@@ -2,6 +2,7 @@
 
 #include <fcntl.h>
 #include <limits.h>
+#include <linux/fanotify.h>
 #include <sys/fanotify.h>
 #include <unistd.h>
 
@@ -60,35 +61,51 @@ outcome::result<void> OnAccessScanner::start_monitoring() {
         return outcome::failure(std::error_code(ret, std::system_category()));
     }
 
-    this->monitoring_thread_ =
-        std::jthread([this](std::stop_token st) -> outcome::result<void> {
-            // Poll and process fanotify events.
-            while (!st.stop_requested()) {
-                ssize_t len = read(this->fanfd_, this->buf_, BUFSIZE);
-                if (len <= 0) continue;
+    this->monitoring_thread_ = std::jthread([this](std::stop_token st)
+                                                -> outcome::result<void> {
+        // Poll and process fanotify events.
+        while (!st.stop_requested()) {
+            ssize_t len = read(this->fanfd_, this->buf_, BUFSIZE);
+            if (len <= 0) continue;
 
-                struct fanotify_event_metadata* metadata =
-                    reinterpret_cast<fanotify_event_metadata*>(this->buf_);
+            struct fanotify_event_metadata* metadata =
+                reinterpret_cast<fanotify_event_metadata*>(this->buf_);
 
-                while (FAN_EVENT_OK(metadata, len)) {
-                    if (metadata->vers != FANOTIFY_METADATA_VERSION) {
-                        return outcome::failure(std::errc::io_error);
-                    }
+            while (FAN_EVENT_OK(metadata, len)) {
+                if (metadata->vers != FANOTIFY_METADATA_VERSION) {
+                    return outcome::failure(std::errc::io_error);
+                }
 
-                    if (metadata->fd >= 0) {
-                        std::string fdpath =
-                            std::format("/proc/self/fd/{}", metadata->fd);
+                if (metadata->fd >= 0) {
+                    std::string fdpath =
+                        std::format("/proc/self/fd/{}", metadata->fd);
 
-                        char path[PATH_MAX + 1] = {0};
-                        ssize_t path_len =
-                            readlink(fdpath.c_str(), path, sizeof(path) - 1);
+                    char path[PATH_MAX + 1] = {0};
+                    ssize_t path_len =
+                        readlink(fdpath.c_str(), path, sizeof(path) - 1);
 
-                        // TODO: Handle the case where we can't read the path.
-                        // I.e. implement scan function on fd.
-                        if (path_len > 0) {
-                            struct fanotify_response resp = {.fd =
-                                                                 metadata->fd};
+                    // TODO: Handle the case where we can't read the path.
+                    // I.e. implement scan function on fd.
+                    if (path_len > 0) {
+                        struct fanotify_response resp = {.fd = metadata->fd};
 
+                        bool cache_hit = false;
+
+                        // Lookup the cache first.
+                        auto info =
+                            this->cache_->get(types::FileFingerprint(path));
+                        if (info.has_value()) {  // Cache hit.
+                            cache_hit = true;
+                            if (info.value().has_value()) {
+                                resp.response = FAN_DENY;
+                                for (auto& listener : this->event_listeners_) {
+                                    listener->on_event(path,
+                                                       info.value().value());
+                                }
+                            } else {
+                                resp.response = FAN_ALLOW;
+                            }
+                        } else {  // Cache miss.
                             auto result = this->scan_strategy_->scan(path);
                             if (result.has_value()) {
                                 auto valid_result = std::ranges::filter_view(
@@ -111,6 +128,12 @@ outcome::result<void> OnAccessScanner::start_monitoring() {
                                             return a.second.likelihood >
                                                    b.second.likelihood;
                                         });
+
+                                    // Cache the result.
+                                    this->cache_->add(
+                                        types::FileFingerprint(path),
+                                        most_likely.second);
+
                                     for (auto& listener :
                                          this->event_listeners_) {
                                         listener->on_event(most_likely.first,
@@ -118,24 +141,33 @@ outcome::result<void> OnAccessScanner::start_monitoring() {
                                     }
                                 } else {
                                     resp.response = FAN_ALLOW;
+
+                                    // Cache the result.
+                                    this->cache_->add(
+                                        types::FileFingerprint(path),
+                                        std::nullopt);
                                 }
-                            } else {
+                            } else {  // Scan result is an error.
                                 resp.response = FAN_ALLOW;
+
+                                // DON'T CACHE THE RESULT!
+                                // Because the scan result is an error!
                             }
-
-                            this->scanned_object_count_++;
-
-                            write(this->fanfd_, &resp, sizeof(resp));
                         }
 
-                        close(metadata->fd);
+                        this->scanned_object_count_++;
+
+                        write(this->fanfd_, &resp, sizeof(resp));
                     }
 
-                    metadata = FAN_EVENT_NEXT(metadata, len);
+                    close(metadata->fd);
                 }
+
+                metadata = FAN_EVENT_NEXT(metadata, len);
             }
-            return outcome::success();
-        });
+        }
+        return outcome::success();
+    });
 
     this->status_ = Status::Running;
 
