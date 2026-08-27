@@ -66,8 +66,14 @@ struct FileFingerprintHash {
         std::size_t seed = 0;
         boost::hash_combine(seed, f.inode);
         boost::hash_combine(seed, f.size);
-        boost::hash_combine(seed, f.mtime);
-        boost::hash_combine(seed, f.ctime);
+        boost::hash_combine(
+            seed, std::chrono::duration_cast<std::chrono::nanoseconds>(
+                      f.mtime.time_since_epoch())
+                      .count());
+        boost::hash_combine(
+            seed, std::chrono::duration_cast<std::chrono::nanoseconds>(
+                      f.ctime.time_since_epoch())
+                      .count());
         return seed;
     }
 };
