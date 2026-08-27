@@ -19,15 +19,17 @@ public:
     Cache& operator=(Cache&&) = delete;
 
 private:
-    std::unordered_map<types::FileFingerprint, types::MalwareInfo,
+    std::unordered_map<types::FileFingerprint,
+                       std::optional<types::MalwareInfo>,
                        types::FileFingerprintHash>
         cache_;
 
 public:
-    auto add(types::FileFingerprint fp, types::MalwareInfo mi)
+    auto add(types::FileFingerprint fp, std::optional<types::MalwareInfo> mi)
         -> decltype(cache_.insert({fp, mi}));
     void remove(const types::FileFingerprint& fp);
-    std::optional<types::MalwareInfo> get(const types::FileFingerprint& fp);
+    std::optional<std::optional<types::MalwareInfo>> get(
+        const types::FileFingerprint& fp);
     void clear();
 };
 }  // namespace cache

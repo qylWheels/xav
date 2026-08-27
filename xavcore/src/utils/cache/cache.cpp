@@ -10,7 +10,8 @@ auto Cache::add(types::FileFingerprint fp, types::MalwareInfo mi)
 
 void Cache::remove(const types::FileFingerprint& fp) { this->cache_.erase(fp); }
 
-std::optional<types::MalwareInfo> Cache::get(const types::FileFingerprint& fp) {
+std::optional<std::optional<types::MalwareInfo>> Cache::get(
+    const types::FileFingerprint& fp) {
     auto it = this->cache_.find(fp);
     if (it != this->cache_.end()) {
         return it->second;
