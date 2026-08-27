@@ -4,8 +4,8 @@ target_link_libraries(cache
     PUBLIC
     xavcore_includes
 )
-target_include_directories(
+target_link_libraries(
     cache
     PUBLIC
-    ${Boost_INCLUDE_DIRS}
+    Boost::container_hash
 )
