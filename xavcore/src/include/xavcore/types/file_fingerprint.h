@@ -2,6 +2,7 @@
 
 #include <sys/stat.h>
 
+#include <boost/container_hash/hash.hpp>
 #include <chrono>
 #include <cstdint>
 #include <filesystem>
@@ -32,7 +33,7 @@ struct FileFingerprint {
             std::chrono::nanoseconds(st.st_ctim.tv_nsec));
     }
 
-    FileFingerprint(const char *path)
+    FileFingerprint(const char* path)
         : FileFingerprint(std::filesystem::path(path)) {}
 
     FileFingerprint(std::string path)
@@ -52,6 +53,22 @@ struct FileFingerprint {
         ctime = std::chrono::system_clock::time_point(
             std::chrono::seconds(st.st_ctim.tv_sec) +
             std::chrono::nanoseconds(st.st_ctim.tv_nsec));
+    }
+
+    bool operator==(const FileFingerprint& other) const {
+        return inode == other.inode && size == other.size &&
+               mtime == other.mtime && ctime == other.ctime;
+    }
+};
+
+struct FileFingerprintHash {
+    std::size_t operator()(const FileFingerprint& f) const {
+        std::size_t seed = 0;
+        boost::hash_combine(seed, f.inode);
+        boost::hash_combine(seed, f.size);
+        boost::hash_combine(seed, f.mtime);
+        boost::hash_combine(seed, f.ctime);
+        return seed;
     }
 };
 }  // namespace types
