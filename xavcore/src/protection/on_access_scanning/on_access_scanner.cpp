@@ -61,22 +61,26 @@ outcome::result<void> OnAccessScanner::start_monitoring() {
         return outcome::failure(std::error_code(ret, std::system_category()));
     }
 
-    this->monitoring_thread_ = std::jthread([this](std::stop_token st)
-                                                -> outcome::result<void> {
-        // Poll and process fanotify events.
-        while (!st.stop_requested()) {
-            ssize_t len = read(this->fanfd_, this->buf_, BUFSIZE);
-            if (len <= 0) continue;
+    this->monitoring_thread_ =
+        std::jthread([this](std::stop_token st) -> outcome::result<void> {
+            // Poll and process fanotify events.
+            while (!st.stop_requested()) {
+                ssize_t len = read(this->fanfd_, this->buf_, BUFSIZE);
+                if (len <= 0) continue;
 
-            struct fanotify_event_metadata* metadata =
-                reinterpret_cast<fanotify_event_metadata*>(this->buf_);
+                struct fanotify_event_metadata* metadata =
+                    reinterpret_cast<fanotify_event_metadata*>(this->buf_);
 
-            while (FAN_EVENT_OK(metadata, len)) {
-                if (metadata->vers != FANOTIFY_METADATA_VERSION) {
-                    return outcome::failure(std::errc::io_error);
-                }
+                while (FAN_EVENT_OK(metadata, len)) {
+                    if (metadata->vers != FANOTIFY_METADATA_VERSION) {
+                        return outcome::failure(std::errc::io_error);
+                    }
 
-                if (metadata->fd >= 0) {
+                    if (metadata->fd < 0 || metadata->fd == FAN_NOFD) {
+                        metadata = FAN_EVENT_NEXT(metadata, len);
+                        continue;
+                    }
+
                     std::string fdpath =
                         std::format("/proc/self/fd/{}", metadata->fd);
 
@@ -160,13 +164,12 @@ outcome::result<void> OnAccessScanner::start_monitoring() {
 
                     ::write(this->fanfd_, &resp, sizeof(resp));
                     ::close(metadata->fd);
-                }
 
-                metadata = FAN_EVENT_NEXT(metadata, len);
+                    metadata = FAN_EVENT_NEXT(metadata, len);
+                }
             }
-        }
-        return outcome::success();
-    });
+            return outcome::success();
+        });
 
     this->status_ = Status::Running;
 
