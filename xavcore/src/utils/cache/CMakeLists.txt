@@ -4,8 +4,3 @@ target_link_libraries(cache
     PUBLIC
     xavcore_includes
 )
-target_link_libraries(
-    cache
-    PUBLIC
-    Boost::container_hash
-)
