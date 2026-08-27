@@ -3,7 +3,7 @@
 namespace xavcore {
 namespace utils {
 namespace cache {
-auto Cache::add(types::FileFingerprint fp, types::MalwareInfo mi)
+auto Cache::add(types::FileFingerprint fp, std::optional<types::MalwareInfo> mi)
     -> decltype(cache_.insert({fp, mi})) {
     return this->cache_.insert({fp, mi});
 }
