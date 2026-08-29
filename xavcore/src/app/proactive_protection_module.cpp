@@ -39,6 +39,12 @@ void startup(spdlog::logger& logger) {
         return;
     }
 
+    // Start monitoring.
+    if (!syscall_event_provider.start()) {
+        logger.error("Failed to start syscall event provider");
+        return;
+    }
+
     // Accept connection asynchronously.
     acceptor.async_accept(sock, [&](boost::system::error_code ec) {
         if (ec) {
