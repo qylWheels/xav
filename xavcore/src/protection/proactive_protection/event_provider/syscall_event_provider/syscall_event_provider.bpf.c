@@ -129,17 +129,14 @@ exit_if:
         break;                                                         \
     }
 
-#define GENERATE_RINGBUF_RESERVE_DYNPTR_CODE(pathbuf, e)                       \
-    u64 _len = bpf_xavcore_strlen(pathbuf);                                    \
-    _len = (_len > MAX_PATH_LEN) ? MAX_PATH_LEN : _len;                        \
-                                                                               \
-    struct bpf_dynptr _dynptr;                                                 \
-    if (bpf_ringbuf_reserve_dynptr(&rb, sizeof(*e) + _len + 5, 0, &_dynptr) != \
-        0) {                                                                   \
-        bpf_ringbuf_discard_dynptr(&_dynptr, 0);                               \
-        e->additional_data_count = 0;                                          \
-        bpf_ringbuf_output(&rb, e, sizeof(*e), 0);                             \
-        break;                                                                 \
+#define GENERATE_RINGBUF_RESERVE_DYNPTR_CODE(len, e)                          \
+    struct bpf_dynptr _dynptr;                                                \
+    if (bpf_ringbuf_reserve_dynptr(&rb, sizeof(*e) + len + 5, 0, &_dynptr) != \
+        0) {                                                                  \
+        bpf_ringbuf_discard_dynptr(&_dynptr, 0);                              \
+        e->additional_data_count = 0;                                         \
+        bpf_ringbuf_output(&rb, e, sizeof(*e), 0);                            \
+        break;                                                                \
     }
 
 #define GENERATE_DYNPTR_WRITE_CODE(dynptr, e, pathbuf, len)                   \
