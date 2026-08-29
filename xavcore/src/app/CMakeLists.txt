@@ -24,3 +24,19 @@ target_link_libraries(
     Boost::asio cpptrace::cpptrace spdlog::spdlog
     nlohmann_json::nlohmann_json
 )
+
+add_executable(
+    xavcore_proactive_protection_module
+    proactive_protection_module.cpp
+)
+target_link_libraries(
+    xavcore_proactive_protection_module
+    PRIVATE
+    xavcore_includes syscall_event_provider
+    rule_based_detection_listener
+)
+target_link_libraries(
+    xavcore_proactive_protection_module
+    PRIVATE
+    Boost::asio cpptrace::cpptrace spdlog::spdlog
+)
