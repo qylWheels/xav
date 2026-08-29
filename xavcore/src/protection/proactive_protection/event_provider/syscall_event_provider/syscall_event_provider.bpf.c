@@ -114,6 +114,21 @@ exit_if:
     return 0;
 }
 
+#define GENERATE_FD_TO_PATH_STR_CODE(pathbuf_index, fd, e)            \
+    u32 i = pathbuf_index;                                            \
+    char* pathbuf = (char*)bpf_map_lookup_elem(&pathbufs, &i);        \
+    if (!pathbuf) {                                                   \
+        e->additional_data_count = 0;                                 \
+        bpf_ringbuf_output(&rb, e, sizeof(*e), 0);                    \
+        break;                                                        \
+    }                                                                 \
+                                                                      \
+    if (bpf_xavcore_fd_to_path_str(pathbuf, MAX_PATH_LEN, fd) != 0) { \
+        e->additional_data_count = 0;                                 \
+        bpf_ringbuf_output(&rb, e, sizeof(*e), 0);                    \
+        break;                                                        \
+    }
+
 SEC("tp/raw_syscalls/sys_exit")
 int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
     u32 pid = bpf_get_current_pid_tgid() >> 32;
@@ -141,21 +156,7 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
     // Handle specific syscalls who have additional data. i.e. read.
     switch (e->syscall_id) {
         case SYS_read: {
-            u32 zero = 0;
-            u8* pathbuf0 = (u8*)bpf_map_lookup_elem(&pathbufs, &zero);
-            if (!pathbuf0) {
-                e->additional_data_count = 0;
-                bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
-                break;
-            }
-
-            int result = bpf_xavcore_fd_to_path_str((char*)pathbuf0,
-                                                    MAX_PATH_LEN, e->args[0]);
-            if (result != 0) {
-                e->additional_data_count = 0;
-                bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
-                break;
-            }
+            GENERATE_FD_TO_PATH_STR_CODE(0, e->args[0], e);
 
             u64 len = bpf_xavcore_strlen((const char*)pathbuf0);
             len = (len > MAX_PATH_LEN) ? MAX_PATH_LEN : len;
