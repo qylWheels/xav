@@ -114,19 +114,19 @@ exit_if:
     return 0;
 }
 
-#define GENERATE_FD_TO_PATH_STR_CODE(pathbuf_index, fd, e)            \
-    u32 i = pathbuf_index;                                            \
-    char* pathbuf = (char*)bpf_map_lookup_elem(&pathbufs, &i);        \
-    if (!pathbuf) {                                                   \
-        e->additional_data_count = 0;                                 \
-        bpf_ringbuf_output(&rb, e, sizeof(*e), 0);                    \
-        break;                                                        \
-    }                                                                 \
-                                                                      \
-    if (bpf_xavcore_fd_to_path_str(pathbuf, MAX_PATH_LEN, fd) != 0) { \
-        e->additional_data_count = 0;                                 \
-        bpf_ringbuf_output(&rb, e, sizeof(*e), 0);                    \
-        break;                                                        \
+#define GENERATE_FD_TO_PATH_STR_CODE(pathbuf_index, fd, e)             \
+    u32 _i = pathbuf_index;                                            \
+    char* _pathbuf = (char*)bpf_map_lookup_elem(&pathbufs, &_i);       \
+    if (!_pathbuf) {                                                   \
+        e->additional_data_count = 0;                                  \
+        bpf_ringbuf_output(&rb, e, sizeof(*e), 0);                     \
+        break;                                                         \
+    }                                                                  \
+                                                                       \
+    if (bpf_xavcore_fd_to_path_str(_pathbuf, MAX_PATH_LEN, fd) != 0) { \
+        e->additional_data_count = 0;                                  \
+        bpf_ringbuf_output(&rb, e, sizeof(*e), 0);                     \
+        break;                                                         \
     }
 
 #define GENERATE_RINGBUF_RESERVE_DYNPTR_CODE(pathbuf, e)                       \
