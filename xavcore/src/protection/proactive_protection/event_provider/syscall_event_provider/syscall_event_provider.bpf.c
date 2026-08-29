@@ -268,48 +268,8 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
         }
         case SYS_openat:
         case SYS_openat2: {
-            u32 zero = 0, one = 1, two = 2;
-            char* pathbuf0 = (char*)bpf_map_lookup_elem(&pathbufs, &zero);
-            char* pathbuf1 = (char*)bpf_map_lookup_elem(&pathbufs, &one);
-            char* pathbuf2 = (char*)bpf_map_lookup_elem(&pathbufs, &two);
-            if (!pathbuf0 || !pathbuf1 || !pathbuf2) {
-                e->additional_data_count = 0;
-                bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
-                break;
-            }
-
-            // Path string from dirfd argument.
-            if (e->args[0] == AT_CWDFD) {
-                if (bpf_xavcore_get_proc_cwd(pathbuf0, MAX_PATH_LEN) != 0) {
-                    e->additional_data_count = 0;
-                    bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
-                    break;
-                }
-            } else {
-                if (bpf_xavcore_fd_to_path_str(pathbuf0, MAX_PATH_LEN,
-                                               e->args[0]) != 0) {
-                    e->additional_data_count = 0;
-                    bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
-                    break;
-                }
-            }
-
-            // Path string from pathname argument.
-            if (bpf_probe_read_user_str(pathbuf1, MAX_PATH_LEN,
-                                        (const void*)e->args[1]) < 0) {
-                e->additional_data_count = 0;
-                bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
-                break;
-            }
-
-            // Concatenate only if path is relative path.
-            if (pathbuf1[0] != '/') {
-                BPF_SNPRINTF(pathbuf2, MAX_PATH_LEN, "%s/%s", pathbuf0,
-                             pathbuf1);
-            } else {
-                BPF_SNPRINTF(pathbuf2, MAX_PATH_LEN, "%s", pathbuf1);
-            }
-
+            GENERATE_PARSE_DIRFD_AND_PATH_STR_CODE(0, 1, 2, e->args[0],
+                                                   (const void*)e->args[1], e);
             u64 len = bpf_xavcore_strlen(pathbuf2);
             len = (len > MAX_PATH_LEN) ? MAX_PATH_LEN : len;
 
