@@ -270,35 +270,11 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
         case SYS_openat2: {
             GENERATE_PARSE_DIRFD_AND_PATH_STR_CODE(0, 1, 2, e->args[0],
                                                    (const void*)e->args[1], e);
-            u64 len = bpf_xavcore_strlen(pathbuf2);
+            u64 len = bpf_xavcore_strlen(_pathbuf2);
             len = (len > MAX_PATH_LEN) ? MAX_PATH_LEN : len;
-
-            struct bpf_dynptr dynptr;
-            if (bpf_ringbuf_reserve_dynptr(&rb, sizeof(*e) + len + 5, 0,
-                                           &dynptr) != 0) {
-                bpf_ringbuf_discard_dynptr(&dynptr, 0);
-                e->additional_data_count = 0;
-                bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
-                break;
-            }
-
-            if (bpf_dynptr_write(&dynptr, sizeof(*e), pathbuf2, len, 0) != 0) {
-                bpf_ringbuf_discard_dynptr(&dynptr, 0);
-                e->additional_data_count = 0;
-                bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
-                break;
-            }
-
-            e->additional_data_count = 1;
-            e->additional_data_lens[0] = len;  // Not include '\0'.
-            if (bpf_dynptr_write(&dynptr, 0, e, sizeof(*e), 0) != 0) {
-                bpf_ringbuf_discard_dynptr(&dynptr, 0);
-                e->additional_data_count = 0;
-                bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
-                break;
-            }
-
-            bpf_ringbuf_submit_dynptr(&dynptr, 0);
+            GENERATE_RINGBUF_RESERVE_DYNPTR_CODE(len, e);
+            GENERATE_DYNPTR_WRITE_CODE(_dynptr, e, _pathbuf2, len);
+            bpf_ringbuf_submit_dynptr(&_dynptr, 0);
             break;
         }
         case SYS_close: {
