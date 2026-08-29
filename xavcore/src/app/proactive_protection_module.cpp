@@ -48,7 +48,7 @@ void startup(spdlog::logger& logger) {
         }
     });
 
-    logger.info("Xavcore On-Access Scanning Module started");
+    logger.info("Xavcore Proactive Protection Module started");
 
     ioc.run();
 
@@ -63,7 +63,8 @@ void sigsegv_handler(int signum) {
 
 int main(int argc, char* argv[]) {
     std::signal(SIGSEGV, sigsegv_handler);
-    auto logger = spdlog::stdout_color_mt("Xavcore On-Access Scanning Module");
+    auto logger =
+        spdlog::stdout_color_mt("Xavcore Proactive Protection Module");
     logger->set_level(spdlog::level::info);
     try {
         startup(*logger);
