@@ -142,6 +142,24 @@ exit_if:
         break;                                                                 \
     }
 
+#define GENERATE_DYNPTR_WRITE_CODE(dynptr, e, pathbuf, len)                   \
+    if (bpf_dynptr_write(&dynptr, sizeof(*e), (void*)pathbuf, len, 0) != 0) { \
+        bpf_ringbuf_discard_dynptr(&dynptr, 0);                               \
+        e->additional_data_count = 0;                                         \
+        bpf_ringbuf_output(&rb, e, sizeof(*e), 0);                            \
+        break;                                                                \
+    }                                                                         \
+                                                                              \
+    e->additional_data_count = 1;                                             \
+    e->additional_data_lens[0] = len; /* Not include '\0'. */                 \
+                                                                              \
+    if (bpf_dynptr_write(&dynptr, 0, e, sizeof(*e), 0) != 0) {                \
+        bpf_ringbuf_discard_dynptr(&dynptr, 0);                               \
+        e->additional_data_count = 0;                                         \
+        bpf_ringbuf_output(&rb, e, sizeof(*e), 0);                            \
+        break;                                                                \
+    }
+
 SEC("tp/raw_syscalls/sys_exit")
 int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
     u32 pid = bpf_get_current_pid_tgid() >> 32;
@@ -171,27 +189,8 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
         case SYS_read: {
             GENERATE_FD_TO_PATH_STR_CODE(0, e->args[0], e);
             GENERATE_RINGBUF_RESERVE_DYNPTR_CODE(_pathbuf, e);
-
-            result =
-                bpf_dynptr_write(&dynptr, sizeof(*e), (void*)pathbuf0, len, 0);
-            if (result != 0) {
-                bpf_ringbuf_discard_dynptr(&dynptr, 0);
-                e->additional_data_count = 0;
-                bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
-                break;
-            }
-
-            e->additional_data_count = 1;
-            e->additional_data_lens[0] = len;  // Not include '\0'.
-            result = bpf_dynptr_write(&dynptr, 0, e, sizeof(*e), 0);
-            if (result != 0) {
-                bpf_ringbuf_discard_dynptr(&dynptr, 0);
-                e->additional_data_count = 0;
-                bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
-                break;
-            }
-
-            bpf_ringbuf_submit_dynptr(&dynptr, 0);
+            GENERATE_DYNPTR_WRITE_CODE(_dynptr, e, _pathbuf, _len);
+            bpf_ringbuf_submit_dynptr(&_dynptr, 0);
             break;
         }
         case SYS_write: {
