@@ -129,6 +129,19 @@ exit_if:
         break;                                                        \
     }
 
+#define GENERATE_RINGBUF_RESERVE_DYNPTR_CODE(pathbuf, e)                       \
+    u64 _len = bpf_xavcore_strlen(pathbuf);                                    \
+    _len = (_len > MAX_PATH_LEN) ? MAX_PATH_LEN : _len;                        \
+                                                                               \
+    struct bpf_dynptr _dynptr;                                                 \
+    if (bpf_ringbuf_reserve_dynptr(&rb, sizeof(*e) + _len + 5, 0, &_dynptr) != \
+        0) {                                                                   \
+        bpf_ringbuf_discard_dynptr(&_dynptr, 0);                               \
+        e->additional_data_count = 0;                                          \
+        bpf_ringbuf_output(&rb, e, sizeof(*e), 0);                             \
+        break;                                                                 \
+    }
+
 SEC("tp/raw_syscalls/sys_exit")
 int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
     u32 pid = bpf_get_current_pid_tgid() >> 32;
@@ -157,19 +170,7 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
     switch (e->syscall_id) {
         case SYS_read: {
             GENERATE_FD_TO_PATH_STR_CODE(0, e->args[0], e);
-
-            u64 len = bpf_xavcore_strlen((const char*)pathbuf0);
-            len = (len > MAX_PATH_LEN) ? MAX_PATH_LEN : len;
-
-            struct bpf_dynptr dynptr;
-            result = bpf_ringbuf_reserve_dynptr(&rb, sizeof(*e) + len + 5, 0,
-                                                &dynptr);
-            if (result != 0) {
-                bpf_ringbuf_discard_dynptr(&dynptr, 0);
-                e->additional_data_count = 0;
-                bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
-                break;
-            }
+            GENERATE_RINGBUF_RESERVE_DYNPTR_CODE(_pathbuf, e);
 
             result =
                 bpf_dynptr_write(&dynptr, sizeof(*e), (void*)pathbuf0, len, 0);
