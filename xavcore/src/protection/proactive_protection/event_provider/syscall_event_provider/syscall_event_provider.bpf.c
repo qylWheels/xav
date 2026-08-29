@@ -160,6 +160,20 @@ exit_if:
         break;                                                                \
     }
 
+#define GENERATE_STRCOPY_FROM_USER_CODE(pathbuf_index, ptr, e)            \
+    u32 _i = pathbuf_index;                                               \
+    char* pathbuf = (char*)bpf_map_lookup_elem(&pathbufs, &_i);           \
+    if (!pathbuf) {                                                       \
+        e->additional_data_count = 0;                                     \
+        bpf_ringbuf_output(&rb, e, sizeof(*e), 0);                        \
+        break;                                                            \
+    }                                                                     \
+    if (bpf_xavcore_strncpy_from_user(pathbuf, ptr, MAX_PATH_LEN) != 0) { \
+        e->additional_data_count = 0;                                     \
+        bpf_ringbuf_output(&rb, e, sizeof(*e), 0);                        \
+        break;                                                            \
+    }
+
 SEC("tp/raw_syscalls/sys_exit")
 int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
     u32 pid = bpf_get_current_pid_tgid() >> 32;
@@ -202,21 +216,7 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
         }
         case SYS_open:
         case SYS_creat: {
-            u32 zero = 0;
-            u8* pathbuf0 = (u8*)bpf_map_lookup_elem(&pathbufs, &zero);
-            if (!pathbuf0) {
-                e->additional_data_count = 0;
-                bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
-                break;
-            }
-
-            int result = bpf_xavcore_strncpy_from_user(
-                (char*)pathbuf0, e->args[0], MAX_PATH_LEN);
-            if (result != 0) {
-                e->additional_data_count = 0;
-                bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
-                break;
-            }
+            GENERATE_STRCOPY_FROM_USER_CODE(0, e->args[0], e);
 
             u64 len = bpf_xavcore_strlen((const char*)pathbuf0);
             len = (len > MAX_PATH_LEN) ? MAX_PATH_LEN : len;
