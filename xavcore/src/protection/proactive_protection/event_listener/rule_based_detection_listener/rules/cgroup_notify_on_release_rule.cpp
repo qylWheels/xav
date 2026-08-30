@@ -5,7 +5,6 @@
 #include <cstdlib>
 #include <regex>
 
-#include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/aslr_inspection_rule.h"
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event.h"
 
 namespace xavcore {
@@ -55,6 +54,6 @@ outcome::result<std::uint8_t> CgroupNotifyOnReleaseRule::apply(
     return 0;
 }
 
-std::size_t ASLRInspectionRule::event_seq_size_hint() { return 1; }
+std::size_t CgroupNotifyOnReleaseRule::event_seq_size_hint() { return 1; }
 }  // namespace rule_based_detection_listener_rules
 }  // namespace xavcore
