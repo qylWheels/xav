@@ -9,6 +9,7 @@
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rule_based_detection_listener.h"
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/anti_debug_rule.h"
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/aslr_inspection_rule.h"
+#include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/cgroup_notify_on_release_rule.h"
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/core_pattern_modification_rule.h"
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event_provider.h"
 
@@ -49,9 +50,11 @@ void startup(spdlog::logger& logger) {
         rule_based_detection_listener_rules::CorePatternModificationRule();
     auto aslr_inspection_rule =
         xavcore::rule_based_detection_listener_rules::ASLRInspectionRule();
+    auto cgroup_notify_on_release_rule = xavcore::
+        rule_based_detection_listener_rules::CgroupNotifyOnReleaseRule();
     std::vector<xavcore::IRuleBasedDetectionListenerRule*> rules{
         &anti_debug_rule, &core_pattern_modification_rule,
-        &aslr_inspection_rule};
+        &aslr_inspection_rule, &cgroup_notify_on_release_rule};
     for (auto rule : rules) {
         ret = rule_based_detection_listener.add_rule(*rule);
         if (!ret) {
