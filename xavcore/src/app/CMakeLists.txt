@@ -34,6 +34,7 @@ target_link_libraries(
     PRIVATE
     xavcore_includes syscall_event_provider
     rule_based_detection_listener
+    proactive_protection_rules
 )
 target_link_libraries(
     xavcore_proactive_protection_module
