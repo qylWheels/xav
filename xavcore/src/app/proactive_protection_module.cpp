@@ -7,6 +7,9 @@
 #include <iostream>
 
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rule_based_detection_listener.h"
+#include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/anti_debug_rule.h"
+#include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/aslr_inspection_rule.h"
+#include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/core_pattern_modification_rule.h"
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event_provider.h"
 
 namespace asio = boost::asio;
@@ -37,6 +40,24 @@ void startup(spdlog::logger& logger) {
         logger.error("Failed to register rule based detection listener: {}",
                      ret.error().message());
         return;
+    }
+
+    // Rules.
+    auto anti_debug_rule =
+        xavcore::rule_based_detection_listener_rules::AntiDebugRule();
+    auto core_pattern_modification_rule = xavcore::
+        rule_based_detection_listener_rules::CorePatternModificationRule();
+    auto aslr_inspection_rule =
+        xavcore::rule_based_detection_listener_rules::ASLRInspectionRule();
+    std::vector<xavcore::IRuleBasedDetectionListenerRule*> rules{
+        &anti_debug_rule, &core_pattern_modification_rule,
+        &aslr_inspection_rule};
+    for (auto rule : rules) {
+        ret = rule_based_detection_listener.add_rule(*rule);
+        if (!ret) {
+            logger.error("Failed to add rule: {}", ret.error().message());
+            return;
+        }
     }
 
     // Start monitoring.
