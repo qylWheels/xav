@@ -224,18 +224,20 @@ exit_if:
         break;                                                                \
     }
 
-#define GENERATE_STRCOPY_FROM_USER_CODE(pathbuf_index, ptr, e)             \
-    u32 _i = pathbuf_index;                                                \
-    char* _pathbuf = (char*)bpf_map_lookup_elem(&pathbufs, &_i);           \
-    if (!_pathbuf) {                                                       \
-        e->additional_data_count = 0;                                      \
-        bpf_ringbuf_output(&rb, e, sizeof(*e), 0);                         \
-        break;                                                             \
-    }                                                                      \
-    if (bpf_xavcore_strncpy_from_user(_pathbuf, ptr, MAX_PATH_LEN) != 0) { \
-        e->additional_data_count = 0;                                      \
-        bpf_ringbuf_output(&rb, e, sizeof(*e), 0);                         \
-        break;                                                             \
+#define GENERATE_STRCOPY_FROM_USER_CODE(pathbuf_index, ptr, e)      \
+    u32 _i##pathbuf_index = pathbuf_index;                          \
+    char* _pathbuf##pathbuf_index =                                 \
+        (char*)bpf_map_lookup_elem(&pathbufs, &_i##pathbuf_index);  \
+    if (!_pathbuf##pathbuf_index) {                                 \
+        e->additional_data_count = 0;                               \
+        bpf_ringbuf_output(&rb, e, sizeof(*e), 0);                  \
+        break;                                                      \
+    }                                                               \
+    if (bpf_xavcore_strncpy_from_user(_pathbuf##pathbuf_index, ptr, \
+                                      MAX_PATH_LEN) != 0) {         \
+        e->additional_data_count = 0;                               \
+        bpf_ringbuf_output(&rb, e, sizeof(*e), 0);                  \
+        break;                                                      \
     }
 
 SEC("tp/raw_syscalls/sys_exit")
