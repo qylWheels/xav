@@ -13,7 +13,7 @@
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/cgroup_release_agent_rule.h"
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/core_pattern_modification_rule.h"
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/default_loader_modify_rule.h"
-#include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/dynamic_code_loading.h"
+#include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/dynamic_code_loading_rule.h"
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event_provider.h"
 
 namespace asio = boost::asio;
