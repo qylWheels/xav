@@ -178,6 +178,37 @@ outcome::result<void> RuleBasedDetectionListener::accept(const IEvent& event) {
                     syscall_event.ret);
             }
         }
+    } else if ((syscall_event.id == SYS_rename ||
+                syscall_event.id == SYS_renameat ||
+                syscall_event.id == SYS_renameat2) &&
+               std::holds_alternative<RenameSyscallAdditionalData>(
+                   syscall_event.additional_data)) {
+        auto& rename_syscall_additional_data =
+            std::get<RenameSyscallAdditionalData>(
+                syscall_event.additional_data);
+        if (syscall_event.args.empty()) {
+            this->logger_->info("rename() = {}", syscall_event.ret);
+        } else {
+            bool old_path_match =
+                rename_syscall_additional_data.old_path.has_value() &&
+                std::regex_match(
+                    rename_syscall_additional_data.old_path.value(),
+                    xavcoretest_regex);
+            bool new_path_match =
+                rename_syscall_additional_data.new_path.has_value() &&
+                std::regex_match(
+                    rename_syscall_additional_data.new_path.value(),
+                    xavcoretest_regex);
+            if (old_path_match || new_path_match) {
+                this->logger_->info(
+                    "rename({}, {}) = {}",
+                    rename_syscall_additional_data.old_path.value_or(
+                        "<unknown>"),
+                    rename_syscall_additional_data.new_path.value_or(
+                        "<unknown>"),
+                    syscall_event.ret);
+            }
+        }
     }
 
     // Apply rules.
