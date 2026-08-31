@@ -12,6 +12,7 @@
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/cgroup_notify_on_release_rule.h"
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/cgroup_release_agent_rule.h"
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/core_pattern_modification_rule.h"
+#include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/default_loader_modify_rule.h"
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event_provider.h"
 
 namespace asio = boost::asio;
@@ -55,10 +56,12 @@ void startup(spdlog::logger& logger) {
         rule_based_detection_listener_rules::CgroupNotifyOnReleaseRule();
     auto cgroup_release_agent_rule =
         xavcore::rule_based_detection_listener_rules::CgroupReleaseAgentRule();
+    auto default_loader_modify_rule =
+        xavcore::rule_based_detection_listener_rules::DefaultLoaderModifyRule();
     std::vector<xavcore::IRuleBasedDetectionListenerRule*> rules{
-        &anti_debug_rule, &core_pattern_modification_rule,
-        &aslr_inspection_rule, &cgroup_notify_on_release_rule,
-        &cgroup_release_agent_rule};
+        &anti_debug_rule,           &core_pattern_modification_rule,
+        &aslr_inspection_rule,      &cgroup_notify_on_release_rule,
+        &cgroup_release_agent_rule, &default_loader_modify_rule};
     for (auto rule : rules) {
         ret = rule_based_detection_listener.add_rule(*rule);
         if (!ret) {
