@@ -287,10 +287,10 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
         case SYS_open:
         case SYS_creat: {
             GENERATE_STRCOPY_FROM_USER_CODE(0, e->args[0], e);
-            u64 len = bpf_xavcore_strlen(_pathbuf);
+            u64 len = bpf_xavcore_strlen(_pathbuf0);
             len = (len > MAX_PATH_LEN) ? MAX_PATH_LEN : len;
             GENERATE_RINGBUF_RESERVE_DYNPTR_CODE(len, e);
-            GENERATE_DYNPTR_WRITE_CODE(_dynptr, e, _pathbuf, len);
+            GENERATE_DYNPTR_WRITE_CODE(_dynptr, e, _pathbuf0, len);
             bpf_ringbuf_submit_dynptr(&_dynptr, 0);
             break;
         }
