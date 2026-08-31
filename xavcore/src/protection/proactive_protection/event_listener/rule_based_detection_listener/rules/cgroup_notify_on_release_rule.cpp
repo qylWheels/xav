@@ -38,7 +38,7 @@ outcome::result<std::uint8_t> CgroupNotifyOnReleaseRule::apply(
                        syscall_event.additional_data)
                        .fd_path.value();
 
-            std::regex r{".*/notify_on_release"};
+            std::regex r{".*notify_on_release"};
             if (std::regex_match(path, r)) {
                 return 70;
             }
