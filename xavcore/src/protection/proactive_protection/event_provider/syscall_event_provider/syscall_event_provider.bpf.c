@@ -131,11 +131,17 @@ exit_if:
 
 #define GENERATE_PARSE_DIRFD_AND_PATH_STR_CODE(pathbuf_index0, pathbuf_index1, \
                                                pathbuf_index2, dirfd, ptr, e)  \
-    u32 _i0 = pathbuf_index0, _i1 = pathbuf_index1, _i2 = pathbuf_index2;      \
-    char* _pathbuf0 = (char*)bpf_map_lookup_elem(&pathbufs, &_i0);             \
-    char* _pathbuf1 = (char*)bpf_map_lookup_elem(&pathbufs, &_i1);             \
-    char* _pathbuf2 = (char*)bpf_map_lookup_elem(&pathbufs, &_i2);             \
-    if (!_pathbuf0 || !_pathbuf1 || !_pathbuf2) {                              \
+    u32 _i##pathbuf_index0 = pathbuf_index0,                                   \
+        _i##pathbuf_index1 = pathbuf_index1,                                   \
+        _i##pathbuf_index2 = pathbuf_index2;                                   \
+    char* _pathbuf##pathbuf_index0 =                                           \
+        (char*)bpf_map_lookup_elem(&pathbufs, &_i##pathbuf_index0);            \
+    char* _pathbuf##pathbuf_index1 =                                           \
+        (char*)bpf_map_lookup_elem(&pathbufs, &_i##pathbuf_index1);            \
+    char* _pathbuf##pathbuf_index2 =                                           \
+        (char*)bpf_map_lookup_elem(&pathbufs, &_i##pathbuf_index2);            \
+    if (!_pathbuf##pathbuf_index0 || !_pathbuf##pathbuf_index1 ||              \
+        !_pathbuf##pathbuf_index2) {                                           \
         e->additional_data_count = 0;                                          \
         bpf_ringbuf_output(&rb, e, sizeof(*e), 0);                             \
         break;                                                                 \
@@ -143,13 +149,15 @@ exit_if:
                                                                                \
     /* Path string from dirfd argument. */                                     \
     if (dirfd == AT_CWDFD) {                                                   \
-        if (bpf_xavcore_get_proc_cwd(_pathbuf0, MAX_PATH_LEN) != 0) {          \
+        if (bpf_xavcore_get_proc_cwd(_pathbuf##pathbuf_index0,                 \
+                                     MAX_PATH_LEN) != 0) {                     \
             e->additional_data_count = 0;                                      \
             bpf_ringbuf_output(&rb, e, sizeof(*e), 0);                         \
             break;                                                             \
         }                                                                      \
     } else {                                                                   \
-        if (bpf_xavcore_fd_to_path_str(_pathbuf0, MAX_PATH_LEN, dirfd) != 0) { \
+        if (bpf_xavcore_fd_to_path_str(_pathbuf##pathbuf_index0, MAX_PATH_LEN, \
+                                       dirfd) != 0) {                          \
             e->additional_data_count = 0;                                      \
             bpf_ringbuf_output(&rb, e, sizeof(*e), 0);                         \
             break;                                                             \
@@ -157,17 +165,20 @@ exit_if:
     }                                                                          \
                                                                                \
     /* Path string from pathname argument. */                                  \
-    if (bpf_probe_read_user_str(_pathbuf1, MAX_PATH_LEN, ptr) < 0) {           \
+    if (bpf_probe_read_user_str(_pathbuf##pathbuf_index1, MAX_PATH_LEN, ptr) < \
+        0) {                                                                   \
         e->additional_data_count = 0;                                          \
         bpf_ringbuf_output(&rb, e, sizeof(*e), 0);                             \
         break;                                                                 \
     }                                                                          \
                                                                                \
     /* Concatenate only if path is relative path. */                           \
-    if (_pathbuf1[0] != '/') {                                                 \
-        BPF_SNPRINTF(_pathbuf2, MAX_PATH_LEN, "%s/%s", _pathbuf0, _pathbuf1);  \
+    if (_pathbuf##pathbuf_index1[0] != '/') {                                  \
+        BPF_SNPRINTF(_pathbuf##pathbuf_index2, MAX_PATH_LEN, "%s/%s",          \
+                     _pathbuf##pathbuf_index0, _pathbuf##pathbuf_index1);      \
     } else {                                                                   \
-        BPF_SNPRINTF(_pathbuf2, MAX_PATH_LEN, "%s", _pathbuf1);                \
+        BPF_SNPRINTF(_pathbuf##pathbuf_index2, MAX_PATH_LEN, "%s",             \
+                     _pathbuf##pathbuf_index1);                                \
     }
 
 #define GENERATE_RINGBUF_RESERVE_DYNPTR_CODE(len, e)                          \
