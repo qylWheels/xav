@@ -3,6 +3,7 @@ add_library(
     SHARED
     test_rule.cpp anti_debug_rule.cpp core_pattern_modification_rule.cpp
     aslr_inspection_rule.cpp cgroup_notify_on_release_rule.cpp
+    cgroup_release_agent_rule.cpp
 )
 
 target_link_libraries(
