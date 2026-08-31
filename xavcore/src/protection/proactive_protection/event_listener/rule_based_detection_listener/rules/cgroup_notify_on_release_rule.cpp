@@ -34,14 +34,9 @@ outcome::result<std::uint8_t> CgroupNotifyOnReleaseRule::apply(
             }
 
             std::string path;
-            try {
-                path = std::get<WriteSyscallAdditionalData>(
-                           syscall_event.additional_data)
-                           .fd_path.value();
-                break;
-            } catch (...) {
-                continue;
-            }
+            path = std::get<WriteSyscallAdditionalData>(
+                       syscall_event.additional_data)
+                       .fd_path.value();
 
             std::regex r{".*/notify_on_release"};
             if (std::regex_match(path, r)) {
