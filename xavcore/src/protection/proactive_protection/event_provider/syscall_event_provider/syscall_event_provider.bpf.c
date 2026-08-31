@@ -245,7 +245,7 @@ exit_if:
         break;                                                      \
     }                                                               \
     if (bpf_xavcore_strncpy_from_user(_pathbuf##pathbuf_index, ptr, \
-                                      MAX_PATH_LEN) != 0) {         \
+                                      MAX_PATH_LEN) < 0) {          \
         e->additional_data_count = 0;                               \
         bpf_ringbuf_output(&rb, e, sizeof(*e), 0);                  \
         break;                                                      \
