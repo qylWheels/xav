@@ -47,9 +47,9 @@ struct RenameSyscallAdditionalData {
     std::optional<std::string> new_path;
 };
 
-struct RenameatSyscallAdditionalData : RenameSyscallAdditionalData {};
+using RenameatSyscallAdditionalData = RenameSyscallAdditionalData;
 
-struct Renameat2SyscallAdditionalData : RenameSyscallAdditionalData {};
+using Renameat2SyscallAdditionalData = RenameSyscallAdditionalData;
 
 // Normal syscall event, for those who don't need to parse arguments.
 struct SyscallEvent : public IEvent {
@@ -64,8 +64,7 @@ struct SyscallEvent : public IEvent {
                  WriteSyscallAdditionalData, OpenSyscallAdditionalData,
                  OpenatSyscallAdditionalData, Openat2SyscallAdditionalData,
                  CloseSyscallAdditionalData, CreatSyscallAdditionalData,
-                 UnlinkSyscallAdditionalData, RenameSyscallAdditionalData,
-                 RenameatSyscallAdditionalData, Renameat2SyscallAdditionalData>
+                 UnlinkSyscallAdditionalData, RenameSyscallAdditionalData>
         additional_data;
 };
 }  // namespace xavcore
