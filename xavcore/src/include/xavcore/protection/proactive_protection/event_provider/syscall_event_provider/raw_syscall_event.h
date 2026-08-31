@@ -14,6 +14,10 @@
 
 #define SYS_creat (85)
 #define SYS_unlink (87)
+
+#define SYS_rename (82)
+#define SYS_renameat (264)
+#define SYS_renameat2 (316)
 #endif  // __TARGET_ARCH_x86_64
 
 #define AT_CWDFD (-100)
