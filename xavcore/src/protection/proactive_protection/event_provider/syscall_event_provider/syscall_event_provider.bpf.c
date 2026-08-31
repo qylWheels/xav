@@ -355,6 +355,19 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
             bpf_ringbuf_submit_dynptr(&_dynptr, 0);
             break;
         }
+        case SYS_rename: {
+            GENERATE_STRCOPY_FROM_USER_CODE(0, e->args[0], e);
+            GENERATE_STRCOPY_FROM_USER_CODE(1, e->args[1], e);
+            u64 len0 = bpf_xavcore_strlen(_pathbuf0);
+            len0 = (len0 > MAX_PATH_LEN) ? MAX_PATH_LEN : len0;
+            u64 len1 = bpf_xavcore_strlen(_pathbuf1);
+            len1 = (len1 > MAX_PATH_LEN) ? MAX_PATH_LEN : len1;
+            GENERATE_RINGBUF_RESERVE_DYNPTR_CODE(len0 + len1, e);
+            GENERATE_DYNPTR_WRITE2_CODE(_dynptr, e, _pathbuf0, len0, _pathbuf1,
+                                        len1);
+            bpf_ringbuf_submit_dynptr(&_dynptr, 0);
+            break;
+        }
         default: {
             e->additional_data_count = 0;
             bpf_ringbuf_output(&rb, e, sizeof(*e), 0);
