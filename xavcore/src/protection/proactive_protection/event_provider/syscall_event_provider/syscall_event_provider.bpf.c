@@ -25,7 +25,7 @@ struct {
 
 struct {
     __uint(type, BPF_MAP_TYPE_PERCPU_ARRAY);
-    __uint(max_entries, 4);
+    __uint(max_entries, 8);
     __type(key, u32);
     __type(value, u8[MAX_PATH_LEN + 5]);
 } pathbufs SEC(".maps");
