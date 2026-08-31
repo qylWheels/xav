@@ -198,6 +198,32 @@ exit_if:
         break;                                                                \
     }
 
+#define GENERATE_DYNPTR_WRITE2_CODE(dynptr, e, buf1, len1, buf2, len2)        \
+    if (bpf_dynptr_write(&dynptr, sizeof(*e), (void*)buf1, len1, 0) != 0) {   \
+        bpf_ringbuf_discard_dynptr(&dynptr, 0);                               \
+        e->additional_data_count = 0;                                         \
+        bpf_ringbuf_output(&rb, e, sizeof(*e), 0);                            \
+        break;                                                                \
+    }                                                                         \
+    if (bpf_dynptr_write(&dynptr, sizeof(*e) + len1, (void*)buf2, len2, 0) != \
+        0) {                                                                  \
+        bpf_ringbuf_discard_dynptr(&dynptr, 0);                               \
+        e->additional_data_count = 0;                                         \
+        bpf_ringbuf_output(&rb, e, sizeof(*e), 0);                            \
+        break;                                                                \
+    }                                                                         \
+                                                                              \
+    e->additional_data_count = 2;                                             \
+    e->additional_data_lens[0] = len1;                                        \
+    e->additional_data_lens[1] = len2;                                        \
+                                                                              \
+    if (bpf_dynptr_write(&dynptr, 0, e, sizeof(*e), 0) != 0) {                \
+        bpf_ringbuf_discard_dynptr(&dynptr, 0);                               \
+        e->additional_data_count = 0;                                         \
+        bpf_ringbuf_output(&rb, e, sizeof(*e), 0);                            \
+        break;                                                                \
+    }
+
 #define GENERATE_STRCOPY_FROM_USER_CODE(pathbuf_index, ptr, e)             \
     u32 _i = pathbuf_index;                                                \
     char* _pathbuf = (char*)bpf_map_lookup_elem(&pathbufs, &_i);           \
