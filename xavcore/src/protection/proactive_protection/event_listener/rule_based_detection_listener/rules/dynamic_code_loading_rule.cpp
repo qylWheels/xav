@@ -1,4 +1,4 @@
-#include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/dynamic_code_loading.h"
+#include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/dynamic_code_loading_rule.h"
 
 #include <sys/mman.h>
 #include <sys/syscall.h>
