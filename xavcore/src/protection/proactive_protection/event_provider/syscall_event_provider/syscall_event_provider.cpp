@@ -299,6 +299,25 @@ void SyscallEventProvider::handle_raw_event_wrapper(
             event.additional_data = additional_data;
             break;
         }
+        case SYS_rename:
+        case SYS_renameat:
+        case SYS_renameat2: {
+            RenameSyscallAdditionalData additional_data;
+            if (raw_event_wrapper.raw_event.enter_captured &&
+                raw_event_wrapper.additional_data.size() == 2) {
+                additional_data.old_path =
+                    std::string(raw_event_wrapper.additional_data[0].begin(),
+                                raw_event_wrapper.additional_data[0].end());
+                additional_data.new_path =
+                    std::string(raw_event_wrapper.additional_data[1].begin(),
+                                raw_event_wrapper.additional_data[1].end());
+            } else {
+                additional_data.old_path = std::nullopt;
+                additional_data.new_path = std::nullopt;
+            }
+            event.additional_data = additional_data;
+            break;
+        }
         default: {
             event.additional_data = std::monostate();
             break;
