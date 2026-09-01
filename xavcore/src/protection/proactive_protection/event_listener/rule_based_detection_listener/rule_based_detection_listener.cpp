@@ -209,6 +209,24 @@ outcome::result<void> RuleBasedDetectionListener::accept(const IEvent& event) {
                     syscall_event.ret);
             }
         }
+    } else if (syscall_event.id == SYS_execve ||
+               syscall_event.id == SYS_execveat) {
+        auto& execve_syscall_additional_data =
+            std::get<ExecveSyscallAdditionalData>(
+                syscall_event.additional_data);
+        if (syscall_event.args.empty()) {
+            this->logger_->info("execve() = {}", syscall_event.ret);
+        } else {
+            if (execve_syscall_additional_data.path.has_value() &&
+                std::regex_match(execve_syscall_additional_data.path.value(),
+                                 xavcoretest_regex)) {
+                this->logger_->info(
+                    "execve({}, {}, {}) = {}",
+                    execve_syscall_additional_data.path.value_or("<unknown>"),
+                    syscall_event.args[1], syscall_event.args[2],
+                    syscall_event.ret);
+            }
+        }
     }
 
     // Apply rules.
