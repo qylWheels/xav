@@ -4,7 +4,7 @@ add_library(
     test_rule.cpp anti_debug_rule.cpp core_pattern_modification_rule.cpp
     aslr_inspection_rule.cpp cgroup_notify_on_release_rule.cpp
     cgroup_release_agent_rule.cpp default_loader_modify_rule.cpp
-    dynamic_code_loading_rule.cpp
+    dynamic_code_loading_rule.cpp fileless_execution_rule.cpp
 )
 
 target_link_libraries(
