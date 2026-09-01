@@ -51,6 +51,12 @@ using RenameatSyscallAdditionalData = RenameSyscallAdditionalData;
 
 using Renameat2SyscallAdditionalData = RenameSyscallAdditionalData;
 
+struct ExecveSyscallAdditionalData {
+    std::optional<std::string> path;
+};
+
+using ExecveatSyscallAdditionalData = ExecveSyscallAdditionalData;
+
 // Normal syscall event, for those who don't need to parse arguments.
 struct SyscallEvent : public IEvent {
     std::chrono::time_point<std::chrono::system_clock> timestamp;
@@ -64,7 +70,8 @@ struct SyscallEvent : public IEvent {
                  WriteSyscallAdditionalData, OpenSyscallAdditionalData,
                  OpenatSyscallAdditionalData, Openat2SyscallAdditionalData,
                  CloseSyscallAdditionalData, CreatSyscallAdditionalData,
-                 UnlinkSyscallAdditionalData, RenameSyscallAdditionalData>
+                 UnlinkSyscallAdditionalData, RenameSyscallAdditionalData,
+                 ExecveSyscallAdditionalData>
         additional_data;
 };
 }  // namespace xavcore
