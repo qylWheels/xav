@@ -39,6 +39,7 @@ FetchContent_MakeAvailable(pfs)
 
 # Subdirectories.
 add_subdirectory(src)
+add_subdirectory(test)
 
 # Include directories.
 add_library(xavcore_includes INTERFACE)
