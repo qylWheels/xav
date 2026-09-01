@@ -18,6 +18,9 @@
 #define SYS_rename (82)
 #define SYS_renameat (264)
 #define SYS_renameat2 (316)
+
+#define SYS_execve (59)
+#define SYS_execveat (322)
 #endif  // __TARGET_ARCH_x86_64
 
 #define AT_CWDFD (-100)
