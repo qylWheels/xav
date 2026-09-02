@@ -229,12 +229,19 @@ outcome::result<void> RuleBasedDetectionListener::accept(const IEvent& event) {
         }
     }
 
+    // Move forward the window by (max_size_hint_ / 3).
+    if (this->proc_syscall_events_[syscall_event.process].size() %
+            std::max(this->max_size_hint_ / 3, (std::size_t)1) !=
+        0) {
+        return outcome::success();
+    }
+
     // Apply rules.
     for (auto& rule : this->rules_) {
         const auto& proc_syscall_events =
             this->proc_syscall_events_[syscall_event.process];
-        std::size_t n = std::min(rule->event_seq_size_hint() * 3,
-                                 proc_syscall_events.size());
+        std::size_t n =
+            std::min(this->max_size_hint_, proc_syscall_events.size());
         std::vector<SyscallEvent> event_slice(proc_syscall_events.end() - n,
                                               proc_syscall_events.end());
         std::vector<std::reference_wrapper<IEvent>> event_ref_slice(
