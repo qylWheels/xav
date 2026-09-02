@@ -261,6 +261,8 @@ outcome::result<void> RuleBasedDetectionListener::accept(const IEvent& event) {
 
 outcome::result<void> RuleBasedDetectionListener::add_rule(
     IRuleBasedDetectionListenerRule& rule) {
+    this->max_size_hint_ =
+        std::max(this->max_size_hint_, rule.event_seq_size_hint());
     this->rules_.insert(&rule);
     return outcome::success();
 }
@@ -268,6 +270,15 @@ outcome::result<void> RuleBasedDetectionListener::add_rule(
 outcome::result<void> RuleBasedDetectionListener::remove_rule(
     IRuleBasedDetectionListenerRule& rule) {
     this->rules_.erase(&rule);
+    auto it = std::max_element(
+        this->rules_.begin(), this->rules_.end(), [](auto& a, auto& b) {
+            return a->event_seq_size_hint() < b->event_seq_size_hint();
+        });
+    if (it != this->rules_.end()) {
+        this->max_size_hint_ = (*it)->event_seq_size_hint();
+    } else {
+        this->max_size_hint_ = 0;
+    }
     return outcome::success();
 }
 
