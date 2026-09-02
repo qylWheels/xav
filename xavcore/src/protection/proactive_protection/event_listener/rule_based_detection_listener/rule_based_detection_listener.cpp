@@ -13,7 +13,7 @@
 
 namespace xavcore {
 RuleBasedDetectionListener::RuleBasedDetectionListener(spdlog::logger& logger)
-    : logger_(&logger) {}
+    : logger_(&logger), max_size_hint_(0) {}
 
 RuleBasedDetectionListener::~RuleBasedDetectionListener() = default;
 
