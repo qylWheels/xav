@@ -31,10 +31,12 @@ public:
 
     // Return severity(0-100) of the event sequence.
     // The higher the severity, the more the event sequence is like a threat.
+    [[deprecated]]
     virtual outcome::result<std::uint8_t> apply(
         std::span<std::reference_wrapper<IEvent>> event_seq) = 0;
 
     // Return the hint of the event sequence size.
+    [[deprecated]]
     virtual std::size_t event_seq_size_hint() = 0;
 
     virtual outcome::result<void> push_event(IEvent& event) = 0;
