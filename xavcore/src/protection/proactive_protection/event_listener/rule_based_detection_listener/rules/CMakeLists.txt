@@ -6,7 +6,7 @@ add_library(
     cgroup_release_agent_rule.cpp default_loader_modify_rule.cpp
     dynamic_code_loading_rule.cpp fileless_execution_rule.cpp
     hidden_file_rule.cpp kernel_module_loading_rule.cpp
-    process_vm_inject_rule.cpp
+    process_vm_inject_rule.cpp proc_kcore_read_rule.cpp
 )
 
 target_link_libraries(
