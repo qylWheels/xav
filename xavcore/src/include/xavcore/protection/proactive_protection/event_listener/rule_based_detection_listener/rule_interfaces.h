@@ -12,6 +12,14 @@
 namespace outcome = OUTCOME_V2_NAMESPACE;
 
 namespace xavcore {
+class IRuleWarningInfo {
+public:
+    virtual ~IRuleWarningInfo() = default;
+
+public:
+    virtual std::uint8_t severity() = 0;
+};
+
 class IRuleBasedDetectionListenerRule {
 public:
     virtual ~IRuleBasedDetectionListenerRule() = default;
