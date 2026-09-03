@@ -17,6 +17,7 @@
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/fileless_execution_rule.h"
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/hidden_file_rule.h"
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/kernel_module_loading_rule.h"
+#include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/process_vm_inject_rule.h"
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event_provider.h"
 
 namespace asio = boost::asio;
@@ -70,12 +71,15 @@ void startup(spdlog::logger& logger) {
         xavcore::rule_based_detection_listener_rules::HiddenFileRule();
     auto kernel_module_loading_rule =
         xavcore::rule_based_detection_listener_rules::KernelModuleLoadingRule();
+    auto process_vm_inject_rule =
+        xavcore::rule_based_detection_listener_rules::ProcessVmInjectRule();
     std::vector<xavcore::IRuleBasedDetectionListenerRule*> rules{
         &anti_debug_rule,           &core_pattern_modification_rule,
         &aslr_inspection_rule,      &cgroup_notify_on_release_rule,
         &cgroup_release_agent_rule, &default_loader_modify_rule,
         &dynamic_code_loading_rule, &fileless_execution_rule,
         &hidden_file_rule,          &kernel_module_loading_rule,
+        &process_vm_inject_rule,
     };
     for (auto rule : rules) {
         ret = rule_based_detection_listener.add_rule(*rule);
