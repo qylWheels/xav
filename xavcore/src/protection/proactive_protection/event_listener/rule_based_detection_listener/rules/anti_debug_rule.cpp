@@ -3,6 +3,8 @@
 #include <sys/ptrace.h>
 #include <sys/syscall.h>
 
+#include <system_error>
+
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event.h"
 
 namespace xavcore {
@@ -35,6 +37,36 @@ outcome::result<std::uint8_t> AntiDebugRule::apply(
 }
 
 std::size_t AntiDebugRule::event_seq_size_hint() { return 1; }
+
+outcome::result<void> AntiDebugRule::push_event(IEvent& event) {
+    try {
+        const auto& syscall_event = dynamic_cast<const SyscallEvent&>(event);
+        if (syscall_event.id == SYS_ptrace &&
+            syscall_event.args[0] == PTRACE_TRACEME) {
+            for (auto& [cbid, cb] : this->cbs_on_warning_) {
+                auto info = AntiDebugRuleWarningInfo{};
+                cb(info);
+            }
+        }
+    } catch (...) {
+        return std::errc::invalid_argument;
+    }
+    return outcome::success();
+}
+
+outcome::result<void> AntiDebugRule::register_warning_callback(
+    int cbid, std::function<void(IRuleWarningInfo&)> cb) {
+    if (this->cbs_on_warning_.find(cbid) != this->cbs_on_warning_.end()) {
+        return std::errc::invalid_argument;
+    }
+    this->cbs_on_warning_[cbid] = cb;
+    return outcome::success();
+}
+
+outcome::result<void> AntiDebugRule::unregister_warning_callback(int cbid) {
+    this->cbs_on_warning_.erase(cbid);
+    return outcome::success();
+}
 
 }  // namespace rule_based_detection_listener_rules
 }  // namespace xavcore
