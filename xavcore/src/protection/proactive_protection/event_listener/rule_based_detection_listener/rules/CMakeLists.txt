@@ -7,6 +7,7 @@ add_library(
     dynamic_code_loading_rule.cpp fileless_execution_rule.cpp
     hidden_file_rule.cpp kernel_module_loading_rule.cpp
     process_vm_inject_rule.cpp proc_kcore_read_rule.cpp
+    proc_mem_access_rule.cpp
 )
 
 target_link_libraries(
