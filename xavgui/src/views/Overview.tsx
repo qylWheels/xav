@@ -3,16 +3,16 @@ import { Biohazard, ChevronDown, ChevronUp, Database, Dock, ShieldCheck, TextSea
 function Overview() {
     return (
         <div className="flex-col">
-            <div className="w-full h-16"></div>
-            <div className="flex">
+            <div className="w-full h-16 bg-green-50"></div>
+            <div className="flex bg-green-50">
                 <ShieldCheck size={64} color="var(--color-success)" className="ml-16 mr-8" />
                 <div className="flex-col">
                     <div className="text-2xl font-bold">Your System is Safe</div>
                     <div className="mt-2">Xav is Protecting Your System</div>
                 </div>
             </div>
-            <div className="w-full h-16"></div>
-            <div className="stats shadow mx-8 grid grid-rows-1 grid-cols-2">
+            <div className="w-full h-16 bg-green-50"></div>
+            <div className="stats shadow mx-8 grid grid-rows-1 grid-cols-2 mt-10">
                 <div className="stat">
                     <div className="stat-title">Software Version</div>
                     <div className="stat-value">0.1.0</div>
