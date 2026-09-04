@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include <map>
+#include <unordered_set>
 
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rule_interfaces.h"
 
@@ -28,12 +28,13 @@ public:  // IRuleBasedDetectionListenerRule methods.
     virtual std::size_t event_seq_size_hint() override;
     virtual outcome::result<void> push_event(IEvent& event) override;
     virtual outcome::result<void> register_warning_callback(
-        int cbid, std::function<void(IRuleWarningInfo&)> cb) override;
+        std::function<void(IRuleWarningInfo&)>& cb) override;
     virtual outcome::result<void> unregister_warning_callback(
-        int cbid) override;
+        std::function<void(IRuleWarningInfo&)>& cb) override;
 
 private:
-    std::map<int, std::function<void(IRuleWarningInfo&)>> callbacks_on_warning_;
+    std::unordered_set<std::function<void(IRuleWarningInfo&)>*>
+        callbacks_on_warning_;
 };
 }  // namespace rule_based_detection_listener_rules
 }  // namespace xavcore

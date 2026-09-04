@@ -5,7 +5,6 @@
 #include <cstdlib>
 #include <iostream>
 #include <regex>
-#include <system_error>
 
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event.h"
 
@@ -142,9 +141,9 @@ outcome::result<void> ASLRInspectionRule::push_event(IEvent& event) {
 
         std::regex re("/proc/sys/kernel/randomize_va_space");
         if (std::regex_search(path, re)) {
-            for (auto& [cbid, cb] : this->callbacks_on_warning_) {
+            for (auto cb : this->callbacks_on_warning_) {
                 auto info = ASLRInspectionRuleWarningInfo{};
-                cb(info);
+                (*cb)(info);
             }
         }
     } catch (...) {
@@ -154,18 +153,14 @@ outcome::result<void> ASLRInspectionRule::push_event(IEvent& event) {
 }
 
 outcome::result<void> ASLRInspectionRule::register_warning_callback(
-    int cbid, std::function<void(IRuleWarningInfo&)> cb) {
-    if (this->callbacks_on_warning_.find(cbid) !=
-        this->callbacks_on_warning_.end()) {
-        return std::errc::invalid_argument;
-    }
-    this->callbacks_on_warning_[cbid] = cb;
+    std::function<void(IRuleWarningInfo&)>& cb) {
+    this->callbacks_on_warning_.insert(&cb);
     return outcome::success();
 }
 
 outcome::result<void> ASLRInspectionRule::unregister_warning_callback(
-    int cbid) {
-    this->callbacks_on_warning_.erase(cbid);
+    std::function<void(IRuleWarningInfo&)>& cb) {
+    this->callbacks_on_warning_.erase(&cb);
     return outcome::success();
 }
 
