@@ -43,9 +43,9 @@ outcome::result<void> AntiDebugRule::push_event(IEvent& event) {
         const auto& syscall_event = dynamic_cast<const SyscallEvent&>(event);
         if (syscall_event.id == SYS_ptrace &&
             syscall_event.args[0] == PTRACE_TRACEME) {
-            for (auto& [cbid, cb] : this->cbs_on_warning_) {
+            for (auto cb : this->cbs_on_warning_) {
                 auto info = AntiDebugRuleWarningInfo{};
-                cb(info);
+                (*cb)(info);
             }
         }
     } catch (...) {
@@ -55,16 +55,14 @@ outcome::result<void> AntiDebugRule::push_event(IEvent& event) {
 }
 
 outcome::result<void> AntiDebugRule::register_warning_callback(
-    int cbid, std::function<void(IRuleWarningInfo&)> cb) {
-    if (this->cbs_on_warning_.find(cbid) != this->cbs_on_warning_.end()) {
-        return std::errc::invalid_argument;
-    }
-    this->cbs_on_warning_[cbid] = cb;
+    std::function<void(IRuleWarningInfo&)>& cb) {
+    this->cbs_on_warning_.insert(&cb);
     return outcome::success();
 }
 
-outcome::result<void> AntiDebugRule::unregister_warning_callback(int cbid) {
-    this->cbs_on_warning_.erase(cbid);
+outcome::result<void> AntiDebugRule::unregister_warning_callback(
+    std::function<void(IRuleWarningInfo&)>& cb) {
+    this->cbs_on_warning_.erase(&cb);
     return outcome::success();
 }
 
