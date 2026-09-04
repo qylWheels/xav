@@ -2,6 +2,7 @@
 
 #include <sys/syscall.h>
 
+#include <iostream>
 #include <regex>
 #include <system_error>
 
@@ -28,9 +29,11 @@ outcome::result<std::uint8_t> CorePatternModificationRule::apply(
 
 std::size_t CorePatternModificationRule::event_seq_size_hint() { return 1; }
 
-outcome::result<void> CorePatternModificationRule::push_event(IEvent& event) {
+outcome::result<void> CorePatternModificationRule::push_event(
+    const IEvent& event) {
     try {
         const auto& syscall_event = dynamic_cast<const SyscallEvent&>(event);
+        std::cout << "!";
         if (syscall_event.id == SYS_write) {
             auto path = std::get<WriteSyscallAdditionalData>(
                             syscall_event.additional_data)
@@ -50,13 +53,13 @@ outcome::result<void> CorePatternModificationRule::push_event(IEvent& event) {
 }
 
 outcome::result<void> CorePatternModificationRule::register_warning_callback(
-    std::function<void(IRuleWarningInfo&)>& cb) {
+    std::function<void(const IRuleWarningInfo&)>& cb) {
     this->callbacks_on_warning_.insert(&cb);
     return outcome::success();
 }
 
 outcome::result<void> CorePatternModificationRule::unregister_warning_callback(
-    std::function<void(IRuleWarningInfo&)>& cb) {
+    std::function<void(const IRuleWarningInfo&)>& cb) {
     this->callbacks_on_warning_.erase(&cb);
     return outcome::success();
 }
