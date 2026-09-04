@@ -10,7 +10,7 @@ namespace rule_based_detection_listener_rules {
 struct CorePatternModificationRuleWarningInfo : public IRuleWarningInfo {
     CorePatternModificationRuleWarningInfo(std::string path) : path(path) {}
 
-    virtual std::uint8_t severity() override { return 60; }
+    virtual std::uint8_t severity() const override { return 60; }
 
     std::string path;
 };
