@@ -8,7 +8,7 @@ function MainWindowLayout() {
             <div className="w-full h-full bg-white rounded-xl shadow-lg flex">
                 <MainSidebar />
                 <div className="w-full h-full flex flex-col">
-                    <TitleBar />
+                    <TitleBar title="" />
                     <div className="w-full h-full overflow-y-auto">
                         <Outlet />
                     </div>
