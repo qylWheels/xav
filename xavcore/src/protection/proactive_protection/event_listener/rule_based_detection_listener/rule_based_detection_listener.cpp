@@ -230,7 +230,7 @@ outcome::result<void> RuleBasedDetectionListener::accept(const IEvent& event) {
 
     // Push event into rules.
     for (auto& rule : this->rules_) {
-        (void)rule->push_event(const_cast<IEvent&>(event));
+        (void)rule->push_event(event);
     }
 
     return outcome::success();
