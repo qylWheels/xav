@@ -35,10 +35,10 @@ function App() {
         <Route path="/protection" element={<Protection />} />
         <Route path="/settings" element={<Settings />} />
       </Route>
-      <Route path="/process-viewer" element={<StandAloneWindowLayout />}>
+      <Route path="/process-viewer" element={<StandAloneWindowLayout title="xav Process Viewer" />}>
         <Route index element={<ProcessViewer />} />
       </Route>
-      <Route path="/on-access-scanning-alert" element={<StandAloneWindowLayout />}>
+      <Route path="/on-access-scanning-alert" element={<StandAloneWindowLayout title="xav On-Access Scanning" />}>
         <Route index element={<OnAccessScanningAlert />} />
       </Route>
     </Routes >
