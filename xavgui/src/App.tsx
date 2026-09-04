@@ -28,7 +28,7 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<MainWindowLayout />}>
+      <Route path="/" element={<MainWindowLayout title="xav" />}>
         <Route index element={<Overview />} />
         <Route path="/overview" element={<Overview />} />
         <Route path="/scan" element={<Scan />} />
