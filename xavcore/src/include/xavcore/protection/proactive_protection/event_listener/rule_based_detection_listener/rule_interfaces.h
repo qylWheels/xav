@@ -39,12 +39,12 @@ public:
     [[deprecated]]
     virtual std::size_t event_seq_size_hint() = 0;
 
-    virtual outcome::result<void> push_event(IEvent& event) = 0;
+    virtual outcome::result<void> push_event(const IEvent& event) = 0;
 
     virtual outcome::result<void> register_warning_callback(
-        std::function<void(IRuleWarningInfo&)>& cb) = 0;
+        std::function<void(const IRuleWarningInfo&)>& cb) = 0;
 
     virtual outcome::result<void> unregister_warning_callback(
-        std::function<void(IRuleWarningInfo&)>& cb) = 0;
+        std::function<void(const IRuleWarningInfo&)>& cb) = 0;
 };
 }  // namespace xavcore
