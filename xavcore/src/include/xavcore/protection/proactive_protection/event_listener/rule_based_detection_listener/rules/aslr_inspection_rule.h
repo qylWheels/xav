@@ -8,7 +8,11 @@
 namespace xavcore {
 namespace rule_based_detection_listener_rules {
 struct ASLRInspectionRuleWarningInfo : public IRuleWarningInfo {
+    ASLRInspectionRuleWarningInfo(std::string path) : path(path) {}
+
     virtual inline std::uint8_t severity() override { return 20; }
+
+    std::string path;
 };
 
 class ASLRInspectionRule : public IRuleBasedDetectionListenerRule {

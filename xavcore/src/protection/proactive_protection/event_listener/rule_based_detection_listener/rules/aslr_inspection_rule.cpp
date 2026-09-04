@@ -142,7 +142,7 @@ outcome::result<void> ASLRInspectionRule::push_event(IEvent& event) {
         std::regex re("/proc/sys/kernel/randomize_va_space");
         if (std::regex_search(path, re)) {
             for (auto cb : this->callbacks_on_warning_) {
-                auto info = ASLRInspectionRuleWarningInfo{};
+                auto info = ASLRInspectionRuleWarningInfo(path);
                 (*cb)(info);
             }
         }
