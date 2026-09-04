@@ -8,7 +8,7 @@ function Overview() {
                 <ShieldCheck size={64} color="var(--color-success)" className="ml-16 mr-8" />
                 <div className="flex-col">
                     <div className="text-2xl font-bold">Your System is Safe</div>
-                    <div className="mt-2">xav is Protecting Your System</div>
+                    <div className="mt-2">Xav is Protecting Your System</div>
                 </div>
             </div>
             <div className="w-full h-16"></div>
