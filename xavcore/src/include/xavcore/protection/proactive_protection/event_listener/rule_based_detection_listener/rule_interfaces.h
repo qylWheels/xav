@@ -42,8 +42,9 @@ public:
     virtual outcome::result<void> push_event(IEvent& event) = 0;
 
     virtual outcome::result<void> register_warning_callback(
-        int cbid, std::function<void(IRuleWarningInfo&)> cb) = 0;
+        std::function<void(IRuleWarningInfo&)>& cb) = 0;
 
-    virtual outcome::result<void> unregister_warning_callback(int cbid) = 0;
+    virtual outcome::result<void> unregister_warning_callback(
+        std::function<void(IRuleWarningInfo&)>& cb) = 0;
 };
 }  // namespace xavcore
