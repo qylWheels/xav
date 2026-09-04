@@ -2,7 +2,6 @@
 
 #include <sys/syscall.h>
 
-#include <iostream>
 #include <regex>
 #include <system_error>
 
@@ -33,7 +32,6 @@ outcome::result<void> CorePatternModificationRule::push_event(
     const IEvent& event) {
     try {
         const auto& syscall_event = dynamic_cast<const SyscallEvent&>(event);
-        std::cout << "!";
         if (syscall_event.id == SYS_write) {
             auto path = std::get<WriteSyscallAdditionalData>(
                             syscall_event.additional_data)
