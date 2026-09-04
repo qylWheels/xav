@@ -2,8 +2,8 @@
 
 #include <sys/syscall.h>
 
-#include <iostream>
-#include <variant>
+#include <regex>
+#include <system_error>
 
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event.h"
 
@@ -23,30 +23,43 @@ std::string CorePatternModificationRule::description() {
 
 outcome::result<std::uint8_t> CorePatternModificationRule::apply(
     std::span<std::reference_wrapper<IEvent>> event_seq) {
-    for (const auto event : event_seq) {
-        try {
-            const auto& syscall_event =
-                dynamic_cast<const SyscallEvent&>(event.get());
-            if (syscall_event.id == SYS_write &&
-                std::holds_alternative<WriteSyscallAdditionalData>(
-                    syscall_event.additional_data)) {
-                auto additional_data = std::get<WriteSyscallAdditionalData>(
-                    syscall_event.additional_data);
-                if (additional_data.fd_path.has_value() &&
-                    additional_data.fd_path.value() ==
-                        "/proc/sys/kernel/core_pattern") {
-                    std::cout << "Core pattern modification detected"
-                              << std::endl;
-                    return 60;
-                }
-            }
-        } catch (...) {
-            continue;
-        }
-    }
-    return 0;
+    return std::errc::not_supported;
 }
 
 std::size_t CorePatternModificationRule::event_seq_size_hint() { return 1; }
+
+outcome::result<void> CorePatternModificationRule::push_event(IEvent& event) {
+    try {
+        const auto& syscall_event = dynamic_cast<const SyscallEvent&>(event);
+        if (syscall_event.id == SYS_write) {
+            auto path = std::get<WriteSyscallAdditionalData>(
+                            syscall_event.additional_data)
+                            .fd_path.value();
+            std::regex re("/proc/sys/kernel/core_pattern");
+            if (std::regex_search(path, re)) {
+                for (auto cb : this->callbacks_on_warning_) {
+                    auto info = CorePatternModificationRuleWarningInfo(path);
+                    (*cb)(info);
+                }
+            }
+        }
+    } catch (...) {
+        // Ignore.
+    }
+    return outcome::success();
+}
+
+outcome::result<void> CorePatternModificationRule::register_warning_callback(
+    std::function<void(IRuleWarningInfo&)>& cb) {
+    this->callbacks_on_warning_.insert(&cb);
+    return outcome::success();
+}
+
+outcome::result<void> CorePatternModificationRule::unregister_warning_callback(
+    std::function<void(IRuleWarningInfo&)>& cb) {
+    this->callbacks_on_warning_.erase(&cb);
+    return outcome::success();
+}
+
 }  // namespace rule_based_detection_listener_rules
 }  // namespace xavcore
