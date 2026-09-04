@@ -3,8 +3,6 @@
 #include <spdlog/spdlog.h>
 #include <sys/syscall.h>
 
-#include <algorithm>
-#include <cstddef>
 #include <regex>
 #include <variant>
 #include <vector>
@@ -13,7 +11,7 @@
 
 namespace xavcore {
 RuleBasedDetectionListener::RuleBasedDetectionListener(spdlog::logger& logger)
-    : logger_(&logger), max_size_hint_(0) {}
+    : logger_(&logger) {}
 
 RuleBasedDetectionListener::~RuleBasedDetectionListener() = default;
 
@@ -229,38 +227,10 @@ outcome::result<void> RuleBasedDetectionListener::accept(const IEvent& event) {
         }
     }
 
-    // Move forward the window by (max_size_hint_ / 3).
-    if (this->proc_syscall_events_[syscall_event.process].size() %
-            std::max(this->max_size_hint_ / 3, (std::size_t)1) !=
-        0) {
-        return outcome::success();
-    }
-
-    // Apply rules.
+    // Push event into rules.
     for (auto& rule : this->rules_) {
-        const auto& proc_syscall_events =
-            this->proc_syscall_events_[syscall_event.process];
-        std::size_t n =
-            std::min(this->max_size_hint_, proc_syscall_events.size());
-        std::vector<SyscallEvent> event_slice(proc_syscall_events.end() - n,
-                                              proc_syscall_events.end());
-        std::vector<std::reference_wrapper<IEvent>> event_ref_slice(
-            event_slice.begin(), event_slice.end());
-        auto severity = rule->apply(event_ref_slice);
-        if (severity.has_error()) {
-            this->logger_->error("Error when apply rule");
-        } else {
-            if (severity.value() > 0) {
-                this->logger_->info(
-                    "Event sequence severity of {}: {} (Rule {}, Description: "
-                    "{})",
-                    syscall_event.process.pid, severity.value(), rule->name(),
-                    rule->description());
-                this->logger_->info("Event count of {}: {}\n",
-                                    syscall_event.process.pid,
-                                    proc_syscall_events.size());
-            }
-        }
+        auto e = event;
+        (void)rule->push_event(e);
     }
 
     return outcome::success();
@@ -268,8 +238,6 @@ outcome::result<void> RuleBasedDetectionListener::accept(const IEvent& event) {
 
 outcome::result<void> RuleBasedDetectionListener::add_rule(
     IRuleBasedDetectionListenerRule& rule) {
-    this->max_size_hint_ =
-        std::max(this->max_size_hint_, rule.event_seq_size_hint());
     this->rules_.insert(&rule);
     return outcome::success();
 }
@@ -277,15 +245,6 @@ outcome::result<void> RuleBasedDetectionListener::add_rule(
 outcome::result<void> RuleBasedDetectionListener::remove_rule(
     IRuleBasedDetectionListenerRule& rule) {
     this->rules_.erase(&rule);
-    auto it = std::max_element(
-        this->rules_.begin(), this->rules_.end(), [](auto& a, auto& b) {
-            return a->event_seq_size_hint() < b->event_seq_size_hint();
-        });
-    if (it != this->rules_.end()) {
-        this->max_size_hint_ = (*it)->event_seq_size_hint();
-    } else {
-        this->max_size_hint_ = 0;
-    }
     return outcome::success();
 }
 

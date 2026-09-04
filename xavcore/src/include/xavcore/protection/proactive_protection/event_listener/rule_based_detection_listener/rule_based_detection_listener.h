@@ -2,7 +2,6 @@
 
 #include <spdlog/logger.h>
 
-#include <cstddef>
 #include <deque>
 #include <unordered_map>
 #include <unordered_set>
@@ -36,8 +35,5 @@ private:
     spdlog::logger* logger_;
     std::unordered_set<IRuleBasedDetectionListenerRule*> rules_;
     std::unordered_map<Process, std::deque<SyscallEvent>> proc_syscall_events_;
-
-    // The max size hint of the event sequence returned by all the rules.
-    std::size_t max_size_hint_;
 };
 }  // namespace xavcore
