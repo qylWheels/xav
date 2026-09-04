@@ -7,6 +7,7 @@
 #include <variant>
 #include <vector>
 
+#include "xavcore/protection/proactive_protection/event.h"
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event.h"
 
 namespace xavcore {
@@ -229,8 +230,7 @@ outcome::result<void> RuleBasedDetectionListener::accept(const IEvent& event) {
 
     // Push event into rules.
     for (auto& rule : this->rules_) {
-        auto e = event;
-        (void)rule->push_event(e);
+        (void)rule->push_event(const_cast<IEvent&>(event));
     }
 
     return outcome::success();
