@@ -17,7 +17,7 @@ public:
     virtual ~IRuleWarningInfo() = default;
 
 public:
-    virtual std::uint8_t severity() = 0;
+    virtual std::uint8_t severity() const = 0;
 };
 
 class IRuleBasedDetectionListenerRule {
