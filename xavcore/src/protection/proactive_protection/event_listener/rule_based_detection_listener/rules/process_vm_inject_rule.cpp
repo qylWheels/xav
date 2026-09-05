@@ -2,6 +2,8 @@
 
 #include <sys/syscall.h>
 
+#include <system_error>
+
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event.h"
 
 namespace xavcore {
@@ -18,21 +20,37 @@ std::string ProcessVmInjectRule::description() {
 
 outcome::result<std::uint8_t> ProcessVmInjectRule::apply(
     std::span<std::reference_wrapper<IEvent>> event_seq) {
-    for (const auto event : event_seq) {
-        try {
-            const auto& syscall_event =
-                dynamic_cast<const SyscallEvent&>(event.get());
-
-            if (syscall_event.id == SYS_process_vm_writev) {
-                return 60;
-            }
-        } catch (...) {
-            continue;
-        }
-    }
-    return 0;
+    return std::errc::not_supported;
 }
 
 std::size_t ProcessVmInjectRule::event_seq_size_hint() { return 1; }
+
+outcome::result<void> ProcessVmInjectRule::push_event(const IEvent& event) {
+    try {
+        const auto& syscall_event = dynamic_cast<const SyscallEvent&>(event);
+        if (syscall_event.id == SYS_process_vm_writev) {
+            for (auto cb : this->callbacks_on_warning_) {
+                auto info = ProcessVmInjectRuleWarningInfo{};
+                (*cb)(info);
+            }
+        }
+    } catch (...) {
+        // Ignore.
+    }
+    return outcome::success();
+}
+
+outcome::result<void> ProcessVmInjectRule::register_warning_callback(
+    std::function<void(const IRuleWarningInfo&)>& cb) {
+    this->callbacks_on_warning_.insert(&cb);
+    return outcome::success();
+}
+
+outcome::result<void> ProcessVmInjectRule::unregister_warning_callback(
+    std::function<void(const IRuleWarningInfo&)>& cb) {
+    this->callbacks_on_warning_.erase(&cb);
+    return outcome::success();
+}
+
 }  // namespace rule_based_detection_listener_rules
 }  // namespace xavcore
