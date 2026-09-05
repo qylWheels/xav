@@ -29,7 +29,7 @@ outcome::result<std::uint8_t> CgroupReleaseAgentRule::apply(
 
 std::size_t CgroupReleaseAgentRule::event_seq_size_hint() { return 1; }
 
-outcome::result<void> CgroupReleaseAgentRule::push_event(IEvent& event) {
+outcome::result<void> CgroupReleaseAgentRule::push_event(const IEvent& event) {
     try {
         const auto& syscall_event = dynamic_cast<const SyscallEvent&>(event);
 
@@ -84,13 +84,13 @@ outcome::result<void> CgroupReleaseAgentRule::push_event(IEvent& event) {
 }
 
 outcome::result<void> CgroupReleaseAgentRule::register_warning_callback(
-    std::function<void(IRuleWarningInfo&)>& cb) {
+    std::function<void(const IRuleWarningInfo&)>& cb) {
     this->callbacks_on_warning_.insert(&cb);
     return outcome::success();
 }
 
 outcome::result<void> CgroupReleaseAgentRule::unregister_warning_callback(
-    std::function<void(IRuleWarningInfo&)>& cb) {
+    std::function<void(const IRuleWarningInfo&)>& cb) {
     this->callbacks_on_warning_.erase(&cb);
     return outcome::success();
 }
