@@ -2,6 +2,8 @@
 
 #include <sys/syscall.h>
 
+#include <system_error>
+
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event.h"
 
 namespace xavcore {
@@ -20,22 +22,39 @@ std::string KernelModuleLoadingRule::description() {
 
 outcome::result<std::uint8_t> KernelModuleLoadingRule::apply(
     std::span<std::reference_wrapper<IEvent>> event_seq) {
-    for (const auto event : event_seq) {
-        try {
-            const auto& syscall_event =
-                dynamic_cast<const SyscallEvent&>(event.get());
-
-            if (syscall_event.id == SYS_init_module ||
-                syscall_event.id == SYS_finit_module) {
-                return 40;
-            }
-        } catch (...) {
-            continue;
-        }
-    }
-    return 0;
+    return std::errc::not_supported;
 }
 
 std::size_t KernelModuleLoadingRule::event_seq_size_hint() { return 1; }
+
+outcome::result<void> KernelModuleLoadingRule::push_event(
+    const IEvent& event) {
+    try {
+        const auto& syscall_event = dynamic_cast<const SyscallEvent&>(event);
+        if (syscall_event.id == SYS_init_module ||
+            syscall_event.id == SYS_finit_module) {
+            for (auto cb : this->callbacks_on_warning_) {
+                auto info = KernelModuleLoadingRuleWarningInfo{};
+                (*cb)(info);
+            }
+        }
+    } catch (...) {
+        // Ignore.
+    }
+    return outcome::success();
+}
+
+outcome::result<void> KernelModuleLoadingRule::register_warning_callback(
+    std::function<void(const IRuleWarningInfo&)>& cb) {
+    this->callbacks_on_warning_.insert(&cb);
+    return outcome::success();
+}
+
+outcome::result<void> KernelModuleLoadingRule::unregister_warning_callback(
+    std::function<void(const IRuleWarningInfo&)>& cb) {
+    this->callbacks_on_warning_.erase(&cb);
+    return outcome::success();
+}
+
 }  // namespace rule_based_detection_listener_rules
 }  // namespace xavcore
