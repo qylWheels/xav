@@ -30,7 +30,7 @@ outcome::result<std::uint8_t> CgroupNotifyOnReleaseRule::apply(
 
 std::size_t CgroupNotifyOnReleaseRule::event_seq_size_hint() { return 1; }
 
-outcome::result<void> CgroupNotifyOnReleaseRule::push_event(IEvent& event) {
+outcome::result<void> CgroupNotifyOnReleaseRule::push_event(const IEvent& event) {
     try {
         const auto& syscall_event = dynamic_cast<const SyscallEvent&>(event);
 
@@ -58,13 +58,13 @@ outcome::result<void> CgroupNotifyOnReleaseRule::push_event(IEvent& event) {
 }
 
 outcome::result<void> CgroupNotifyOnReleaseRule::register_warning_callback(
-    std::function<void(IRuleWarningInfo&)>& cb) {
+    std::function<void(const IRuleWarningInfo&)>& cb) {
     this->callbacks_on_warning_.insert(&cb);
     return outcome::success();
 }
 
 outcome::result<void> CgroupNotifyOnReleaseRule::unregister_warning_callback(
-    std::function<void(IRuleWarningInfo&)>& cb) {
+    std::function<void(const IRuleWarningInfo&)>& cb) {
     this->callbacks_on_warning_.erase(&cb);
     return outcome::success();
 }
