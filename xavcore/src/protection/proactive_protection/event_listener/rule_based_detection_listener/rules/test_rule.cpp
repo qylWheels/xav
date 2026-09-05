@@ -3,6 +3,7 @@
 #include <sys/syscall.h>
 
 #include <boost/sml.hpp>
+#include <system_error>
 
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event.h"
 
@@ -20,19 +21,19 @@ std::string TestRule::description() {
 
 outcome::result<std::uint8_t> TestRule::apply(
     std::span<std::reference_wrapper<IEvent>> event_seq) {
-    // Reset FSM. i.e. renew it.
-    this->fsm_ = sml::sm<TestRuleFSM>();
+    return std::errc::not_supported;
+}
 
-    for (const auto event : event_seq) {
-        try {
-            const auto& syscall_event =
-                dynamic_cast<const SyscallEvent&>(event.get());
-            if (syscall_event.id == SYS_process_vm_writev) {
-                this->fsm_.process_event(TestRuleFSM::ProcessVmWriteEvent{});
-            }
-        } catch (...) {
-            continue;
+std::size_t TestRule::event_seq_size_hint() { return 5; }
+
+outcome::result<void> TestRule::push_event(const IEvent& event) {
+    try {
+        const auto& syscall_event = dynamic_cast<const SyscallEvent&>(event);
+        if (syscall_event.id == SYS_process_vm_writev) {
+            this->fsm_.process_event(TestRuleFSM::ProcessVmWriteEvent{});
         }
+    } catch (...) {
+        // Ignore.
     }
 
     std::uint8_t severity = 0;
@@ -45,9 +46,32 @@ outcome::result<std::uint8_t> TestRule::apply(
     } else {
         severity = 0;
     }
-    return severity;
+
+    if (severity > 0) {
+        for (auto cb : this->callbacks_on_warning_) {
+            auto info = TestRuleWarningInfo(severity);
+            (*cb)(info);
+        }
+    }
+
+    // Renew the FSM once the terminal state is reached.
+    if (this->fsm_.is(sml::X)) {
+        this->fsm_ = sml::sm<TestRuleFSM>();
+    }
+    return outcome::success();
 }
 
-std::size_t TestRule::event_seq_size_hint() { return 5; }
+outcome::result<void> TestRule::register_warning_callback(
+    std::function<void(const IRuleWarningInfo&)>& cb) {
+    this->callbacks_on_warning_.insert(&cb);
+    return outcome::success();
+}
+
+outcome::result<void> TestRule::unregister_warning_callback(
+    std::function<void(const IRuleWarningInfo&)>& cb) {
+    this->callbacks_on_warning_.erase(&cb);
+    return outcome::success();
+}
+
 }  // namespace rule_based_detection_listener_rules
 }  // namespace xavcore
