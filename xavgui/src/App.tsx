@@ -10,6 +10,7 @@ import StandAloneWindowLayout from "@/components/StandAloneWindowLayout";
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
 import OnAccessScanningAlert from "@/views/OnAccessScanningAlert";
 import { listen } from '@tauri-apps/api/event';
+import ProactiveProtectionAlert from "@/views/ProactiveProtectionAlert";
 
 function App() {
   const unlisten = listen('threat-detected', (event) => {
@@ -26,6 +27,23 @@ function App() {
     });
   })
 
+  // TODO: Test.
+  const mock_data = {
+    path: '/bin/ssh1',
+    threat_name: 'Linux/Spy.Generic',
+  }
+  new WebviewWindow('proactive-protection-alert', {
+    url: '/#/proactive-protection-alert?payload=' + encodeURIComponent(JSON.stringify(mock_data)),
+    width: 650,
+    height: 440,
+    center: true,
+    decorations: false,
+    transparent: true,
+    shadow: false,
+    maximizable: false,
+    resizable: false
+  });
+
   return (
     <Routes>
       <Route path="/" element={<MainWindowLayout title="xav" />}>
@@ -40,6 +58,9 @@ function App() {
       </Route>
       <Route path="/on-access-scanning-alert" element={<StandAloneWindowLayout title="xav On-Access Scanning" />}>
         <Route index element={<OnAccessScanningAlert />} />
+      </Route>
+      <Route path="/proactive-protection-alert" element={<StandAloneWindowLayout title="" />}>
+        <Route index element={<ProactiveProtectionAlert />} />
       </Route>
     </Routes >
   );
