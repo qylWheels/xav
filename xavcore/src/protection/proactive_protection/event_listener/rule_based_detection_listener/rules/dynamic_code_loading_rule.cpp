@@ -3,7 +3,7 @@
 #include <sys/mman.h>
 #include <sys/syscall.h>
 
-#include <cstdlib>
+#include <system_error>
 
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event.h"
 
@@ -23,22 +23,39 @@ std::string DynamicCodeLoadingRule::description() {
 
 outcome::result<std::uint8_t> DynamicCodeLoadingRule::apply(
     std::span<std::reference_wrapper<IEvent>> event_seq) {
-    for (const auto event : event_seq) {
-        try {
-            const auto& syscall_event =
-                dynamic_cast<const SyscallEvent&>(event.get());
-
-            if (syscall_event.id == SYS_mprotect &&
-                syscall_event.args[2] == (PROT_WRITE | PROT_EXEC)) {
-                return 60;
-            }
-        } catch (...) {
-            continue;
-        }
-    }
-    return 0;
+    return std::errc::not_supported;
 }
 
 std::size_t DynamicCodeLoadingRule::event_seq_size_hint() { return 1; }
+
+outcome::result<void> DynamicCodeLoadingRule::push_event(
+    const IEvent& event) {
+    try {
+        const auto& syscall_event = dynamic_cast<const SyscallEvent&>(event);
+        if (syscall_event.id == SYS_mprotect &&
+            syscall_event.args[2] == (PROT_WRITE | PROT_EXEC)) {
+            for (auto cb : this->callbacks_on_warning_) {
+                auto info = DynamicCodeLoadingRuleWarningInfo{};
+                (*cb)(info);
+            }
+        }
+    } catch (...) {
+        // Ignore.
+    }
+    return outcome::success();
+}
+
+outcome::result<void> DynamicCodeLoadingRule::register_warning_callback(
+    std::function<void(const IRuleWarningInfo&)>& cb) {
+    this->callbacks_on_warning_.insert(&cb);
+    return outcome::success();
+}
+
+outcome::result<void> DynamicCodeLoadingRule::unregister_warning_callback(
+    std::function<void(const IRuleWarningInfo&)>& cb) {
+    this->callbacks_on_warning_.erase(&cb);
+    return outcome::success();
+}
+
 }  // namespace rule_based_detection_listener_rules
 }  // namespace xavcore
