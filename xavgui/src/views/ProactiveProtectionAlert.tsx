@@ -28,7 +28,7 @@ function ProactiveProtectionAlert() {
                 </div>
                 <div className="mt-4 flex justify-center items-center gap-4">
                     <button className="btn btn-soft btn-success justify-self-end">Kill Process Only</button>
-                    <button className="btn">Ignore</button>
+                    <button className="btn btn-soft btn-error">Ignore</button>
                 </div>
                 <div className="mt-2 flex justify-center items-center">
                     <button className="btn btn-link text-neutral">Add to Exclusion List</button>
