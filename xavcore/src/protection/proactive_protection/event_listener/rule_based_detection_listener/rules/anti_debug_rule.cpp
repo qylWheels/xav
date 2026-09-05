@@ -3,8 +3,6 @@
 #include <sys/ptrace.h>
 #include <sys/syscall.h>
 
-#include <system_error>
-
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event.h"
 
 namespace xavcore {
@@ -38,7 +36,7 @@ outcome::result<std::uint8_t> AntiDebugRule::apply(
 
 std::size_t AntiDebugRule::event_seq_size_hint() { return 1; }
 
-outcome::result<void> AntiDebugRule::push_event(IEvent& event) {
+outcome::result<void> AntiDebugRule::push_event(const IEvent& event) {
     try {
         const auto& syscall_event = dynamic_cast<const SyscallEvent&>(event);
         if (syscall_event.id == SYS_ptrace &&
@@ -49,19 +47,19 @@ outcome::result<void> AntiDebugRule::push_event(IEvent& event) {
             }
         }
     } catch (...) {
-        return std::errc::invalid_argument;
+        // Ignore.
     }
     return outcome::success();
 }
 
 outcome::result<void> AntiDebugRule::register_warning_callback(
-    std::function<void(IRuleWarningInfo&)>& cb) {
+    std::function<void(const IRuleWarningInfo&)>& cb) {
     this->cbs_on_warning_.insert(&cb);
     return outcome::success();
 }
 
 outcome::result<void> AntiDebugRule::unregister_warning_callback(
-    std::function<void(IRuleWarningInfo&)>& cb) {
+    std::function<void(const IRuleWarningInfo&)>& cb) {
     this->cbs_on_warning_.erase(&cb);
     return outcome::success();
 }
