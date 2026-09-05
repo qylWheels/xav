@@ -22,13 +22,15 @@ function ProactiveProtectionAlert() {
                 <div>Threat:</div>
                 <div className="ml-2 text-error max-w-64 truncate" title={j.threat_name}>{j.threat_name}</div>
             </div>
-            <div className="mt-6 flex flex-col">
-                <div className="flex justify-end gap-2">
-                    <button className="btn">Ignore</button>
+            <div className="mt-4 flex flex-col">
+                <div className="flex justify-center items-center">
                     <button className="btn btn-success justify-self-end">Kill Process and Quarantine (Recommended)</button>
-                    <button className="btn btn-soft btn-success justify-self-end">Kill Process Only</button>
                 </div>
-                <div className="mt-4 flex justify-center">
+                <div className="mt-4 flex justify-center items-center gap-4">
+                    <button className="btn btn-soft btn-success justify-self-end">Kill Process Only</button>
+                    <button className="btn">Ignore</button>
+                </div>
+                <div className="mt-2 flex justify-center items-center">
                     <button className="btn btn-link text-neutral">Add to Exclusion List</button>
                     <button className="btn btn-link text-neutral">Details</button>
                 </div>
