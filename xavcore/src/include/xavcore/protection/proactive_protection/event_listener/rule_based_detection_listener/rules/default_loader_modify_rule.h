@@ -12,7 +12,7 @@ namespace rule_based_detection_listener_rules {
 struct DefaultLoaderModifyRuleWarningInfo : public IRuleWarningInfo {
     DefaultLoaderModifyRuleWarningInfo(std::string path) : path(path) {}
 
-    virtual std::uint8_t severity() override { return 70; }
+    virtual std::uint8_t severity() const override { return 70; }
 
     std::string path;
 };
@@ -32,14 +32,14 @@ public:  // IRuleBasedDetectionListenerRule methods.
     virtual outcome::result<std::uint8_t> apply(
         std::span<std::reference_wrapper<IEvent>> event_seq) override;
     virtual std::size_t event_seq_size_hint() override;
-    virtual outcome::result<void> push_event(IEvent& event) override;
+    virtual outcome::result<void> push_event(const IEvent& event) override;
     virtual outcome::result<void> register_warning_callback(
-        std::function<void(IRuleWarningInfo&)>& cb) override;
+        std::function<void(const IRuleWarningInfo&)>& cb) override;
     virtual outcome::result<void> unregister_warning_callback(
-        std::function<void(IRuleWarningInfo&)>& cb) override;
+        std::function<void(const IRuleWarningInfo&)>& cb) override;
 
 private:
-    std::unordered_set<std::function<void(IRuleWarningInfo&)>*> cbs_;
+    std::unordered_set<std::function<void(const IRuleWarningInfo&)>*> cbs_;
 };
 }  // namespace rule_based_detection_listener_rules
 }  // namespace xavcore

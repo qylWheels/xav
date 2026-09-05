@@ -29,7 +29,7 @@ outcome::result<std::uint8_t> DefaultLoaderModifyRule::apply(
 
 std::size_t DefaultLoaderModifyRule::event_seq_size_hint() { return 1; }
 
-outcome::result<void> DefaultLoaderModifyRule::push_event(IEvent& event) {
+outcome::result<void> DefaultLoaderModifyRule::push_event(const IEvent& event) {
     try {
         const auto& syscall_event = dynamic_cast<const SyscallEvent&>(event);
 
@@ -83,13 +83,13 @@ outcome::result<void> DefaultLoaderModifyRule::push_event(IEvent& event) {
 }
 
 outcome::result<void> DefaultLoaderModifyRule::register_warning_callback(
-    std::function<void(IRuleWarningInfo&)>& cb) {
+    std::function<void(const IRuleWarningInfo&)>& cb) {
     this->cbs_.insert(&cb);
     return outcome::success();
 }
 
 outcome::result<void> DefaultLoaderModifyRule::unregister_warning_callback(
-    std::function<void(IRuleWarningInfo&)>& cb) {
+    std::function<void(const IRuleWarningInfo&)>& cb) {
     this->cbs_.erase(&cb);
     return outcome::success();
 }
