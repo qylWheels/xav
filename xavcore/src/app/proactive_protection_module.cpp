@@ -97,6 +97,25 @@ void startup(spdlog::logger& logger) {
                     "Core pattern modification rule is violated: severity = "
                     "{}, path = {}",
                     p->severity(), p->path);
+                return;
+            }
+            if (const auto* p =
+                    dynamic_cast<const xavcore::rule_based_detection_listener_rules::
+                                      ProcKcoreReadRuleWarningInfo*>(&info)) {
+                logger.warn(
+                    "Proc kcore read rule is violated: severity = {}, path = "
+                    "{}",
+                    p->severity(), p->path);
+                return;
+            }
+            if (const auto* p =
+                    dynamic_cast<const xavcore::rule_based_detection_listener_rules::
+                                      ProcMemAccessRuleWarningInfo*>(&info)) {
+                logger.warn(
+                    "Proc mem access rule is violated: severity = {}, path = "
+                    "{}",
+                    p->severity(), p->path);
+                return;
             }
         };
     for (auto rule : rules) {
