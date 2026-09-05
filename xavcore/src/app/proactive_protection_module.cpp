@@ -4,6 +4,7 @@
 #include <boost/asio.hpp>
 #include <cpptrace/cpptrace.hpp>
 #include <csignal>
+#include <functional>
 #include <iostream>
 
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rule_based_detection_listener.h"
@@ -87,7 +88,19 @@ void startup(spdlog::logger& logger) {
         &hidden_file_rule,          &kernel_module_loading_rule,
         &process_vm_inject_rule,    &proc_kcore_read_rule,
         &proc_mem_access_rule};
+    std::function<void(const xavcore::IRuleWarningInfo&)> cb =
+        [&](const xavcore::IRuleWarningInfo& info) {
+            if (const xavcore::rule_based_detection_listener_rules::
+                    CorePatternModificationRuleWarningInfo* p =
+                        dynamic_cast<decltype(p)>(&info)) {
+                logger.warn(
+                    "Core pattern modification rule is violated: severity = "
+                    "{}, path = {}",
+                    p->severity(), p->path);
+            }
+        };
     for (auto rule : rules) {
+        (void)rule->register_warning_callback(cb);
         ret = rule_based_detection_listener.add_rule(*rule);
         if (!ret) {
             logger.error("Failed to add rule: {}", ret.error().message());
