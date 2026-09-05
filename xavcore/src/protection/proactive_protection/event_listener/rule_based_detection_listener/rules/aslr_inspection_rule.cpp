@@ -90,7 +90,7 @@ outcome::result<std::uint8_t> ASLRInspectionRule::apply(
 
 std::size_t ASLRInspectionRule::event_seq_size_hint() { return 1; }
 
-outcome::result<void> ASLRInspectionRule::push_event(IEvent& event) {
+outcome::result<void> ASLRInspectionRule::push_event(const IEvent& event) {
     try {
         const auto& syscall_event = dynamic_cast<const SyscallEvent&>(event);
 
@@ -153,13 +153,13 @@ outcome::result<void> ASLRInspectionRule::push_event(IEvent& event) {
 }
 
 outcome::result<void> ASLRInspectionRule::register_warning_callback(
-    std::function<void(IRuleWarningInfo&)>& cb) {
+    std::function<void(const IRuleWarningInfo&)>& cb) {
     this->callbacks_on_warning_.insert(&cb);
     return outcome::success();
 }
 
 outcome::result<void> ASLRInspectionRule::unregister_warning_callback(
-    std::function<void(IRuleWarningInfo&)>& cb) {
+    std::function<void(const IRuleWarningInfo&)>& cb) {
     this->callbacks_on_warning_.erase(&cb);
     return outcome::success();
 }
