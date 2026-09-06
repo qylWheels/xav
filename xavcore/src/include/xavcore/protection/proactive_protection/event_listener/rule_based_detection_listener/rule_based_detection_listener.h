@@ -35,5 +35,7 @@ private:
     spdlog::logger* logger_;
     std::unordered_set<IRuleBasedDetectionListenerRule*> rules_;
     std::unordered_map<Process, std::deque<SyscallEvent>> proc_syscall_events_;
+    std::unordered_map<Process, std::deque<IRuleWarningInfo>>
+        proc_violated_events_;
 };
 }  // namespace xavcore
