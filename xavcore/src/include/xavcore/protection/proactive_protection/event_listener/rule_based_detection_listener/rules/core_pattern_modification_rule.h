@@ -13,6 +13,9 @@ struct CorePatternModificationRuleWarningInfo : public IRuleWarningInfo {
 
     virtual std::uint8_t severity() const override { return 60; }
     virtual Process process() const override { return this->process_; }
+    virtual std::shared_ptr<IRuleWarningInfo> clone() const override {
+        return std::make_shared<CorePatternModificationRuleWarningInfo>(*this);
+    }
 
     std::string path;
 

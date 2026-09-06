@@ -38,6 +38,9 @@ struct TestRuleWarningInfo : public IRuleWarningInfo {
 
     virtual std::uint8_t severity() const override { return this->severity_; }
     virtual Process process() const override { return this->process_; }
+    virtual std::shared_ptr<IRuleWarningInfo> clone() const override {
+        return std::make_shared<TestRuleWarningInfo>(*this);
+    }
 
 private:
     Process process_;
