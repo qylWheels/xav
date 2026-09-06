@@ -4,6 +4,7 @@
 
 #include <deque>
 #include <functional>
+#include <memory>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -36,7 +37,7 @@ private:
     spdlog::logger* logger_;
     std::unordered_set<IRuleBasedDetectionListenerRule*> rules_;
     std::unordered_map<Process, std::deque<SyscallEvent>> proc_syscall_events_;
-    std::unordered_map<Process, std::deque<IRuleWarningInfo>>
+    std::unordered_map<Process, std::deque<std::shared_ptr<IRuleWarningInfo>>>
         proc_violated_events_;
     std::function<void(const IRuleWarningInfo&)> callback_on_warning_;
 };
