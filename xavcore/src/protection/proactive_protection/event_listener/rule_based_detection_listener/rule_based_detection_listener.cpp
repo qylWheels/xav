@@ -243,6 +243,9 @@ outcome::result<void> RuleBasedDetectionListener::accept(const IEvent& event) {
 
 outcome::result<void> RuleBasedDetectionListener::add_rule(
     IRuleBasedDetectionListenerRule& rule) {
+    if (!rule.register_warning_callback(this->callback_on_warning_)) {
+        return std::errc::io_error;
+    }
     this->rules_.insert(&rule);
     return outcome::success();
 }
