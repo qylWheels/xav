@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <memory>
 #include <outcome/outcome.hpp>
 #include <span>
 #include <string>
@@ -21,6 +22,9 @@ public:
 
     // Return the process information of the process that violates the rule.
     virtual Process process() const = 0;
+
+    // Return a deep copy of this warning info preserving its dynamic type.
+    virtual std::shared_ptr<IRuleWarningInfo> clone() const = 0;
 };
 
 class IRuleBasedDetectionListenerRule {
