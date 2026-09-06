@@ -3,6 +3,7 @@
 #include <spdlog/logger.h>
 
 #include <deque>
+#include <functional>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -37,5 +38,6 @@ private:
     std::unordered_map<Process, std::deque<SyscallEvent>> proc_syscall_events_;
     std::unordered_map<Process, std::deque<IRuleWarningInfo>>
         proc_violated_events_;
+    std::function<void(const IRuleWarningInfo&)> callback_on_warning_;
 };
 }  // namespace xavcore
