@@ -8,11 +8,16 @@
 namespace xavcore {
 namespace rule_based_detection_listener_rules {
 struct CorePatternModificationRuleWarningInfo : public IRuleWarningInfo {
-    CorePatternModificationRuleWarningInfo(std::string path) : path(path) {}
+    CorePatternModificationRuleWarningInfo(Process process, std::string path)
+        : process_(process), path(path) {}
 
     virtual std::uint8_t severity() const override { return 60; }
+    virtual Process process() const override { return this->process_; }
 
     std::string path;
+
+private:
+    Process process_;
 };
 
 class CorePatternModificationRule : public IRuleBasedDetectionListenerRule {

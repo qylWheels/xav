@@ -36,7 +36,8 @@ outcome::result<void> ProcMemAccessRule::push_event(const IEvent& event) {
             std::regex re("/proc/\\d+/mem");
             if (std::regex_search(path, re)) {
                 for (auto cb : this->callbacks_on_warning_) {
-                    auto info = ProcMemAccessRuleWarningInfo(path);
+                    auto info = ProcMemAccessRuleWarningInfo(
+                        syscall_event.process, path);
                     (*cb)(info);
                 }
             }

@@ -33,11 +33,14 @@ struct TestRuleFSM {
 };
 
 struct TestRuleWarningInfo : public IRuleWarningInfo {
-    explicit TestRuleWarningInfo(std::uint8_t severity) : severity_(severity) {}
+    explicit TestRuleWarningInfo(Process process, std::uint8_t severity)
+        : process_(process), severity_(severity) {}
 
     virtual std::uint8_t severity() const override { return this->severity_; }
+    virtual Process process() const override { return this->process_; }
 
 private:
+    Process process_;
     std::uint8_t severity_;
 };
 

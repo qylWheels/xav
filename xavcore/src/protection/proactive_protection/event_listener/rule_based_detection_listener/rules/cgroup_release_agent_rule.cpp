@@ -65,12 +65,14 @@ outcome::result<void> CgroupReleaseAgentRule::push_event(const IEvent& event) {
 
         std::regex r{".*release_agent"};
         if (std::regex_match(path1, r)) {
-            auto info = CgroupReleaseAgentRuleWarningInfo(path1);
+            auto info =
+                CgroupReleaseAgentRuleWarningInfo(syscall_event.process, path1);
             for (auto cb : this->callbacks_on_warning_) {
                 (*cb)(info);
             }
         } else if (std::regex_match(path2, r)) {
-            auto info = CgroupReleaseAgentRuleWarningInfo(path2);
+            auto info =
+                CgroupReleaseAgentRuleWarningInfo(syscall_event.process, path2);
             for (auto cb : this->callbacks_on_warning_) {
                 (*cb)(info);
             }

@@ -27,8 +27,10 @@ outcome::result<std::uint8_t> TestRule::apply(
 std::size_t TestRule::event_seq_size_hint() { return 5; }
 
 outcome::result<void> TestRule::push_event(const IEvent& event) {
+    std::optional<Process> process;
     try {
         const auto& syscall_event = dynamic_cast<const SyscallEvent&>(event);
+        process = syscall_event.process;
         if (syscall_event.id == SYS_process_vm_writev) {
             this->fsm_.process_event(TestRuleFSM::ProcessVmWriteEvent{});
         }
@@ -47,9 +49,9 @@ outcome::result<void> TestRule::push_event(const IEvent& event) {
         severity = 0;
     }
 
-    if (severity > 0) {
+    if (severity > 0 && process.has_value()) {
         for (auto cb : this->callbacks_on_warning_) {
-            auto info = TestRuleWarningInfo(severity);
+            auto info = TestRuleWarningInfo(process.value(), severity);
             (*cb)(info);
         }
     }

@@ -64,12 +64,14 @@ outcome::result<void> DefaultLoaderModifyRule::push_event(const IEvent& event) {
 
         std::regex re{".*lib.*ld-.*\\.so.*"};
         if (std::regex_match(path1, re)) {
-            auto info = DefaultLoaderModifyRuleWarningInfo(path1);
+            auto info =
+                DefaultLoaderModifyRuleWarningInfo(syscall_event.process, path1);
             for (auto cb : this->cbs_) {
                 (*cb)(info);
             }
         } else if (std::regex_match(path2, re)) {
-            auto info = DefaultLoaderModifyRuleWarningInfo(path2);
+            auto info =
+                DefaultLoaderModifyRuleWarningInfo(syscall_event.process, path2);
             for (auto cb : this->cbs_) {
                 (*cb)(info);
             }

@@ -34,7 +34,8 @@ outcome::result<void> KernelModuleLoadingRule::push_event(
         if (syscall_event.id == SYS_init_module ||
             syscall_event.id == SYS_finit_module) {
             for (auto cb : this->callbacks_on_warning_) {
-                auto info = KernelModuleLoadingRuleWarningInfo{};
+                auto info =
+                    KernelModuleLoadingRuleWarningInfo(syscall_event.process);
                 (*cb)(info);
             }
         }

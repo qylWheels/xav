@@ -71,7 +71,8 @@ outcome::result<void> HiddenFileRule::push_event(const IEvent& event) {
         std::regex re("/\\..*");
         if (std::regex_search(path, re)) {
             for (auto cb : this->callbacks_on_warning_) {
-                auto info = HiddenFileRuleWarningInfo(path);
+                auto info = HiddenFileRuleWarningInfo(syscall_event.process,
+                                                      path);
                 (*cb)(info);
             }
         }

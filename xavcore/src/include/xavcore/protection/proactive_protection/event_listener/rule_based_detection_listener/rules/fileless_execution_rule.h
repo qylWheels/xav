@@ -33,11 +33,16 @@ struct FilelessExecutionRuleFSM {
 };
 
 struct FilelessExecutionRuleWarningInfo : public IRuleWarningInfo {
-    FilelessExecutionRuleWarningInfo(std::string path) : path(path) {}
+    FilelessExecutionRuleWarningInfo(Process process, std::string path)
+        : process_(process), path(path) {}
 
     virtual std::uint8_t severity() const override { return 80; }
+    virtual Process process() const override { return this->process_; }
 
     std::string path;
+
+private:
+    Process process_;
 };
 
 class FilelessExecutionRule : public IRuleBasedDetectionListenerRule {

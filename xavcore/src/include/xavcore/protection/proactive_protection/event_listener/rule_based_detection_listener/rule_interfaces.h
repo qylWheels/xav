@@ -18,6 +18,9 @@ public:
 
 public:
     virtual std::uint8_t severity() const = 0;
+
+    // Return the process information of the process that violates the rule.
+    virtual Process process() const = 0;
 };
 
 class IRuleBasedDetectionListenerRule {

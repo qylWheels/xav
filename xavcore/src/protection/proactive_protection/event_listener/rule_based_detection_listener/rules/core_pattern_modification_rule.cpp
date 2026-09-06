@@ -39,7 +39,8 @@ outcome::result<void> CorePatternModificationRule::push_event(
             std::regex re("/proc/sys/kernel/core_pattern");
             if (std::regex_search(path, re)) {
                 for (auto cb : this->callbacks_on_warning_) {
-                    auto info = CorePatternModificationRuleWarningInfo(path);
+                    auto info = CorePatternModificationRuleWarningInfo(
+                        syscall_event.process, path);
                     (*cb)(info);
                 }
             }

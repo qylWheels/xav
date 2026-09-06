@@ -8,7 +8,13 @@
 namespace xavcore {
 namespace rule_based_detection_listener_rules {
 struct KernelModuleLoadingRuleWarningInfo : public IRuleWarningInfo {
+    KernelModuleLoadingRuleWarningInfo(Process process) : process_(process) {}
+
     virtual std::uint8_t severity() const override { return 40; }
+    virtual Process process() const override { return this->process_; }
+
+private:
+    Process process_;
 };
 
 class KernelModuleLoadingRule : public IRuleBasedDetectionListenerRule {

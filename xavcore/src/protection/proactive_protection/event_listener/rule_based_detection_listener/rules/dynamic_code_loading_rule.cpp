@@ -35,7 +35,8 @@ outcome::result<void> DynamicCodeLoadingRule::push_event(
         if (syscall_event.id == SYS_mprotect &&
             syscall_event.args[2] == (PROT_WRITE | PROT_EXEC)) {
             for (auto cb : this->callbacks_on_warning_) {
-                auto info = DynamicCodeLoadingRuleWarningInfo{};
+                auto info =
+                    DynamicCodeLoadingRuleWarningInfo(syscall_event.process);
                 (*cb)(info);
             }
         }

@@ -9,11 +9,16 @@
 namespace xavcore {
 namespace rule_based_detection_listener_rules {
 struct HiddenFileRuleWarningInfo : public IRuleWarningInfo {
-    HiddenFileRuleWarningInfo(std::string path) : path(path) {}
+    HiddenFileRuleWarningInfo(Process process, std::string path)
+        : process_(process), path(path) {}
 
     virtual std::uint8_t severity() const override { return 30; }
+    virtual Process process() const override { return this->process_; }
 
     std::string path;
+
+private:
+    Process process_;
 };
 
 class HiddenFileRule : public IRuleBasedDetectionListenerRule {

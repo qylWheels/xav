@@ -42,7 +42,7 @@ outcome::result<void> AntiDebugRule::push_event(const IEvent& event) {
         if (syscall_event.id == SYS_ptrace &&
             syscall_event.args[0] == PTRACE_TRACEME) {
             for (auto cb : this->cbs_on_warning_) {
-                auto info = AntiDebugRuleWarningInfo{};
+                auto info = AntiDebugRuleWarningInfo(syscall_event.process);
                 (*cb)(info);
             }
         }

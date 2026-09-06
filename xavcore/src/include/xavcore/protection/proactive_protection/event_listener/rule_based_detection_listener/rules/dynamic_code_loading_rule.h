@@ -8,7 +8,13 @@
 namespace xavcore {
 namespace rule_based_detection_listener_rules {
 struct DynamicCodeLoadingRuleWarningInfo : public IRuleWarningInfo {
+    DynamicCodeLoadingRuleWarningInfo(Process process) : process_(process) {}
+
     virtual std::uint8_t severity() const override { return 60; }
+    virtual Process process() const override { return this->process_; }
+
+private:
+    Process process_;
 };
 
 class DynamicCodeLoadingRule : public IRuleBasedDetectionListenerRule {

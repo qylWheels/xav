@@ -30,7 +30,8 @@ outcome::result<void> ProcessVmInjectRule::push_event(const IEvent& event) {
         const auto& syscall_event = dynamic_cast<const SyscallEvent&>(event);
         if (syscall_event.id == SYS_process_vm_writev) {
             for (auto cb : this->callbacks_on_warning_) {
-                auto info = ProcessVmInjectRuleWarningInfo{};
+                auto info =
+                    ProcessVmInjectRuleWarningInfo(syscall_event.process);
                 (*cb)(info);
             }
         }

@@ -47,7 +47,8 @@ outcome::result<void> CgroupNotifyOnReleaseRule::push_event(const IEvent& event)
         std::regex r{".*notify_on_release"};
         if (std::regex_match(path, r)) {
             for (auto cb : this->callbacks_on_warning_) {
-                auto info = CgroupNotifyOnReleaseRuleWarningInfo(path);
+                auto info = CgroupNotifyOnReleaseRuleWarningInfo(
+                    syscall_event.process, path);
                 (*cb)(info);
             }
         }

@@ -51,8 +51,8 @@ outcome::result<void> FilelessExecutionRule::push_event(const IEvent& event) {
 
                 // Report a warning and renew the FSM for the next sequence.
                 for (auto cb : this->callbacks_on_warning_) {
-                    auto info =
-                        FilelessExecutionRuleWarningInfo(a_data.path.value());
+                    auto info = FilelessExecutionRuleWarningInfo(
+                        syscall_event.process, a_data.path.value());
                     (*cb)(info);
                 }
                 this->fsm_ = sml::sm<FilelessExecutionRuleFSM>();
