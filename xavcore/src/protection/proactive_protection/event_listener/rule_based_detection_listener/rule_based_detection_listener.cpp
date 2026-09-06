@@ -4,6 +4,7 @@
 #include <sys/syscall.h>
 
 #include <regex>
+#include <system_error>
 #include <variant>
 #include <vector>
 
@@ -34,6 +35,12 @@ outcome::result<void> RuleBasedDetectionListener::accept(const IEvent& event) {
     const SyscallEvent& syscall_event =
         dynamic_cast<const SyscallEvent&>(event);
     this->proc_syscall_events_[syscall_event.process].push_back(syscall_event);
+    for (auto rule : this->rules_) {
+        if (!rule->push_event(syscall_event)) {
+            this->logger_->warn("Failed to push event to rule: {}",
+                                rule->name());
+        }
+    }
 
     // FIXME: Test print.
     std::regex xavcoretest_regex(".*xavcoretest");
