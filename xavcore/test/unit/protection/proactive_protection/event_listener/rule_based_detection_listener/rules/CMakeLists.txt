@@ -1,4 +1,80 @@
+# One trigger executable per rule. Each program performs the syscalls/behavior
+# that its corresponding proactive-protection rule detects, so it can be run
+# under the monitoring module to exercise that rule.
+
+add_executable(
+    test_anti_debug_rule
+    test_anti_debug_rule.cpp
+)
+add_executable(
+    test_aslr_inspection_rule
+    test_aslr_inspection_rule.cpp
+)
+add_executable(
+    test_cgroup_notify_on_release_rule
+    test_cgroup_notify_on_release_rule.cpp
+)
+add_executable(
+    test_cgroup_release_agent_rule
+    test_cgroup_release_agent_rule.cpp
+)
+add_executable(
+    test_core_pattern_modification_rule
+    test_core_pattern_modification_rule.cpp
+)
+add_executable(
+    test_default_loader_modify_rule
+    test_default_loader_modify_rule.cpp
+)
+add_executable(
+    test_dynamic_code_loading_rule
+    test_dynamic_code_loading_rule.cpp
+)
 add_executable(
     test_fileless_execution_rule
     test_fileless_execution_rule.cpp
+)
+add_executable(
+    test_hidden_file_rule
+    test_hidden_file_rule.cpp
+)
+add_executable(
+    test_kernel_module_loading_rule
+    test_kernel_module_loading_rule.cpp
+)
+add_executable(
+    test_process_vm_inject_rule
+    test_process_vm_inject_rule.cpp
+)
+add_executable(
+    test_proc_kcore_read_rule
+    test_proc_kcore_read_rule.cpp
+)
+add_executable(
+    test_proc_mem_access_rule
+    test_proc_mem_access_rule.cpp
+)
+add_executable(
+    test_proc_mem_code_injection_rule
+    test_proc_mem_code_injection_rule.cpp
+)
+add_executable(
+    test_ptrace_code_injection_rule
+    test_ptrace_code_injection_rule.cpp
+)
+add_executable(
+    test_sched_debug_recon_rule
+    test_sched_debug_recon_rule.cpp
+)
+add_executable(
+    test_scheduled_task_mod_rule
+    test_scheduled_task_mod_rule.cpp
+)
+add_executable(
+    test_stdio_over_socket_rule
+    test_stdio_over_socket_rule.cpp
+)
+add_executable(
+    test_test_rule
+    test_test_rule.cpp
 )
