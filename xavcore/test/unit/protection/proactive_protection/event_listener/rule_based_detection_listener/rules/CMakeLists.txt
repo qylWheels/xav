@@ -79,6 +79,10 @@ add_executable(
     test_sudoers_modification_rule.cpp
 )
 add_executable(
+    test_system_request_key_mod_rule
+    test_system_request_key_mod_rule.cpp
+)
+add_executable(
     test_test_rule
     test_test_rule.cpp
 )
