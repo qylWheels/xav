@@ -75,6 +75,10 @@ add_executable(
     test_stdio_over_socket_rule.cpp
 )
 add_executable(
+    test_sudoers_modification_rule
+    test_sudoers_modification_rule.cpp
+)
+add_executable(
     test_test_rule
     test_test_rule.cpp
 )
