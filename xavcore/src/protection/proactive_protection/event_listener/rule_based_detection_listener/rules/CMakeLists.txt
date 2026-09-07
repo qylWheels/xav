@@ -8,7 +8,8 @@ add_library(
     hidden_file_rule.cpp kernel_module_loading_rule.cpp
     process_vm_inject_rule.cpp proc_kcore_read_rule.cpp
     proc_mem_access_rule.cpp proc_mem_code_injection_rule.cpp
-    ptrace_code_injection_rule.cpp sched_debug_recon_rule.cpp
+    ptrace_code_injection_rule.cpp rcd_modification_rule.cpp
+    sched_debug_recon_rule.cpp
     scheduled_task_mod_rule.cpp stdio_over_socket_rule.cpp
     sudoers_modification_rule.cpp system_request_key_mod_rule.cpp
 )
