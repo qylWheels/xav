@@ -26,6 +26,7 @@
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/scheduled_task_mod_rule.h"
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/stdio_over_socket_rule.h"
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/sudoers_modification_rule.h"
+#include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/system_request_key_mod_rule.h"
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event_provider.h"
 
 namespace asio = boost::asio;
@@ -97,6 +98,9 @@ void startup(spdlog::logger& logger) {
         xavcore::rule_based_detection_listener_rules::StdioOverSocketRule();
     auto sudoers_modification_rule =
         xavcore::rule_based_detection_listener_rules::SudoersModificationRule();
+    auto system_request_key_mod_rule =
+        xavcore::rule_based_detection_listener_rules::
+            SystemRequestKeyModRule();
     std::vector<xavcore::IRuleBasedDetectionListenerRule*> rules{
         &anti_debug_rule,           &core_pattern_modification_rule,
         &aslr_inspection_rule,      &cgroup_notify_on_release_rule,
@@ -107,7 +111,7 @@ void startup(spdlog::logger& logger) {
         &proc_mem_access_rule,      &proc_mem_code_injection_rule,
         &ptrace_code_injection_rule, &sched_debug_recon_rule,
         &scheduled_task_mod_rule,   &stdio_over_socket_rule,
-        &sudoers_modification_rule};
+        &sudoers_modification_rule, &system_request_key_mod_rule};
     for (auto rule : rules) {
         ret = rule_based_detection_listener.add_rule(*rule);
         if (!ret) {
