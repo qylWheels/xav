@@ -63,6 +63,10 @@ add_executable(
     test_ptrace_code_injection_rule.cpp
 )
 add_executable(
+    test_rcd_modification_rule
+    test_rcd_modification_rule.cpp
+)
+add_executable(
     test_sched_debug_recon_rule
     test_sched_debug_recon_rule.cpp
 )
