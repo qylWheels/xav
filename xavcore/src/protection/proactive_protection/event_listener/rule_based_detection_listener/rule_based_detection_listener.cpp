@@ -22,10 +22,13 @@ RuleBasedDetectionListener::RuleBasedDetectionListener(spdlog::logger& logger)
         auto result = this->threat_scorer_.verdict(proc);
         switch (result) {
             case ProcessThreatScorer::Verdict::Suspicious:
-                this->logger_->warn("Process {} is suspicious", proc.pid);
+                this->logger_->warn("Process {} is suspicious, score: {}",
+                                    proc.pid, this->threat_scorer_.score(proc));
                 break;
             case ProcessThreatScorer::Verdict::Malicious:
-                this->logger_->error("Process {} is malicious", proc.pid);
+                this->logger_->error("Process {} is malicious, score: {}",
+                                     proc.pid,
+                                     this->threat_scorer_.score(proc));
                 break;
             default:
                 break;
