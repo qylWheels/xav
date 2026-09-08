@@ -46,3 +46,12 @@ add_library(xavcore_includes INTERFACE)
 target_include_directories(xavcore_includes INTERFACE
     ${PROJECT_SOURCE_DIR}/src/include
 )
+
+# CPack.
+set(CPACK_GENERATOR "DEB")
+set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+set(CPACK_PACKAGE_NAME "xavcore")
+set(CPACK_PACKAGE_VERSION "0.1.0")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "qylWheels <command1748165360@126.com>")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Xav core components")
+include(CPack)
