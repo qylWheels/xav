@@ -31,13 +31,12 @@ outcome::result<void> HiddenFileRule::push_event(const IEvent& event) {
     try {
         const auto& syscall_event = dynamic_cast<const SyscallEvent&>(event);
 
-        bool id_and_arg_match =
-            (syscall_event.id == SYS_creat ||
-             (syscall_event.id == SYS_open &&
-              (syscall_event.args[1]) & O_CREAT) ||
-             (syscall_event.id == SYS_openat &&
-              (syscall_event.args[2]) & O_CREAT) ||
-             syscall_event.id == SYS_openat2);
+        bool id_and_arg_match = (syscall_event.id == SYS_creat ||
+                                 (syscall_event.id == SYS_open &&
+                                  (syscall_event.args.at(1)) & O_CREAT) ||
+                                 (syscall_event.id == SYS_openat &&
+                                  (syscall_event.args.at(2)) & O_CREAT) ||
+                                 syscall_event.id == SYS_openat2);
         if (!id_and_arg_match) {
             return outcome::success();
         }
@@ -71,8 +70,8 @@ outcome::result<void> HiddenFileRule::push_event(const IEvent& event) {
         std::regex re("/\\..*");
         if (std::regex_search(path, re)) {
             for (auto cb : this->callbacks_on_warning_) {
-                auto info = HiddenFileRuleWarningInfo(syscall_event.process,
-                                                      path);
+                auto info =
+                    HiddenFileRuleWarningInfo(syscall_event.process, path);
                 (*cb)(info);
             }
         }
