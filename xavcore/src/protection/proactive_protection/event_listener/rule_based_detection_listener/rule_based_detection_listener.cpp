@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "xavcore/protection/proactive_protection/event.h"
+#include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/process_threat_scorer.h"
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event.h"
 
 namespace xavcore {
@@ -18,6 +19,17 @@ RuleBasedDetectionListener::RuleBasedDetectionListener(spdlog::logger& logger)
         const Process& proc = info.process();
         this->proc_violated_events_[proc].push_back(info.clone());
         this->threat_scorer_.feed(proc, typeid(info), info.severity());
+        auto result = this->threat_scorer_.verdict(proc);
+        switch (result) {
+            case ProcessThreatScorer::Verdict::Suspicious:
+                this->logger_->warn("Process {} is suspicious", proc.pid);
+                break;
+            case ProcessThreatScorer::Verdict::Malicious:
+                this->logger_->error("Process {} is malicious", proc.pid);
+                break;
+            default:
+                break;
+        }
     };
 }
 
