@@ -15,7 +15,9 @@ namespace xavcore {
 RuleBasedDetectionListener::RuleBasedDetectionListener(spdlog::logger& logger)
     : logger_(&logger) {
     this->callback_on_warning_ = [this](const IRuleWarningInfo& info) {
-        this->proc_violated_events_[info.process()].push_back(info.clone());
+        const Process& proc = info.process();
+        this->proc_violated_events_[proc].push_back(info.clone());
+        this->threat_scorer_.feed(proc, typeid(info), info.severity());
     };
 }
 
