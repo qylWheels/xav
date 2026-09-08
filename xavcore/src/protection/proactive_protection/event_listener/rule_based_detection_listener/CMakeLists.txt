@@ -5,6 +5,7 @@ add_library(
     rule_based_detection_listener
     SHARED
     rule_based_detection_listener.cpp
+    process_threat_scorer.cpp
 )
 
 target_link_libraries(
