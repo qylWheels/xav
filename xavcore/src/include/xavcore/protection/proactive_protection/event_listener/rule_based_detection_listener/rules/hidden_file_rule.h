@@ -12,7 +12,7 @@ struct HiddenFileRuleWarningInfo : public IRuleWarningInfo {
     HiddenFileRuleWarningInfo(Process process, std::string path)
         : process_(process), path(path) {}
 
-    virtual std::uint8_t severity() const override { return 30; }
+    virtual std::uint8_t severity() const override { return 20; }
     virtual Process process() const override { return this->process_; }
     virtual std::shared_ptr<IRuleWarningInfo> clone() const override {
         return std::make_shared<HiddenFileRuleWarningInfo>(*this);
