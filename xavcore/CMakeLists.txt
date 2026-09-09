@@ -8,6 +8,21 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# RPATH policy for packaging.
+#
+# All xavcore libraries install into ${prefix}/lib and the executables into
+# ${prefix}/bin, both searched by the dynamic loader by default, so no RPATH
+# is needed in the packaged binaries.  We therefore:
+#   - link with the (empty) install RPATH instead of absolute build-tree paths
+#     (CMAKE_BUILD_WITH_INSTALL_RPATH), so no build directory leaks in, and
+#   - skip CMake's install-time RPATH rewriting (CMAKE_SKIP_INSTALL_RPATH).
+#   Without this, installing a .so whose build RPATH is a single directory
+#   fails CMake's "file RPATH_CHANGE" step (it compares against "<dir>:").
+# Trade-off: running the modules straight out of build/ now needs the libs on
+# LD_LIBRARY_PATH.
+set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
+set(CMAKE_SKIP_INSTALL_RPATH ON)
+
 # Packages from vcpkg.
 find_path(MLPACK_INCLUDE_DIRS "mlpack.hpp")
 find_path(BEXT_SML_INCLUDE_DIRS "boost/sml.hpp")
@@ -45,6 +60,38 @@ add_subdirectory(test)
 add_library(xavcore_includes INTERFACE)
 target_include_directories(xavcore_includes INTERFACE
     ${PROJECT_SOURCE_DIR}/src/include
+)
+
+# Libraries: every SHARED library we build goes to ${prefix}/lib.
+install(
+    TARGETS
+        types
+        cache
+        scan
+        protobufs
+        hips_monitor
+        syscall_event_provider
+        on_access_scanning
+        placeholder_event_listener
+        anomalous_syscall_detection_listener
+        rule_based_detection_listener
+        proactive_protection_rules
+    LIBRARY DESTINATION lib        # ${prefix}/lib/lib*.so
+)
+
+# Executables: the runtime service binaries go to ${prefix}/bin.
+install(
+    TARGETS
+        xavcore_on_access_scanning_module
+        xavcore_proactive_protection_module
+    RUNTIME DESTINATION bin        # ${prefix}/bin/<name>
+)
+
+# Public headers: copy the whole src/include/xavcore tree, preserving layout,
+# into ${prefix}/include/xavcore.
+install(
+    DIRECTORY ${PROJECT_SOURCE_DIR}/src/include/xavcore
+    DESTINATION include
 )
 
 # CPack.

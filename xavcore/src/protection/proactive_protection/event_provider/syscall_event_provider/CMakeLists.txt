@@ -29,6 +29,9 @@ add_custom_target(
 )
 add_dependencies(syscall_event_provider_obj vmlinux_header)
 
+# Ship the compiled eBPF object (loaded at runtime by the daemon).
+install(FILES ${EBPF_OUTPUT} DESTINATION lib/xavcore/bpf)
+
 # eBPF dummy target for IDE code check.
 add_library(syscall_event_provider_obj_dummy OBJECT ${CMAKE_CURRENT_SOURCE_DIR}/syscall_event_provider.bpf.c)
 target_include_directories(

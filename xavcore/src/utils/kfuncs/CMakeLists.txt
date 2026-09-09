@@ -40,6 +40,12 @@ add_custom_target(
     ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL_MODULE_KOBJECT}
 )
 
+# Install the built kernel module into the running kernel's module tree.
+install(
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL_MODULE_KOBJECT}
+    DESTINATION lib/modules/${KERNEL_RELEASE}/extra
+)
+
 # Dummy target for IDE code check.
 add_library(${KERNEL_MODULE_NAME}_dummy OBJECT ${KERNEL_MODULE_SOURCE})
 target_include_directories(

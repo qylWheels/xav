@@ -29,6 +29,9 @@ add_custom_target(
 )
 add_dependencies(hips_monitor_obj vmlinux_header)
 
+# Ship the compiled eBPF object (loaded at runtime by the daemon).
+install(FILES ${EBPF_OUTPUT} DESTINATION lib/xavcore/bpf)
+
 # Skeleton header.
 set(
     SKELETON_HEADER
