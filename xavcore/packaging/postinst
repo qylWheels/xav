@@ -1,0 +1,36 @@
+#!/bin/sh
+# postinst for the xavcore deb.
+
+set -e
+
+# --- DKMS identity (keep in sync with src/utils/kfuncs/dkms.conf) ---------
+DKMS_NAME="xavcore-kfuncs"
+DKMS_VERSION="0.1.0"
+SRC_DIR="/usr/src/${DKMS_NAME}/${DKMS_NAME}-${DKMS_VERSION}"
+
+case "$1" in
+    configure)
+        # Robustness: make sure the source is in place before adding it.
+        if [ ! -f "${SRC_DIR}/dkms.conf" ]; then
+            echo "postinst: ${SRC_DIR} missing; cannot build DKMS module" >&2
+            exit 1
+        fi
+
+        # Register, build and install against the running kernel.
+        dkms add     -m "${DKMS_NAME}" -v "${DKMS_VERSION}" || true
+        dkms build   -m "${DKMS_NAME}" -v "${DKMS_VERSION}"
+        dkms install -m "${DKMS_NAME}" -v "${DKMS_VERSION}"
+
+        # Make sure any depmod indexes are refreshed for this kernel.
+        depmod -a
+        ;;
+    abort-upgrade|abort-remove|abort-deconfigure)
+        # Nothing to do on these transitions.
+        ;;
+    *)
+        echo "postinst called with unknown argument \"$1\"" >&2
+        exit 1
+        ;;
+esac
+
+exit 0

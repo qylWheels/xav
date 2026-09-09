@@ -1,0 +1,35 @@
+#!/bin/sh
+# prerm for the xavcore deb.
+#
+# Removes the DKMS-managed xavcore_kfuncs module before the packages files go
+# away, and (because we chose "remove source too") deletes /usr/src content to
+# keep the machine clean. The /usr/src dir itself is left behind (harmless).
+
+set -e
+
+# --- DKMS identity (keep in sync with src/utils/kfuncs/dkms.conf) ---------
+DKMS_NAME="xavcore-kfuncs"
+DKMS_VERSION="0.1.0"
+SRC_DIR="/usr/src/${DKMS_NAME}/${DKMS_NAME}-${DKMS_VERSION}"
+
+case "$1" in
+    remove|deconfigure)
+        # Uninstall the built module and drop it from the DKMS database.
+        dkms remove -m "${DKMS_NAME}" -v "${DKMS_VERSION}" --all 2>/dev/null || true
+        # Remove the shipped source (the whole DKMS tree entry).
+        rm -rf "${SRC_DIR}"
+        # Refresh module index so the gone module isn't listed.
+        depmod -a 2>/dev/null || true
+        ;;
+    upgrade|failed-upgrade)
+        # On an upgrade keep the source / rebuilt module so the new version
+        # can reuse/bump the tree cleanly.
+        dkms remove -m "${DKMS_NAME}" -v "${DKMS_VERSION}" --all 2>/dev/null || true
+        ;;
+    *)
+        echo "prerm called with unknown argument \"$1\"" >&2
+        exit 1
+        ;;
+esac
+
+exit 0

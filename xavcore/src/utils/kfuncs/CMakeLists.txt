@@ -1,57 +1,43 @@
-execute_process(COMMAND uname -r OUTPUT_VARIABLE KERNEL_RELEASE OUTPUT_STRIP_TRAILING_WHITESPACE)
-set(KERNEL_DIR "/lib/modules/${KERNEL_RELEASE}/build")
-
 set(KERNEL_MODULE_NAME xavcore_kfuncs)
 set(KERNEL_MODULE_SOURCE ${KERNEL_MODULE_NAME}.c)
-set(KERNEL_MODULE_OBJECT ${KERNEL_MODULE_NAME}.o)
-set(KERNEL_MODULE_KOBJECT ${KERNEL_MODULE_NAME}.ko)
 
-# We run make in the binary directory,
-# so we need to create a link to the source file.
-file(
-    CREATE_LINK
-    ${CMAKE_CURRENT_SOURCE_DIR}/${KERNEL_MODULE_SOURCE}
-    ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL_MODULE_SOURCE}
-    SYMBOLIC
+# DKMS registration identity
+set(XAVCORE_KFUNCS_DKMS_NAME "xavcore-kfuncs")
+set(XAVCORE_KFUNCS_DKMS_VERSION "0.1.0")
+set(XAVCORE_KFUNCS_DKMS_DIR
+    "${XAVCORE_KFUNCS_DKMS_NAME}-${XAVCORE_KFUNCS_DKMS_VERSION}"
 )
-
-add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL_MODULE_KOBJECT}
-
-    # Temporary KBuild Makefile.
-    COMMAND echo "obj-m += ${KERNEL_MODULE_OBJECT}" > ${CMAKE_CURRENT_BINARY_DIR}/Makefile
-    COMMAND echo "KBUILD_CFLAGS += -g -O2" >> ${CMAKE_CURRENT_BINARY_DIR}/Makefile
-    COMMAND echo "all:" >> ${CMAKE_CURRENT_BINARY_DIR}/Makefile
-    COMMAND
-        echo "\tmake -C /lib/modules/${KERNEL_RELEASE}/build M=${CMAKE_CURRENT_BINARY_DIR} modules"
-        >> ${CMAKE_CURRENT_BINARY_DIR}/Makefile
-
-    # Call the kernel build system.
-    COMMAND make
-
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    COMMENT "Building kernel module ${KERNEL_MODULE_NAME} using KBuild"
-    VERBATIM
-
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${KERNEL_MODULE_SOURCE}
+# Relative-to /usr source destination used by this directory's install(), plus
+# the /usr-anchored absolute path a deb control script would need. Expose the
+# absolute one to the enclosing scopes too (src/utils, src, top-level) so the
+# root CMakeLists could reconstitute it if ever needed.
+set(XAVCORE_KFUNCS_DKMS_SRC_DEST
+    "src/${XAVCORE_KFUNCS_DKMS_NAME}/${XAVCORE_KFUNCS_DKMS_DIR}"
 )
-add_custom_target(
-    ${KERNEL_MODULE_NAME} ALL DEPENDS
-    ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL_MODULE_KOBJECT}
-)
+set(XAVCORE_KFUNCS_DKMS_SRC_DIR
+    "/usr/${XAVCORE_KFUNCS_DKMS_SRC_DEST}" PARENT_SCOPE)
 
-# Install the built kernel module into the running kernel's module tree.
-install(
-    FILES ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL_MODULE_KOBJECT}
-    DESTINATION lib/modules/${KERNEL_RELEASE}/extra
+# IDE / clangd helper: let the kernel header be resolved for dbg.
+execute_process(
+    COMMAND uname -r
+    OUTPUT_VARIABLE KERNEL_REBUILD_REL
+    OUTPUT_STRIP_TRAILING_WHITESPACE
 )
-
-# Dummy target for IDE code check.
 add_library(${KERNEL_MODULE_NAME}_dummy OBJECT ${KERNEL_MODULE_SOURCE})
 target_include_directories(
     ${KERNEL_MODULE_NAME}_dummy PRIVATE
-    /usr/local/include/myapp
-    /lib/modules/${KERNEL_RELEASE}/build/source/include
+    /lib/modules/${KERNEL_REBUILD_REL}/build/source/include
 )
-set_target_properties(${KERNEL_MODULE_NAME}_dummy PROPERTIES EXCLUDE_FROM_ALL TRUE)
-set_target_properties(${KERNEL_MODULE_NAME}_dummy PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD TRUE)
+set_target_properties(${KERNEL_MODULE_NAME}_dummy PROPERTIES
+    EXCLUDE_FROM_ALL TRUE
+    EXCLUDE_FROM_DEFAULT_BUILD TRUE
+)
+
+# Installation: ship the module *source* tree to /usr/src for DKMS.
+install(
+    FILES
+        ${CMAKE_CURRENT_SOURCE_DIR}/${KERNEL_MODULE_SOURCE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/Makefile
+        ${CMAKE_CURRENT_SOURCE_DIR}/dkms.conf
+    DESTINATION ${XAVCORE_KFUNCS_DKMS_SRC_DEST}
+)

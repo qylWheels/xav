@@ -101,4 +101,16 @@ set(CPACK_PACKAGE_NAME "xavcore")
 set(CPACK_PACKAGE_VERSION "0.1.0")
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "qylWheels <command1748165360@126.com>")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Xav core components")
+
+# DKMS control scripts.
+set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
+    ${PROJECT_SOURCE_DIR}/packaging/postinst
+    ${PROJECT_SOURCE_DIR}/packaging/prerm
+)
+
+# Runtime dependencies needed so the DKMS build can succeed on the target.
+set(CPACK_DEBIAN_PACKAGE_DEPENDS
+    "dkms (>= 3.0), gcc, make, linux-headers-amd64"
+)
+
 include(CPack)
