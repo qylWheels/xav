@@ -5,32 +5,44 @@ function ProcessViewer() {
         {
             pid: 296,
             path: "/bin/ssh",
-            securityLevel: "High",
+            commandLine: "ssh -T asdlko@slic9.comsdddddddddddddddddddddddddddd",
+            eventCount: 100,
+            eventsViolatedRules: 50,
+            severityScore: "83",
+            severityLevel: "High",
         },
         {
             pid: 300,
             path: "/bin/bash",
-            securityLevel: "Medium",
+            commandLine: "bash",
+            eventCount: 2918,
+            eventsViolatedRules: 12,
+            severityScore: "42",
+            severityLevel: "Medium",
         },
         {
             pid: 301,
             path: "/bin/mirai",
-            securityLevel: "Low",
+            commandLine: "mirai",
+            eventCount: 100,
+            eventsViolatedRules: 1,
+            severityScore: "31",
+            severityLevel: "Low",
         },
     ];
     const processList = Array(100).fill(processListSlice).flat();
 
-    const securityLevelToStatus = (securityLevel: string) => {
-        if (securityLevel === "Low") {
+    const severityLevelToStatus = (severityLevel: string) => {
+        if (severityLevel === "High") {
             return "status-error";
         }
-        if (securityLevel === "Medium") {
+        if (severityLevel === "Medium") {
             return "status-warning";
         }
-        if (securityLevel === "High") {
+        if (severityLevel === "Low") {
             return "status-success";
         }
-        throw new Error("Invalid security level");
+        throw new Error("Invalid severity level");
     }
 
     return (
@@ -38,28 +50,34 @@ function ProcessViewer() {
             <div className="card card-border bg-base-100">
                 <div className="card-body">
                     <h2 className="card-title">Active Processes</h2>
-                    <div className="overflow-y-auto h-115">
-                        <table className="table table-pin-rows mt-2">
+                    <div className="overflow-auto h-115">
+                        <table className="table table-pin-rows table-pin-cols mt-2 whitespace-nowrap">
                             <thead>
                                 <tr>
                                     <td>PID</td>
                                     <td>Path</td>
-                                    <td>Security Level</td>
+                                    <td>Command Line</td>
+                                    <td>Event Count</td>
+                                    <td>Events Violated Rules</td>
+                                    <td>Severity Score</td>
                                     <td>Actions</td>
                                 </tr>
                             </thead>
                             <tbody>
                                 {processList.map((item, _index) => (
                                     <tr className="hover:bg-base-300">
-                                        <th>{item.pid}</th>
+                                        <th className="truncate">{item.pid}</th>
                                         <td>{item.path}</td>
+                                        <td className="truncate">{item.commandLine}</td>
+                                        <td>{item.eventCount}</td>
+                                        <td className="text-bold">{item.eventsViolatedRules}</td>
                                         <td>
                                             <div>
                                                 <div className="inline-grid *:[grid-area:1/1]  ">
-                                                    <div className={`status ${securityLevelToStatus(item.securityLevel)} ${item.securityLevel === "Low" ? "animate-ping" : ""}`}></div>
-                                                    <div className={`status ${securityLevelToStatus(item.securityLevel)}`}></div>
+                                                    <div className={`status ${severityLevelToStatus(item.severityLevel)} ${item.severityLevel === "High" ? "animate-ping" : ""}`}></div>
+                                                    <div className={`status ${severityLevelToStatus(item.severityLevel)}`}></div>
                                                 </div>
-                                                <span className="ml-4">{item.securityLevel}</span>
+                                                <span className="ml-4">{item.severityLevel} ({item.severityScore})</span>
                                             </div>
                                         </td>
                                         <td>
