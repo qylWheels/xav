@@ -67,8 +67,8 @@ function ProcessViewer() {
                                 {processList.map((item, _index) => (
                                     <tr className="hover:bg-base-300">
                                         <th>{item.pid}</th>
-                                        <td className="max-w-32 truncate">{item.path}</td>
-                                        <td className="max-w-48 truncate">{item.commandLine}</td>
+                                        <td className="max-w-32 truncate" title={item.path}>{item.path}</td>
+                                        <td className="max-w-48 truncate" title={item.commandLine}>{item.commandLine}</td>
                                         <td>{item.eventCount}</td>
                                         <td className="text-bold">{item.eventsViolatedRules}</td>
                                         <td>
