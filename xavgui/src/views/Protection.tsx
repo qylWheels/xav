@@ -5,7 +5,7 @@ function Protection() {
     const onOpenProcessViewerBtnClick = async () => {
         new WebviewWindow('process-viewer', {
             url: '/#/process-viewer',
-            width: 800,
+            width: 900,
             height: 600,
             decorations: false,
             transparent: true,
