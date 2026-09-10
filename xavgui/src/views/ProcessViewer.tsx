@@ -50,8 +50,8 @@ function ProcessViewer() {
             <div className="card card-border bg-base-100">
                 <div className="card-body">
                     <h2 className="card-title">Active Processes</h2>
-                    <div className="overflow-auto h-115">
-                        <table className="table table-pin-rows table-pin-cols mt-2 whitespace-nowrap">
+                    <div className="overflow-y-auto h-115">
+                        <table className="table table-pin-rows mt-2 whitespace-nowrap">
                             <thead>
                                 <tr>
                                     <td>PID</td>
@@ -66,9 +66,9 @@ function ProcessViewer() {
                             <tbody>
                                 {processList.map((item, _index) => (
                                     <tr className="hover:bg-base-300">
-                                        <th className="truncate">{item.pid}</th>
-                                        <td>{item.path}</td>
-                                        <td className="truncate">{item.commandLine}</td>
+                                        <th>{item.pid}</th>
+                                        <td className="max-w-32 truncate">{item.path}</td>
+                                        <td className="max-w-48 truncate">{item.commandLine}</td>
                                         <td>{item.eventCount}</td>
                                         <td className="text-bold">{item.eventsViolatedRules}</td>
                                         <td>
