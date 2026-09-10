@@ -8,11 +8,9 @@ set(XAVCORE_KFUNCS_DKMS_DIR
     "${XAVCORE_KFUNCS_DKMS_NAME}-${XAVCORE_KFUNCS_DKMS_VERSION}"
 )
 # Relative-to /usr source destination used by this directory's install(), plus
-# the /usr-anchored absolute path a deb control script would need. Expose the
-# absolute one to the enclosing scopes too (src/utils, src, top-level) so the
-# root CMakeLists could reconstitute it if ever needed.
+# the /usr-anchored absolute path a deb control script would need.
 set(XAVCORE_KFUNCS_DKMS_SRC_DEST
-    "src/${XAVCORE_KFUNCS_DKMS_NAME}/${XAVCORE_KFUNCS_DKMS_DIR}"
+    "src/${XAVCORE_KFUNCS_DKMS_DIR}"
 )
 set(XAVCORE_KFUNCS_DKMS_SRC_DIR
     "/usr/${XAVCORE_KFUNCS_DKMS_SRC_DEST}" PARENT_SCOPE)

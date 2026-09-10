@@ -8,16 +8,22 @@
 set -e
 
 # --- DKMS identity (keep in sync with src/utils/kfuncs/dkms.conf) ---------
+# DKMS expects the flat source layout /usr/src/<name>-<version>/.
 DKMS_NAME="xavcore-kfuncs"
 DKMS_VERSION="0.1.0"
-SRC_DIR="/usr/src/${DKMS_NAME}/${DKMS_NAME}-${DKMS_VERSION}"
+SRC_DIR="/usr/src/${DKMS_NAME}-${DKMS_VERSION}"
+# Earlier (broken) packages nested the source under /usr/src/<name>/<name>-<ver>/;
+# remove that leftover too if present.
+LEGACY_SRC_DIR="/usr/src/${DKMS_NAME}/${DKMS_NAME}-${DKMS_VERSION}"
 
 case "$1" in
     remove|deconfigure)
         # Uninstall the built module and drop it from the DKMS database.
         dkms remove -m "${DKMS_NAME}" -v "${DKMS_VERSION}" --all 2>/dev/null || true
         # Remove the shipped source (the whole DKMS tree entry).
-        rm -rf "${SRC_DIR}"
+        rm -rf "${SRC_DIR}" "${LEGACY_SRC_DIR}"
+        # Remove the now-empty nested parent dir left by the broken layout.
+        rmdir "/usr/src/${DKMS_NAME}" 2>/dev/null || true
         # Refresh module index so the gone module isn't listed.
         depmod -a 2>/dev/null || true
         ;;

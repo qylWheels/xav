@@ -4,9 +4,10 @@
 set -e
 
 # --- DKMS identity (keep in sync with src/utils/kfuncs/dkms.conf) ---------
+# DKMS expects the flat source layout /usr/src/<name>-<version>/.
 DKMS_NAME="xavcore-kfuncs"
 DKMS_VERSION="0.1.0"
-SRC_DIR="/usr/src/${DKMS_NAME}/${DKMS_NAME}-${DKMS_VERSION}"
+SRC_DIR="/usr/src/${DKMS_NAME}-${DKMS_VERSION}"
 
 case "$1" in
     configure)
