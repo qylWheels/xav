@@ -37,7 +37,7 @@ public:
         double c = 4.0;       // rule-diversity coefficient
         std::uint32_t m = 3;  // per-rule count cap
         std::uint32_t k = 5;  // diversity-count cap
-        double t1 = 30.0;     // benign / suspicious boundary
+        double t1 = 25.0;     // benign / suspicious boundary
         double t2 = 50.0;     // suspicious / malicious boundary
         double max_score = 100.0;
     };
