@@ -38,7 +38,6 @@ function Protection() {
                             </div>
                         </div>
                     </div>
-                    {/* <button className="btn mt-2" onClick={onOpenProcessViewerBtnClick}>Open Process Viewer</button> */}
                 </div>
             </div>
             <div className="card border mt-6">
