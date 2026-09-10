@@ -1,19 +1,19 @@
 import { AppWindow, Boxes, File, LayoutList, ShieldBan, SquareChartGantt } from "lucide-react";
-// import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
+import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
 
 function Protection() {
-    // const onOpenProcessViewerBtnClick = async () => {
-    //     new WebviewWindow('process-viewer', {
-    //         url: '/#/process-viewer',
-    //         width: 800,
-    //         height: 600,
-    //         decorations: false,
-    //         transparent: true,
-    //         shadow: false,
-    //         maximizable: false,
-    //         resizable: false
-    //     });
-    // };
+    const onOpenProcessViewerBtnClick = async () => {
+        new WebviewWindow('process-viewer', {
+            url: '/#/process-viewer',
+            width: 800,
+            height: 600,
+            decorations: false,
+            transparent: true,
+            shadow: false,
+            maximizable: false,
+            resizable: false
+        });
+    };
 
     return (
         <div className="flex flex-col mb-8 mx-6">
@@ -61,7 +61,7 @@ function Protection() {
                             </div>
                         </div>
                     </div>
-                    {/* <button className="btn mt-2" onClick={onOpenProcessViewerBtnClick}>Open Process Viewer</button> */}
+                    <button className="btn mt-2" onClick={onOpenProcessViewerBtnClick}>Open Process Viewer</button>
                 </div>
             </div>
             <div className="card border mt-6">
