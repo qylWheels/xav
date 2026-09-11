@@ -188,10 +188,8 @@ void SyscallEventProvider::handle_raw_event_wrapper(
                              raw_event_wrapper.raw_event.proc_start_boottime)};
     event.id = raw_event_wrapper.raw_event.syscall_id;
 
-    // Fill in the additional process info.
-    if (!this->fill_process_additional_info(event.process)) {
-        this->logger_->warn("Failed to fill process additional info");
-    }
+    // Fill in the additional process info (best effort).
+    (void)this->fill_process_additional_info(event.process);
 
     if (raw_event_wrapper.raw_event.enter_captured) {
         std::uint64_t args[6];
@@ -370,9 +368,13 @@ void SyscallEventProvider::handle_raw_event_wrapper(
 bool SyscallEventProvider::fill_process_additional_info(Process& process) {
     auto it = this->proc_additional_info_cache_.find(process);
     if (it != this->proc_additional_info_cache_.end()) {
-        process.ppid = it->second.ppid;
-        process.exe_path = it->second.exe_path;
-        process.cmdline = it->second.cmdline;
+        if (!it->second.has_value()) {
+            // Tried before and gave up, don't retry for every event.
+            return false;
+        }
+        process.ppid = it->second->ppid;
+        process.exe_path = it->second->exe_path;
+        process.cmdline = it->second->cmdline;
         return true;
     }
 
@@ -390,16 +392,23 @@ bool SyscallEventProvider::fill_process_additional_info(Process& process) {
             info.cmdline += arg;
             info.cmdline.push_back(' ');
         }
-    } catch (const std::exception&) {
-        // Give up.
+    } catch (const std::exception& e) {
+        // The process sometimes exited before /proc could be read, which is
+        // expected for short-lived processes.  Remember the failure so the same
+        // process is not retried (and logged) once per event.
+        this->logger_->info("Failed to fill process additional info: {}",
+                            e.what());
+        this->proc_additional_info_cache_.emplace(process, std::nullopt);
         return false;
     }
 
     // Cache and fill it when getting the additional info successfully.
-    this->proc_additional_info_cache_[process] = info;
-    process.ppid = info.ppid;
-    process.exe_path = info.exe_path;
-    process.cmdline = info.cmdline;
+    auto inserted =
+        this->proc_additional_info_cache_.emplace(process, std::move(info))
+            .first;
+    process.ppid = inserted->second->ppid;
+    process.exe_path = inserted->second->exe_path;
+    process.cmdline = inserted->second->cmdline;
     return true;
 }
 }  // namespace xavcore

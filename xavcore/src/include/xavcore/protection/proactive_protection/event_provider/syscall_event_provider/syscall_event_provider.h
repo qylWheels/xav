@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <memory>
+#include <optional>
 #include <string>
 #include <thread>
 #include <unordered_map>
@@ -77,7 +78,9 @@ private:
         std::filesystem::path exe_path;
         std::string cmdline;
     };
-    std::unordered_map<Process, ProcessAdditionalInfo>
+    // A nullopt entry means the info of that process was already attempted and
+    // could not be read, so it is not retried for every event of the process.
+    std::unordered_map<Process, std::optional<ProcessAdditionalInfo>>
         proc_additional_info_cache_;
     bool fill_process_additional_info(Process& process);
 };
