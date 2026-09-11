@@ -396,8 +396,6 @@ bool SyscallEventProvider::fill_process_additional_info(Process& process) {
         // The process sometimes exited before /proc could be read, which is
         // expected for short-lived processes.  Remember the failure so the same
         // process is not retried (and logged) once per event.
-        this->logger_->info("Failed to fill process additional info: {}",
-                            e.what());
         this->proc_additional_info_cache_.emplace(process, std::nullopt);
         return false;
     }
