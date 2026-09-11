@@ -17,11 +17,14 @@
 #include <cstdint>
 #include <cstring>
 #include <ctime>
+#include <optional>
 #include <outcome/success_failure.hpp>
 #include <pfs/procfs.hpp>
 #include <stdexcept>
 #include <stop_token>
+#include <string>
 #include <system_error>
+#include <utility>
 
 #include "syscall_event_provider.skel.h"
 #include "xavcore/protection/proactive_protection/event.h"
@@ -184,6 +187,15 @@ void SyscallEventProvider::handle_raw_event_wrapper(
                          std::chrono::nanoseconds(
                              raw_event_wrapper.raw_event.proc_start_boottime)};
     event.id = raw_event_wrapper.raw_event.syscall_id;
+
+    // Fill in the process info parsed from /proc.
+    auto it = this->proc_additional_info_cache_.find(event.process);
+    if (it != this->proc_additional_info_cache_.end()) {
+        event.process.ppid = it->second.ppid;
+        event.process.exe_path = it->second.exe_path;
+        event.process.cmdline = it->second.cmdline;
+    }
+
     if (raw_event_wrapper.raw_event.enter_captured) {
         std::uint64_t args[6];
         std::memcpy(args, raw_event_wrapper.raw_event.args, sizeof(args));
@@ -356,5 +368,41 @@ void SyscallEventProvider::handle_raw_event_wrapper(
             (void)listener->accept(event);
         }
     }
+}
+
+bool SyscallEventProvider::fill_process_additional_info(Process& process) {
+    auto it = this->proc_additional_info_cache_.find(process);
+    if (it != this->proc_additional_info_cache_.end()) {
+        process.ppid = it->second.ppid;
+        process.exe_path = it->second.exe_path;
+        process.cmdline = it->second.cmdline;
+        return true;
+    }
+
+    // Not in cache, try to fill it.
+    ProcessAdditionalInfo info;
+    try {
+        pfs::procfs procfs;
+        pfs::task task = procfs.get_task(process.pid);
+        info.exe_path = task.get_exe();
+        info.ppid = task.get_stat().ppid;
+        for (const std::string& arg : task.get_cmdline()) {
+            if (arg.empty()) {
+                continue;
+            }
+            info.cmdline += arg;
+            info.cmdline.push_back(' ');
+        }
+    } catch (const std::exception&) {
+        // Give up.
+        return false;
+    }
+
+    // Cache and fill it when getting the additional info successfully.
+    this->proc_additional_info_cache_[process] = info;
+    process.ppid = info.ppid;
+    process.exe_path = info.exe_path;
+    process.cmdline = info.cmdline;
+    return true;
 }
 }  // namespace xavcore

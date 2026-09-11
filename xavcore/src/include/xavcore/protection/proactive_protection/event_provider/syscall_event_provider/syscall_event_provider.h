@@ -9,13 +9,17 @@
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <filesystem>
 #include <memory>
+#include <string>
 #include <thread>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
 #include "syscall_event_provider.skel.h"
 #include "xavcore/protection/proactive_protection/behavior_monitor.h"
+#include "xavcore/protection/proactive_protection/event.h"
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/raw_syscall_event.h"
 
 namespace xavcore {
@@ -65,5 +69,16 @@ private:
         raw_event_wrappers_to_handle_;
     std::jthread handle_raw_events_thread_;
     std::chrono::time_point<std::chrono::system_clock> sys_boot_time_point_;
+
+private:
+    // Process additional info parsed from /proc.
+    struct ProcessAdditionalInfo {
+        std::uint32_t ppid;
+        std::filesystem::path exe_path;
+        std::string cmdline;
+    };
+    std::unordered_map<Process, ProcessAdditionalInfo>
+        proc_additional_info_cache_;
+    bool fill_process_additional_info(Process& process);
 };
 }  // namespace xavcore
