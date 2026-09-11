@@ -188,12 +188,9 @@ void SyscallEventProvider::handle_raw_event_wrapper(
                              raw_event_wrapper.raw_event.proc_start_boottime)};
     event.id = raw_event_wrapper.raw_event.syscall_id;
 
-    // Fill in the process info parsed from /proc.
-    auto it = this->proc_additional_info_cache_.find(event.process);
-    if (it != this->proc_additional_info_cache_.end()) {
-        event.process.ppid = it->second.ppid;
-        event.process.exe_path = it->second.exe_path;
-        event.process.cmdline = it->second.cmdline;
+    // Fill in the additional process info.
+    if (!this->fill_process_additional_info(event.process)) {
+        this->logger_->warn("Failed to fill process additional info");
     }
 
     if (raw_event_wrapper.raw_event.enter_captured) {
