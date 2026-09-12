@@ -48,7 +48,7 @@ private:
     }
 
 public:
-    outcome::result<nlohmann::json> dispatcher(nlohmann::json req) {
+    outcome::result<nlohmann::json> dispatch(nlohmann::json req) {
         try {
             std::string method = req["method"].get<std::string>();
             if (method == "status") {
