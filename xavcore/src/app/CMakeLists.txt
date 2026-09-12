@@ -40,5 +40,5 @@ target_link_libraries(
     xavcore_proactive_protection_module
     PRIVATE
     Boost::asio cpptrace::cpptrace spdlog::spdlog
-    nlohmann_json::nlohmann_json outcome::hl
+    nlohmann_json::nlohmann_json
 )

@@ -3,11 +3,6 @@
 #include <cstdint>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
-#include <outcome/config.hpp>
-#include <outcome/outcome.hpp>
-#include <system_error>
-
-namespace outcome = OUTCOME_V2_NAMESPACE;
 
 namespace xavcore {
 namespace app {
@@ -36,7 +31,7 @@ public:
     Api& operator=(Api&&) = delete;
 
 private:
-    outcome::result<nlohmann::json> status() {
+    nlohmann::json status() {
         return nlohmann::json{
             {"status", StatusInfo::Status::Running},
             {"active_proc_count", 0},
@@ -48,16 +43,16 @@ private:
     }
 
 public:
-    outcome::result<nlohmann::json> dispatch(nlohmann::json req) {
+    nlohmann::json dispatch(nlohmann::json req) {
         try {
             std::string method = req["method"].get<std::string>();
             if (method == "status") {
                 return this->status();
             }
         } catch (...) {
-            return std::errc::invalid_argument;
+            return {"error", "invalid_argument"};
         }
-        return std::errc::not_supported;
+        return {"error", "not_supported"};
     }
 };
 }  // namespace proactive_protection_module_api
