@@ -5,7 +5,9 @@
 #include <cpptrace/cpptrace.hpp>
 #include <csignal>
 #include <iostream>
+#include <nlohmann/json.hpp>
 
+#include "proactive_protection_module_api.h"
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rule_based_detection_listener.h"
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/anti_debug_rule.h"
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rules/aslr_inspection_rule.h"
@@ -33,6 +35,9 @@
 namespace asio = boost::asio;
 
 void startup(spdlog::logger& logger) {
+    // Api.
+    xavcore::app::proactive_protection_module_api::Api api;
+
     // I/O context.
     asio::io_context ioc;
 
@@ -100,21 +105,30 @@ void startup(spdlog::logger& logger) {
     auto sudoers_modification_rule =
         xavcore::rule_based_detection_listener_rules::SudoersModificationRule();
     auto system_request_key_mod_rule =
-        xavcore::rule_based_detection_listener_rules::
-            SystemRequestKeyModRule();
+        xavcore::rule_based_detection_listener_rules::SystemRequestKeyModRule();
     auto rcd_modification_rule =
         xavcore::rule_based_detection_listener_rules::RcdModificationRule();
     std::vector<xavcore::IRuleBasedDetectionListenerRule*> rules{
-        &anti_debug_rule,           &core_pattern_modification_rule,
-        &aslr_inspection_rule,      &cgroup_notify_on_release_rule,
-        &cgroup_release_agent_rule, &default_loader_modify_rule,
-        &dynamic_code_loading_rule, &fileless_execution_rule,
-        &hidden_file_rule,          &kernel_module_loading_rule,
-        &process_vm_inject_rule,    &proc_kcore_read_rule,
-        &proc_mem_access_rule,      &proc_mem_code_injection_rule,
-        &ptrace_code_injection_rule, &sched_debug_recon_rule,
-        &scheduled_task_mod_rule,   &stdio_over_socket_rule,
-        &sudoers_modification_rule, &system_request_key_mod_rule,
+        &anti_debug_rule,
+        &core_pattern_modification_rule,
+        &aslr_inspection_rule,
+        &cgroup_notify_on_release_rule,
+        &cgroup_release_agent_rule,
+        &default_loader_modify_rule,
+        &dynamic_code_loading_rule,
+        &fileless_execution_rule,
+        &hidden_file_rule,
+        &kernel_module_loading_rule,
+        &process_vm_inject_rule,
+        &proc_kcore_read_rule,
+        &proc_mem_access_rule,
+        &proc_mem_code_injection_rule,
+        &ptrace_code_injection_rule,
+        &sched_debug_recon_rule,
+        &scheduled_task_mod_rule,
+        &stdio_over_socket_rule,
+        &sudoers_modification_rule,
+        &system_request_key_mod_rule,
         &rcd_modification_rule};
     for (auto rule : rules) {
         ret = rule_based_detection_listener.add_rule(*rule);
@@ -131,11 +145,28 @@ void startup(spdlog::logger& logger) {
     }
 
     // Accept connection asynchronously.
+    char recv_buf[4096];
+    asio::socket_base::message_flags flags = 0;
     acceptor.async_accept(sock, [&](boost::system::error_code ec) {
         if (ec) {
             logger.warn("Accept error: {}", ec.message());
         } else {
             logger.info("Client connected");
+            // Receive data asynchronously.
+            sock.async_receive(
+                asio::buffer(recv_buf, sizeof(recv_buf)), flags,
+                [&](const boost::system::error_code& ec,
+                    std::size_t bytes_transferred) {
+                    if (ec) {
+                        logger.warn("Receive error: {}", ec.message());
+                    } else {
+                        logger.info("Received {} bytes", bytes_transferred);
+                        nlohmann::json j = nlohmann::json::parse(
+                            recv_buf, recv_buf + bytes_transferred);
+                        auto result = api.dispatch(j);
+                        sock.send(asio::buffer(result.dump()), flags);
+                    }
+                });
         }
     });
 
