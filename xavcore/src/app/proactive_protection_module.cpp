@@ -143,7 +143,7 @@ void startup(spdlog::logger& logger) {
 
     // Api.
     xavcore::app::proactive_protection_module_api::Api api(
-        rule_based_detection_listener);
+        rule_based_detection_listener, syscall_event_provider);
 
     // Accept connection asynchronously.
     char recv_buf[4096];
