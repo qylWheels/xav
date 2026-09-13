@@ -55,12 +55,12 @@ private:
     void handle_raw_event_wrapper(
         const RawSyscallEventWrapper& raw_event_wrapper);
 
-private:
-    enum class Status { Started, Stopped };
-    Status status_;
-
 public:
+    enum class Status { Started, Stopped };
     Status status() const { return this->status_; }
+
+private:
+    Status status_;
 
 private:
     std::shared_ptr<spdlog::logger> logger_;
