@@ -58,6 +58,8 @@ private:
 private:
     enum class Status { Started, Stopped };
     Status status_;
+
+public:
     Status status() const { return this->status_; }
 
 private:
