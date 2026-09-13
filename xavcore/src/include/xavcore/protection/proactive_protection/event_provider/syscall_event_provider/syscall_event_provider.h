@@ -58,6 +58,7 @@ private:
 private:
     enum class Status { Started, Stopped };
     Status status_;
+    Status status() const { return this->status_; }
 
 private:
     std::shared_ptr<spdlog::logger> logger_;
