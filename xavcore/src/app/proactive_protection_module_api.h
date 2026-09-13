@@ -6,6 +6,7 @@
 #include <nlohmann/json_fwd.hpp>
 
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rule_based_detection_listener.h"
+#include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event_provider.h"
 
 namespace xavcore {
 namespace app {
@@ -26,8 +27,10 @@ struct StatusInfo {
 
 class Api {
 public:
-    Api(RuleBasedDetectionListener& rule_based_detection_listener)
-        : rule_based_detection_listener_(&rule_based_detection_listener) {};
+    Api(RuleBasedDetectionListener& rule_based_detection_listener,
+        SyscallEventProvider& syscall_event_provider)
+        : rule_based_detection_listener_(&rule_based_detection_listener),
+          syscall_event_provider_(&syscall_event_provider) {};
     ~Api() = default;
     Api(const Api&) = delete;
     Api& operator=(const Api&) = delete;
@@ -63,7 +66,10 @@ private:
         }
 
         return nlohmann::json{
-            {"status", StatusInfo::Status::Running},
+            {"status", this->syscall_event_provider_->status() ==
+                               SyscallEventProvider::Status::Started
+                           ? "Running"
+                           : "Stopped"},
             {"suspicious_proc_count", suspicious_proc_count},
             {"malicious_proc_count", malicious_proc_count},
             {"event_count", event_count},
@@ -104,6 +110,7 @@ public:
 
 private:
     RuleBasedDetectionListener* rule_based_detection_listener_;
+    SyscallEventProvider* syscall_event_provider_;
 };
 }  // namespace proactive_protection_module_api
 }  // namespace app
