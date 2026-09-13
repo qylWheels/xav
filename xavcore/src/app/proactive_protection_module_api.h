@@ -46,13 +46,31 @@ public:
     nlohmann::json dispatch(nlohmann::json req) {
         try {
             std::string method = req["method"].get<std::string>();
-            if (method == "status") {
-                return this->status();
+            if (method ==
+                "xavcore::app::proactive_protection_module_api::Api::status") {
+                auto result = this->status();
+                return nlohmann::json{
+                    {"jsonrpc", "2.0"},
+                    {"result", result},
+                    {"id", req["id"]},
+                };
             }
         } catch (...) {
-            return {"error", "invalid_argument"};
+            return {{"jsonrpc", "2.0"},
+                    {"error",
+                     {
+                         {"code", -32602},
+                         {"message", "Invalid params"},
+                     }},
+                    {"id", req["id"]}};
         }
-        return {"error", "not_supported"};
+        return {{"jsonrpc", "2.0"},
+                {"error",
+                 {
+                     {"code", -32601},
+                     {"message", "Method not found"},
+                 }},
+                {"id", req["id"]}};
     }
 };
 }  // namespace proactive_protection_module_api
