@@ -35,9 +35,6 @@
 namespace asio = boost::asio;
 
 void startup(spdlog::logger& logger) {
-    // Api.
-    xavcore::app::proactive_protection_module_api::Api api;
-
     // I/O context.
     asio::io_context ioc;
 
@@ -143,6 +140,10 @@ void startup(spdlog::logger& logger) {
         logger.error("Failed to start syscall event provider");
         return;
     }
+
+    // Api.
+    xavcore::app::proactive_protection_module_api::Api api(
+        rule_based_detection_listener);
 
     // Accept connection asynchronously.
     char recv_buf[4096];

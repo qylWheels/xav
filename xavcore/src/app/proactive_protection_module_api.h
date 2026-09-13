@@ -4,6 +4,8 @@
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 
+#include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rule_based_detection_listener.h"
+
 namespace xavcore {
 namespace app {
 namespace proactive_protection_module_api {
@@ -23,7 +25,8 @@ struct StatusInfo {
 
 class Api {
 public:
-    Api() = default;
+    Api(RuleBasedDetectionListener& rule_based_detection_listener)
+        : rule_based_detection_listener_(&rule_based_detection_listener) {};
     ~Api() = default;
     Api(const Api&) = delete;
     Api& operator=(const Api&) = delete;
@@ -71,6 +74,9 @@ public:
                  }},
                 {"id", req["id"]}};
     }
+
+private:
+    RuleBasedDetectionListener* rule_based_detection_listener_;
 };
 }  // namespace proactive_protection_module_api
 }  // namespace app
