@@ -58,7 +58,10 @@ def status():
             
         # Print status.
         result = resp["result"]
-        console.print(f"Status: [green]{result['status']}[/green]")
+        if result["status"] == "Running":
+            console.print(f"Status: [green]Running[/green]")
+        else:
+            console.print(f"Status: [red][bold]Stopped[/bold][/red]")
         console.print()
         console.print(f"Suspicious Process Count: [yellow]{result['suspicious_proc_count']}[/yellow]")
         console.print(f"Malicious Process Count: [red]{result['malicious_proc_count']}[/red]")
