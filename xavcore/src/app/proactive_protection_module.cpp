@@ -4,8 +4,10 @@
 #include <boost/asio.hpp>
 #include <cpptrace/cpptrace.hpp>
 #include <csignal>
+#include <functional>
 #include <iostream>
 #include <nlohmann/json.hpp>
+#include <string>
 
 #include "proactive_protection_module_api.h"
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rule_based_detection_listener.h"
@@ -145,15 +147,19 @@ void startup(spdlog::logger& logger) {
     xavcore::app::proactive_protection_module_api::Api api(
         rule_based_detection_listener, syscall_event_provider);
 
-    // Accept connection asynchronously.
+    // Serve one JSON-RPC request per connection. Clients such as xavctl
+    // connect, send one request and disconnect, so the socket is reset after
+    // every request to be ready for the next connection.
     char recv_buf[4096];
     asio::socket_base::message_flags flags = 0;
-    acceptor.async_accept(sock, [&](boost::system::error_code ec) {
-        if (ec) {
-            logger.warn("Accept error: {}", ec.message());
-        } else {
+    std::function<void()> accept_next = [&]() {
+        acceptor.async_accept(sock, [&](boost::system::error_code ec) {
+            if (ec) {
+                logger.warn("Accept error: {}", ec.message());
+                accept_next();
+                return;
+            }
             logger.info("Client connected");
-            // Receive data asynchronously.
             sock.async_receive(
                 asio::buffer(recv_buf, sizeof(recv_buf)), flags,
                 [&](const boost::system::error_code& ec,
@@ -161,14 +167,29 @@ void startup(spdlog::logger& logger) {
                     if (ec) {
                         logger.warn("Receive error: {}", ec.message());
                     } else {
-                        nlohmann::json j = nlohmann::json::parse(
-                            recv_buf, recv_buf + bytes_transferred);
-                        auto result = api.dispatch(j);
-                        sock.send(asio::buffer(result.dump()), flags);
+                        try {
+                            nlohmann::json request = nlohmann::json::parse(
+                                recv_buf, recv_buf + bytes_transferred);
+                            std::string response = api.dispatch(request).dump();
+                            boost::system::error_code send_ec;
+                            sock.send(asio::buffer(response), flags, send_ec);
+                            if (send_ec) {
+                                logger.warn("Send error: {}",
+                                            send_ec.message());
+                            }
+                        } catch (const std::exception& e) {
+                            logger.warn("Bad request: {}", e.what());
+                        }
                     }
+
+                    // Reset the socket and wait for the next connection.
+                    boost::system::error_code ignored;
+                    auto ret = sock.close(ignored);
+                    accept_next();
                 });
-        }
-    });
+        });
+    };
+    accept_next();
 
     logger.info("Xavcore Proactive Protection Module started");
 
