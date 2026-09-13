@@ -3,6 +3,7 @@ import rich
 from rich.console import Console
 import json
 import socket
+import uuid
 
 # Connect.
 SOCKET_PATH = "\0xavcore_proactive_protection_module_socket"
@@ -32,18 +33,34 @@ def proactive_stop():
 @proactive_app.command("status")
 def status():
     """Check proactive protection status"""
-    s.send(json.dumps({"method": "status"}).encode())
+
+    # Send request.
+    req_uuid = str(uuid.uuid4())
+    s.send(json.dumps({
+        "jsonrpc": "2.0",
+        "method": "xavcore::app::proactive_protection_module_api::Api::status",
+        "params": [],
+        "id": req_uuid,
+    }).encode())
+
+    # Parse response.
     resp = s.recv(4096)
     resp = json.loads(resp.decode())
-    console.print(resp)
-    # console.print(f"Status: [green]Running[/green]")
-    # console.print()
-    # console.print(f"Active Process: 1203")
-    # console.print(f"Suspicious Process: [yellow]12[/yellow]")
-    # console.print(f"Malicious Process: [red]1[/red]")
-    # console.print()
-    # console.print(f"Total Event: 302834")
-    # console.print(f"Event Violates Rules: [yellow]129[/yellow]")
+
+    if "error" in resp:
+        console.print(f"Error: {resp['error']['code']}: {resp['error']['message']}")
+        return
+        
+    # Print status.
+    result = resp["result"]
+    console.print(f"Status: [green]{result['status']}[/green]")
+    console.print()
+    console.print(f"Active Process: {result['active_proc_count']}")
+    console.print(f"Suspicious Process: [yellow]{result['suspicious_proc_count']}[/yellow]")
+    console.print(f"Malicious Process: [red]{result['malicious_proc_count']}[/red]")
+    console.print()
+    console.print(f"Total Event: {result['event_count']}")
+    console.print(f"Event Violates Rules: [yellow]{result['violate_rules_event_count']}[/yellow]")
 
 if __name__ == "__main__":
     main_app()
