@@ -16,6 +16,7 @@ namespace xavcore {
 RuleBasedDetectionListener::RuleBasedDetectionListener(spdlog::logger& logger)
     : logger_(&logger) {
     this->callback_on_warning_ = [this](const IRuleWarningInfo& info) {
+        std::lock_guard<std::recursive_mutex> lock(this->mutex_);
         const Process& proc = info.process();
         this->proc_violated_events_[proc].push_back(info.clone());
         this->threat_scorer_.feed(proc, typeid(info), info.severity());
@@ -51,6 +52,7 @@ bool RuleBasedDetectionListener::is_accept(const IEvent& event) {
 }
 
 outcome::result<void> RuleBasedDetectionListener::accept(const IEvent& event) {
+    std::lock_guard<std::recursive_mutex> lock(this->mutex_);
     const SyscallEvent& syscall_event =
         dynamic_cast<const SyscallEvent&>(event);
     this->proc_syscall_events_[syscall_event.process].push_back(syscall_event);
@@ -264,6 +266,7 @@ outcome::result<void> RuleBasedDetectionListener::accept(const IEvent& event) {
 
 outcome::result<void> RuleBasedDetectionListener::add_rule(
     IRuleBasedDetectionListenerRule& rule) {
+    std::lock_guard<std::recursive_mutex> lock(this->mutex_);
     if (!rule.register_warning_callback(this->callback_on_warning_)) {
         return std::errc::io_error;
     }
@@ -273,6 +276,7 @@ outcome::result<void> RuleBasedDetectionListener::add_rule(
 
 outcome::result<void> RuleBasedDetectionListener::remove_rule(
     IRuleBasedDetectionListenerRule& rule) {
+    std::lock_guard<std::recursive_mutex> lock(this->mutex_);
     this->rules_.erase(&rule);
     return outcome::success();
 }

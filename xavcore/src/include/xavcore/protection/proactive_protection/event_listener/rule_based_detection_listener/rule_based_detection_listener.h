@@ -5,14 +5,15 @@
 #include <deque>
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <unordered_map>
 #include <unordered_set>
 
 #include "xavcore/protection/proactive_protection/behavior_monitor.h"
 #include "xavcore/protection/proactive_protection/event.h"
+#include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/process_threat_scorer.h"
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rule_interfaces.h"
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event.h"
-#include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/process_threat_scorer.h"
 
 namespace xavcore {
 class RuleBasedDetectionListener : public IEventListener {
@@ -37,12 +38,29 @@ public:
     // Recompute the current maliciousness score for a process from the rules
     // it has violated so far.
     double threat_score(const Process& process) const {
+        std::lock_guard<std::recursive_mutex> lock(this->mutex_);
         return this->threat_scorer_.score(process);
     }
 
     ProcessThreatScorer::Verdict threat_verdict(const Process& process) const {
+        std::lock_guard<std::recursive_mutex> lock(this->mutex_);
         return this->threat_scorer_.verdict(process);
     }
+
+public:  // Getters.
+    const std::unordered_map<Process, std::deque<SyscallEvent>>&
+    proc_syscall_events() const {
+        return this->proc_syscall_events_;
+    }
+
+    const std::unordered_map<Process,
+                             std::deque<std::shared_ptr<IRuleWarningInfo>>>&
+    proc_violated_events() const {
+        return this->proc_violated_events_;
+    }
+
+    // Hold it while iterating them from another thread.
+    std::recursive_mutex& mutex() const { return this->mutex_; }
 
 private:
     spdlog::logger* logger_;
@@ -52,5 +70,9 @@ private:
         proc_violated_events_;
     std::function<void(const IRuleWarningInfo&)> callback_on_warning_;
     ProcessThreatScorer threat_scorer_;
+
+    // Guards everything above. The warning callback runs inside accept() while
+    // accept() already holds the lock, so it has to be recursive.
+    mutable std::recursive_mutex mutex_;
 };
 }  // namespace xavcore
