@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <mutex>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 
@@ -35,12 +36,38 @@ public:
 
 private:
     nlohmann::json status() {
+        RuleBasedDetectionListener* listener =
+            this->rule_based_detection_listener_;
+        std::lock_guard<std::recursive_mutex> lock(listener->mutex());
+
+        std::uint64_t suspicious_proc_count = 0;
+        std::uint64_t malicious_proc_count = 0;
+        std::uint64_t event_count = 0;
+        std::uint64_t violate_rules_event_count = 0;
+        for (const auto& [process, events] : listener->proc_syscall_events()) {
+            event_count += events.size();
+            switch (listener->threat_verdict(process)) {
+                case ProcessThreatScorer::Verdict::Suspicious:
+                    ++suspicious_proc_count;
+                    break;
+                case ProcessThreatScorer::Verdict::Malicious:
+                    ++malicious_proc_count;
+                    break;
+                default:
+                    break;
+            }
+        }
+        for (const auto& [process, violations] :
+             listener->proc_violated_events()) {
+            violate_rules_event_count += violations.size();
+        }
+
         return nlohmann::json{
             {"status", StatusInfo::Status::Running},
-            {"suspicious_proc_count", 0},
-            {"malicious_proc_count", 0},
-            {"event_count", 0},
-            {"violate_rules_event_count", 0},
+            {"suspicious_proc_count", suspicious_proc_count},
+            {"malicious_proc_count", malicious_proc_count},
+            {"event_count", event_count},
+            {"violate_rules_event_count", violate_rules_event_count},
         };
     }
 
