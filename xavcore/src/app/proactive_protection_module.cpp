@@ -160,7 +160,6 @@ void startup(spdlog::logger& logger) {
                     if (ec) {
                         logger.warn("Receive error: {}", ec.message());
                     } else {
-                        logger.info("Received {} bytes", bytes_transferred);
                         nlohmann::json j = nlohmann::json::parse(
                             recv_buf, recv_buf + bytes_transferred);
                         auto result = api.dispatch(j);
