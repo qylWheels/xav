@@ -60,9 +60,8 @@ def status():
         result = resp["result"]
         console.print(f"Status: [green]{result['status']}[/green]")
         console.print()
-        console.print(f"Active Process: {result['active_proc_count']}")
-        console.print(f"Suspicious Process: [yellow]{result['suspicious_proc_count']}[/yellow]")
-        console.print(f"Malicious Process: [red]{result['malicious_proc_count']}[/red]")
+        console.print(f"Suspicious Process Count: [yellow]{result['suspicious_proc_count']}[/yellow]")
+        console.print(f"Malicious Process Count: [red]{result['malicious_proc_count']}[/red]")
         console.print()
         console.print(f"Total Event: {result['event_count']}")
         console.print(f"Event Violates Rules: [yellow]{result['violate_rules_event_count']}[/yellow]")
