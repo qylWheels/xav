@@ -36,35 +36,39 @@ def proactive_stop():
 def status():
     """Check proactive protection status"""
 
-    s = connect()
+    try:
+        s = connect()
 
-    # Send request.
-    req_uuid = str(uuid.uuid4())
-    s.send(json.dumps({
-        "jsonrpc": "2.0",
-        "method": "xavcore::app::proactive_protection_module_api::Api::status",
-        "params": [],
-        "id": req_uuid,
-    }).encode())
+        # Send request.
+        req_uuid = str(uuid.uuid4())
+        s.send(json.dumps({
+            "jsonrpc": "2.0",
+            "method": "xavcore::app::proactive_protection_module_api::Api::status",
+            "params": [],
+            "id": req_uuid,
+        }).encode())
 
-    # Parse response.
-    resp = s.recv(4096)
-    resp = json.loads(resp.decode())
+        # Parse response.
+        resp = s.recv(4096)
+        resp = json.loads(resp.decode())
 
-    if "error" in resp:
-        console.print(f"Error: {resp['error']['code']}: {resp['error']['message']}")
+        if "error" in resp:
+            console.print(f"Error: {resp['error']['code']}: {resp['error']['message']}")
+            return
+            
+        # Print status.
+        result = resp["result"]
+        console.print(f"Status: [green]{result['status']}[/green]")
+        console.print()
+        console.print(f"Active Process: {result['active_proc_count']}")
+        console.print(f"Suspicious Process: [yellow]{result['suspicious_proc_count']}[/yellow]")
+        console.print(f"Malicious Process: [red]{result['malicious_proc_count']}[/red]")
+        console.print()
+        console.print(f"Total Event: {result['event_count']}")
+        console.print(f"Event Violates Rules: [yellow]{result['violate_rules_event_count']}[/yellow]")
+    except socket.error as e:
+        console.print(f"Socket Error: [red]{e}[/red]")
         return
-        
-    # Print status.
-    result = resp["result"]
-    console.print(f"Status: [green]{result['status']}[/green]")
-    console.print()
-    console.print(f"Active Process: {result['active_proc_count']}")
-    console.print(f"Suspicious Process: [yellow]{result['suspicious_proc_count']}[/yellow]")
-    console.print(f"Malicious Process: [red]{result['malicious_proc_count']}[/red]")
-    console.print()
-    console.print(f"Total Event: {result['event_count']}")
-    console.print(f"Event Violates Rules: [yellow]{result['violate_rules_event_count']}[/yellow]")
 
 if __name__ == "__main__":
     main_app()
