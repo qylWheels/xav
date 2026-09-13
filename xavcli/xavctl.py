@@ -5,11 +5,6 @@ import json
 import socket
 import uuid
 
-# Connect.
-SOCKET_PATH = "\0xavcore_proactive_protection_module_socket"
-s = socket.socket(socket.AF_UNIX, socket.SOCK_SEQPACKET)
-s.connect(SOCKET_PATH)
-
 # Typers.
 main_app = typer.Typer()
 on_access_app = typer.Typer()
@@ -19,6 +14,13 @@ main_app.add_typer(proactive_app, name="proactive", help="Proactive Protection M
 
 # Console.
 console = Console(highlight=False)
+
+# Socket connection.
+def connect():
+    SOCKET_PATH = "\0xavcore_proactive_protection_module_socket"
+    s = socket.socket(socket.AF_UNIX, socket.SOCK_SEQPACKET)
+    s.connect(SOCKET_PATH)
+    return s
 
 @proactive_app.command("start")
 def proactive_start():
@@ -33,6 +35,8 @@ def proactive_stop():
 @proactive_app.command("status")
 def status():
     """Check proactive protection status"""
+
+    s = connect()
 
     # Send request.
     req_uuid = str(uuid.uuid4())
