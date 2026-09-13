@@ -34,7 +34,6 @@ private:
     nlohmann::json status() {
         return nlohmann::json{
             {"status", StatusInfo::Status::Running},
-            {"active_proc_count", 0},
             {"suspicious_proc_count", 0},
             {"malicious_proc_count", 0},
             {"event_count", 0},
