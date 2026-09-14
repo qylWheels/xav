@@ -1,6 +1,9 @@
 import typer
 import rich
 from rich.console import Console
+from rich.box import SIMPLE_HEAD
+from rich.table import Table
+from datetime import datetime
 import json
 import socket
 import uuid
@@ -17,6 +20,19 @@ console = Console(highlight=False)
 
 # Proactive protection module API.
 API = "xavcore::app::proactive_protection_module_api::Api"
+
+# Placeholder for nullable fields.
+UNKNOWN = "<unknown>"
+
+def display(value):
+    """Render a nullable JSON value."""
+    return UNKNOWN if value is None else str(value)
+
+def display_time(epoch_millis):
+    """Render a millisecond epoch timestamp in local time."""
+    if epoch_millis is None:
+        return UNKNOWN
+    return datetime.fromtimestamp(epoch_millis / 1000).strftime("%Y-%m-%d %H:%M:%S")
 
 # Socket connection.
 def connect():
@@ -92,6 +108,48 @@ def status():
     console.print()
     console.print(f"Total Event: {result['event_count']}")
     console.print(f"Event Violates Rules: [yellow]{result['violate_rules_event_count']}[/yellow]")
+
+@proactive_app.command("ps")
+def proactive_ps():
+    """List the processes monitored by proactive protection"""
+    result = call("processes")
+    if result is None:
+        console.print("Failed to list processes")
+        return
+
+    if not result:
+        console.print("No processes monitored yet")
+        return
+
+    table = Table(box=SIMPLE_HEAD)
+    table.add_column("PID", justify="right", no_wrap=True)
+    table.add_column("Start Time", no_wrap=True)
+    table.add_column("PPID", justify="right", no_wrap=True)
+    table.add_column("Path", no_wrap=True, overflow="ellipsis", max_width=32)
+    table.add_column("Command Line", no_wrap=True, overflow="ellipsis",
+                     max_width=40)
+    table.add_column("Events", justify="right", no_wrap=True)
+    table.add_column("Violations", justify="right", no_wrap=True)
+    table.add_column("Score", justify="right", no_wrap=True)
+    table.add_column("Level", no_wrap=True)
+
+    for process in result:
+        table.add_row(
+            str(process["pid"]),
+            display_time(process["start_time"]),
+            display(process["ppid"]),
+            display(process["exe_path"]),
+            display(process["cmdline"]),
+            str(process["event_count"]),
+            str(process["violated_event_count"]),
+            str(round(process["severity_score"])),
+            process["severity_level"],
+        )
+
+    # Piped output has no known width, and Rich would then squeeze this table
+    # into its 80 column default. Render at a fixed width so no column is lost.
+    out = console if console.is_terminal else Console(width=200, highlight=False)
+    out.print(table)
 
 if __name__ == "__main__":
     main_app()
