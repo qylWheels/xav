@@ -1,9 +1,14 @@
 #pragma once
 
 #include <cstdint>
+#include <exception>
 #include <mutex>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
+#include <optional>
+#include <outcome/success_failure.hpp>
+#include <string>
+#include <utility>
 
 #include "xavcore/protection/proactive_protection/event_listener/rule_based_detection_listener/rule_based_detection_listener.h"
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event_provider.h"
@@ -77,35 +82,87 @@ private:
         };
     }
 
-public:
-    nlohmann::json dispatch(nlohmann::json req) {
-        try {
-            std::string method = req["method"].get<std::string>();
-            if (method ==
-                "xavcore::app::proactive_protection_module_api::Api::status") {
-                auto result = this->status();
-                return nlohmann::json{
-                    {"jsonrpc", "2.0"},
-                    {"result", result},
-                    {"id", req["id"]},
-                };
-            }
-        } catch (...) {
-            return {{"jsonrpc", "2.0"},
-                    {"error",
-                     {
-                         {"code", -32602},
-                         {"message", "Invalid params"},
-                     }},
-                    {"id", req["id"]}};
+    outcome::result<void> start() {
+        auto result = this->syscall_event_provider_->start();
+        if (!result) {
+            return result.error();
         }
-        return {{"jsonrpc", "2.0"},
-                {"error",
-                 {
-                     {"code", -32601},
-                     {"message", "Method not found"},
-                 }},
-                {"id", req["id"]}};
+        return outcome::success();
+    }
+
+    outcome::result<void> stop() {
+        auto result = this->syscall_event_provider_->stop();
+        if (!result) {
+            return result.error();
+        }
+        return outcome::success();
+    }
+
+public:
+    std::optional<nlohmann::json> dispatch(nlohmann::json req) {
+        if (!req.is_object()) {
+            return this->error_response(nullptr, -32600, "Invalid Request");
+        }
+
+        // Notification, no need to response.
+        if (!req.contains("id")) {
+            return std::nullopt;
+        }
+
+        const nlohmann::json id = req["id"];
+
+        std::string method;
+        try {
+            method = req["method"].get<std::string>();
+        } catch (const std::exception&) {
+            return this->error_response(id, -32602, "Invalid params");
+        }
+
+        if (method ==
+            "xavcore::app::proactive_protection_module_api::Api::status") {
+            return this->success_response(id, this->status());
+        } else if (method ==
+                   "xavcore::app::proactive_protection_module_api::Api::"
+                   "start") {
+            auto result = this->start();
+            if (result) {
+                return this->success_response(
+                    id, nlohmann::json{{"status", "Running"}});
+            } else {
+                return this->error_response(id, -32000,
+                                            result.error().message());
+            }
+        } else if (method ==
+                   "xavcore::app::proactive_protection_module_api::Api::stop") {
+            auto result = this->stop();
+            if (result) {
+                return this->success_response(
+                    id, nlohmann::json{{"status", "Stopped"}});
+            } else {
+                return this->error_response(id, -32000,
+                                            result.error().message());
+            }
+        }
+        return this->error_response(id, -32601, "Method not found");
+    }
+
+private:
+    nlohmann::json success_response(const nlohmann::json& id,
+                                    nlohmann::json result) {
+        return nlohmann::json{
+            {"jsonrpc", "2.0"},
+            {"result", std::move(result)},
+            {"id", id},
+        };
+    }
+
+    nlohmann::json error_response(const nlohmann::json& id, int code,
+                                  const std::string& message) {
+        return nlohmann::json{
+            {"jsonrpc", "2.0"},
+            {"error", {{"code", code}, {"message", message}}},
+            {"id", id},
+        };
     }
 
 private:
