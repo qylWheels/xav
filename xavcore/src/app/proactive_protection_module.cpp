@@ -170,12 +170,17 @@ void startup(spdlog::logger& logger) {
                         try {
                             nlohmann::json request = nlohmann::json::parse(
                                 recv_buf, recv_buf + bytes_transferred);
-                            std::string response = api.dispatch(request).dump();
-                            boost::system::error_code send_ec;
-                            sock.send(asio::buffer(response), flags, send_ec);
-                            if (send_ec) {
-                                logger.warn("Send error: {}",
-                                            send_ec.message());
+                            auto response = api.dispatch(request);
+                            if (response.has_value()) {
+                                std::string response_str =
+                                    response.value().dump();
+                                boost::system::error_code send_ec;
+                                sock.send(asio::buffer(response_str), flags,
+                                          send_ec);
+                                if (send_ec) {
+                                    logger.warn("Send error: {}",
+                                                send_ec.message());
+                                }
                             }
                         } catch (const std::exception& e) {
                             logger.warn("Bad request: {}", e.what());
