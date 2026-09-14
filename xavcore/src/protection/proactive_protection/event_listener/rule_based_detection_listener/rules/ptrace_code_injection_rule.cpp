@@ -31,6 +31,9 @@ std::size_t PtraceCodeInjectionRule::event_seq_size_hint() { return 1; }
 outcome::result<void> PtraceCodeInjectionRule::push_event(const IEvent& event) {
     try {
         const auto& syscall_event = dynamic_cast<const SyscallEvent&>(event);
+        if (syscall_event.args.empty()) {
+            return outcome::success();
+        }
         if (syscall_event.id != SYS_ptrace) {
             return outcome::success();
         }

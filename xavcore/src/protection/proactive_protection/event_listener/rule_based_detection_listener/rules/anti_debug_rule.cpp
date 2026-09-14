@@ -23,6 +23,9 @@ outcome::result<std::uint8_t> AntiDebugRule::apply(
         try {
             const auto& syscall_event =
                 dynamic_cast<const SyscallEvent&>(event.get());
+            if (syscall_event.args.empty()) {
+                continue;
+            }
             if (syscall_event.id == SYS_ptrace &&
                 syscall_event.args[0] == PTRACE_TRACEME) {
                 return 40;
@@ -39,6 +42,11 @@ std::size_t AntiDebugRule::event_seq_size_hint() { return 1; }
 outcome::result<void> AntiDebugRule::push_event(const IEvent& event) {
     try {
         const auto& syscall_event = dynamic_cast<const SyscallEvent&>(event);
+        // The syscall entry may not have been captured, in which case the
+        // arguments are unknown and the event cannot be evaluated.
+        if (syscall_event.args.empty()) {
+            return outcome::success();
+        }
         if (syscall_event.id == SYS_ptrace &&
             syscall_event.args[0] == PTRACE_TRACEME) {
             for (auto cb : this->cbs_on_warning_) {

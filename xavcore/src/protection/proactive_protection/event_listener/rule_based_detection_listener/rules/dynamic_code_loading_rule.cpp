@@ -28,10 +28,12 @@ outcome::result<std::uint8_t> DynamicCodeLoadingRule::apply(
 
 std::size_t DynamicCodeLoadingRule::event_seq_size_hint() { return 1; }
 
-outcome::result<void> DynamicCodeLoadingRule::push_event(
-    const IEvent& event) {
+outcome::result<void> DynamicCodeLoadingRule::push_event(const IEvent& event) {
     try {
         const auto& syscall_event = dynamic_cast<const SyscallEvent&>(event);
+        if (syscall_event.args.empty()) {
+            return outcome::success();
+        }
         if (syscall_event.id == SYS_mprotect &&
             syscall_event.args[2] == (PROT_WRITE | PROT_EXEC)) {
             for (auto cb : this->callbacks_on_warning_) {

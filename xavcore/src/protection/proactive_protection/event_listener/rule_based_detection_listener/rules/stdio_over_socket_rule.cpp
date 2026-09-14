@@ -50,6 +50,9 @@ outcome::result<void> StdioOverSocketRule::push_event(const IEvent& event) {
                 break;
             }
             case SYS_dup: {
+                if (syscall_event.args.empty()) {
+                    break;
+                }
                 // dup(oldfd) duplicates onto the lowest available fd, which is
                 // returned by ret. A duplicate of a socket is still a socket.
                 const auto oldfd =
@@ -63,6 +66,9 @@ outcome::result<void> StdioOverSocketRule::push_event(const IEvent& event) {
             }
             case SYS_dup2:
             case SYS_dup3: {
+                if (syscall_event.args.empty()) {
+                    break;
+                }
                 const auto oldfd =
                     static_cast<std::int64_t>(syscall_event.args[0]);
                 const auto newfd =
@@ -98,6 +104,9 @@ outcome::result<void> StdioOverSocketRule::push_event(const IEvent& event) {
                 break;
             }
             case SYS_close: {
+                if (syscall_event.args.empty()) {
+                    break;
+                }
                 proc_socket_fds.erase(
                     static_cast<std::int64_t>(syscall_event.args[0]));
                 break;
