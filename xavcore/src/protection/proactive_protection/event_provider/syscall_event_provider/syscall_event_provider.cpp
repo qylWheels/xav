@@ -59,9 +59,8 @@ SyscallEventProvider::~SyscallEventProvider() {
 }
 
 outcome::result<void> SyscallEventProvider::start() {
-    if (this->status_ != Status::Stopped) {
-        return outcome::failure(
-            std::make_error_code(std::errc::device_or_resource_busy));
+    if (this->status_ == Status::Started) {
+        return outcome::success();
     }
 
     int ret = syscall_event_provider_bpf::attach(this->skel_);
@@ -103,9 +102,8 @@ outcome::result<void> SyscallEventProvider::start() {
 }
 
 outcome::result<void> SyscallEventProvider::stop() {
-    if (this->status_ != Status::Started) {
-        return outcome::failure(
-            std::make_error_code(std::errc::no_such_device_or_address));
+    if (this->status_ == Status::Stopped) {
+        return outcome::success();
     }
 
     this->monitor_thread_.request_stop();
