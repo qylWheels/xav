@@ -52,7 +52,7 @@ def call(method: str):
                 "params": [],
                 "id": str(uuid.uuid4()),
             }).encode())
-            resp = json.loads(s.recv(4096).decode())
+            resp = json.loads(s.recv(1 * 1024 * 1024).decode())
         finally:
             s.close()
     except socket.error as e:
