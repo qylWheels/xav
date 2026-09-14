@@ -51,12 +51,20 @@ def call(method: str):
 @proactive_app.command("start")
 def proactive_start():
     """Start proactive protection"""
-    pass
+    result = call("start")
+    if result is not None:
+        console.print(
+            f"Failed to start proactive protection: {result["error"]["message"]} ({result["error"]["code"]})"
+        )
 
 @proactive_app.command("stop")
 def proactive_stop():
     """Stop proactive protection"""
-    pass
+    result = call("stop")
+    if result is not None:
+        console.print(
+            f"Failed to stop proactive protection: {result["error"]["message"]} ({result["error"]["code"]})"
+        )
 
 @proactive_app.command("status")
 def status():
