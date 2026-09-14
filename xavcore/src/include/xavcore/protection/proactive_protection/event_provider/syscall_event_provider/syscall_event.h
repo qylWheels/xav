@@ -62,6 +62,10 @@ struct SyscallEvent : public IEvent {
     std::chrono::time_point<std::chrono::system_clock> timestamp;
     Process process;
     std::uint32_t id;
+
+    // Syscall arguments. Empty when the syscall entry was not captured (the
+    // event then only has `ret`), otherwise exactly six elements. Never index
+    // it without checking that it is not empty.
     std::vector<std::uint64_t> args;
     std::uint64_t ret;
 
