@@ -125,9 +125,9 @@ def proactive_ps():
     table.add_column("PID", justify="right", no_wrap=True)
     table.add_column("Start Time", no_wrap=True)
     table.add_column("PPID", justify="right", no_wrap=True)
-    table.add_column("Path", no_wrap=True, overflow="ellipsis", max_width=32)
+    table.add_column("Path", no_wrap=True, overflow="ellipsis", max_width=24)
     table.add_column("Command Line", no_wrap=True, overflow="ellipsis",
-                     max_width=40)
+                     max_width=32)
     table.add_column("Events", justify="right", no_wrap=True)
     table.add_column("Violations", justify="right", no_wrap=True)
     table.add_column("Score", justify="right", no_wrap=True)
