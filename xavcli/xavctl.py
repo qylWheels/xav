@@ -41,6 +41,27 @@ def connect():
     s.connect(SOCKET_PATH)
     return s
 
+def recv_reply(s):
+    """Receive one reply, reassembling it if it was split over datagrams."""
+    buffer = bytearray(1 * 1024 * 1024)
+    length = s.recv_into(buffer)
+    first = bytes(buffer[:length])
+
+    # A reply too large for a single datagram is sent as a marker datagram
+    # carrying the chunk count, followed by that many payload chunks.
+    try:
+        marker = json.loads(first.decode())
+    except ValueError:
+        return first
+    if not isinstance(marker, dict) or "chunk_count" not in marker:
+        return first
+
+    chunks = []
+    for _ in range(marker["chunk_count"]):
+        length = s.recv_into(buffer)
+        chunks.append(bytes(buffer[:length]))
+    return b"".join(chunks)
+
 def call(method: str):
     """Send one JSON-RPC request and return its result, or None on failure."""
     try:
@@ -52,7 +73,7 @@ def call(method: str):
                 "params": [],
                 "id": str(uuid.uuid4()),
             }).encode())
-            resp = json.loads(s.recv(1 * 1024 * 1024).decode())
+            resp = json.loads(recv_reply(s).decode())
         finally:
             s.close()
     except socket.error as e:

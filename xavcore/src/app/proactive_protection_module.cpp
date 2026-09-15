@@ -1,12 +1,15 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
+#include <algorithm>
 #include <boost/asio.hpp>
 #include <cpptrace/cpptrace.hpp>
 #include <csignal>
+#include <cstddef>
 #include <functional>
 #include <iostream>
 #include <nlohmann/json.hpp>
+#include <outcome/success_failure.hpp>
 #include <string>
 
 #include "proactive_protection_module_api.h"
@@ -35,6 +38,43 @@
 #include "xavcore/protection/proactive_protection/event_provider/syscall_event_provider/syscall_event_provider.h"
 
 namespace asio = boost::asio;
+
+namespace {
+// A seqpacket datagram is bounded by the socket send buffer, so a reply larger
+// than this is split over several datagrams: first a marker datagram holding
+// the chunk count, then the payload chunks in order. Small replies are sent
+// as a single datagram, exactly as before.
+constexpr std::size_t kMaxChunkBytes = 64 * 1024;  // 64KB
+
+outcome::result<void> send_reply(asio::local::seq_packet_protocol::socket& sock,
+                                 const std::string& payload,
+                                 asio::socket_base::message_flags flags,
+                                 spdlog::logger& logger) {
+    boost::system::error_code ec;
+
+    if (payload.size() <= kMaxChunkBytes) {
+        sock.send(asio::buffer(payload), flags, ec);
+    } else {
+        const std::size_t chunk_count =
+            (payload.size() + kMaxChunkBytes - 1) / kMaxChunkBytes;
+        const std::string marker =
+            nlohmann::json{{"chunk_count", chunk_count}}.dump();
+        sock.send(asio::buffer(marker), flags, ec);
+        for (std::size_t offset = 0; !ec && offset < payload.size();
+             offset += kMaxChunkBytes) {
+            const std::size_t length =
+                std::min(kMaxChunkBytes, payload.size() - offset);
+            sock.send(asio::buffer(payload.data() + offset, length), flags, ec);
+        }
+    }
+
+    if (ec) {
+        logger.warn("Send error: {}", ec.message());
+        return ec;
+    }
+    return outcome::success();
+}
+}  // namespace
 
 void startup(spdlog::logger& logger) {
     // I/O context.
@@ -172,15 +212,8 @@ void startup(spdlog::logger& logger) {
                                 recv_buf, recv_buf + bytes_transferred);
                             auto response = api.dispatch(request);
                             if (response.has_value()) {
-                                std::string response_str =
-                                    response.value().dump();
-                                boost::system::error_code send_ec;
-                                sock.send(asio::buffer(response_str), flags,
-                                          send_ec);
-                                if (send_ec) {
-                                    logger.warn("Send error: {}",
-                                                send_ec.message());
-                                }
+                                (void)send_reply(sock, response.value().dump(),
+                                                 flags, logger);
                             }
                         } catch (const std::exception& e) {
                             logger.warn("Bad request: {}", e.what());
