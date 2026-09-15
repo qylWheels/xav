@@ -34,6 +34,25 @@ def display_time(epoch_millis):
         return UNKNOWN
     return datetime.fromtimestamp(epoch_millis / 1000).strftime("%Y-%m-%d %H:%M:%S")
 
+# Columns of `proactive ps`: name -> (header, right aligned, max width, renderer).
+PS_COLUMNS = {
+    "pid": ("PID", True, None, lambda p: str(p["pid"])),
+    "start_time": ("Start Time", False, None,
+                   lambda p: display_time(p["start_time"])),
+    "ppid": ("PPID", True, None, lambda p: display(p["ppid"])),
+    "path": ("Path", False, 24, lambda p: display(p["exe_path"])),
+    "cmdline": ("Command Line", False, 32, lambda p: display(p["cmdline"])),
+    "events": ("Events", True, None, lambda p: str(p["event_count"])),
+    "violations": ("Violations", True, None,
+                   lambda p: str(p["violated_event_count"])),
+    "score": ("Score", True, None,
+              lambda p: str(round(p["severity_score"]))),
+    "level": ("Level", False, None, lambda p: p["severity_level"]),
+}
+
+# Columns shown when `-c` is not given.
+DEFAULT_PS_COLUMNS = "pid,ppid,path,violations,level"
+
 # Socket connection.
 def connect():
     SOCKET_PATH = "\0xavcore_proactive_protection_module_socket"
@@ -131,8 +150,25 @@ def status():
     console.print(f"Event Violates Rules: [yellow]{result['violate_rules_event_count']}[/yellow]")
 
 @proactive_app.command("ps")
-def proactive_ps():
+def proactive_ps(
+    columns: str = typer.Option(
+        DEFAULT_PS_COLUMNS,
+        "-c",
+        "--columns",
+        help="Comma separated columns to display, e.g. pid,path,cmdline",
+    ),
+):
     """List the processes monitored by proactive protection"""
+    names = [name.strip() for name in columns.split(",") if name.strip()]
+    unknown = [name for name in names if name not in PS_COLUMNS]
+    if not names or unknown:
+        if unknown:
+            console.print(f"Unknown column(s): {', '.join(unknown)}")
+        else:
+            console.print("No columns selected")
+        console.print(f"Available columns: {', '.join(PS_COLUMNS)}")
+        raise typer.Exit(code=1)
+
     result = call("processes")
     if result is None:
         console.print("Failed to list processes")
@@ -143,29 +179,17 @@ def proactive_ps():
         return
 
     table = Table(box=SIMPLE_HEAD)
-    table.add_column("PID", justify="right", no_wrap=True)
-    table.add_column("Start Time", no_wrap=True)
-    table.add_column("PPID", justify="right", no_wrap=True)
-    table.add_column("Path", no_wrap=True, overflow="ellipsis", max_width=24)
-    table.add_column("Command Line", no_wrap=True, overflow="ellipsis",
-                     max_width=32)
-    table.add_column("Events", justify="right", no_wrap=True)
-    table.add_column("Violations", justify="right", no_wrap=True)
-    table.add_column("Score", justify="right", no_wrap=True)
-    table.add_column("Level", no_wrap=True)
+    for name in names:
+        header, right, max_width, _ = PS_COLUMNS[name]
+        justify = "right" if right else "left"
+        if max_width is None:
+            table.add_column(header, justify=justify, no_wrap=True)
+        else:
+            table.add_column(header, justify=justify, no_wrap=True,
+                             overflow="ellipsis", max_width=max_width)
 
     for process in result:
-        table.add_row(
-            str(process["pid"]),
-            display_time(process["start_time"]),
-            display(process["ppid"]),
-            display(process["exe_path"]),
-            display(process["cmdline"]),
-            str(process["event_count"]),
-            str(process["violated_event_count"]),
-            str(round(process["severity_score"])),
-            process["severity_level"],
-        )
+        table.add_row(*[PS_COLUMNS[name][3](process) for name in names])
 
     # Piped output has no known width, and Rich would then squeeze this table
     # into its 80 column default. Render at a fixed width so no column is lost.
