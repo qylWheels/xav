@@ -55,7 +55,7 @@ int trace_sys_enter(struct trace_event_raw_sys_enter* ctx) {
     e.exit_captured = 0;
     e.timestamp = bpf_ktime_get_boot_ns();
     e.pid = pid;
-    e.proc_start_boottime = task->start_boottime;
+    e.proc_start_boottime = BPF_CORE_READ(task, group_leader, start_boottime);
     e.syscall_id = ctx->id;
     e.args[0] = ctx->args[0];
     e.args[1] = ctx->args[1];
@@ -264,7 +264,8 @@ int trace_sys_exit(struct trace_event_raw_sys_exit* ctx) {
         e2.timestamp = bpf_ktime_get_boot_ns();
         e2.pid = pid;
         struct task_struct* task = bpf_get_current_task_btf();
-        e2.proc_start_boottime = task->start_boottime;
+        e2.proc_start_boottime =
+            BPF_CORE_READ(task, group_leader, start_boottime);
         e2.syscall_id = ctx->id;
         e2.ret = ctx->ret;
         e2.additional_data_count = 0;
