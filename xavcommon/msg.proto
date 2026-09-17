@@ -1,0 +1,10 @@
+syntax = "proto3";
+package msg;
+
+import "scan_status.proto";
+
+message Message {
+    oneof data {
+        scan_status.ScanStatus scan_status = 2;
+    }
+}
