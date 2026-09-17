@@ -13,3 +13,6 @@ target_link_libraries(scan
     PUBLIC
     spdlog::spdlog leveldb::leveldb ZLIB::ZLIB
 )
+
+# Subdirectories.
+add_subdirectory(sandbox)
