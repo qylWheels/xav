@@ -8,32 +8,31 @@
 #include <outcome.hpp>
 #include <outcome/config.hpp>
 #include <outcome/result.hpp>
-#include <string>
 
 namespace outcome = OUTCOME_V2_NAMESPACE;
 
 namespace xavcore {
 namespace scan {
 namespace sandbox {
-// Syscall invoked by process in sandbox.
+// A syscall made by the sandboxed process.
 struct Syscall {
-    // Notification id, needed to answer this request.
+    // Notification id. Used to send the answer back.
     std::uint64_t id = 0;
-    // Thread id of the caller, as seen inside the sandbox.
+    // Thread id of the caller, as seen in the sandbox.
     std::int32_t pid = 0;
     std::int32_t syscall_id = 0;
     std::uint64_t args[6] = {};
 };
 
-// How the sandbox answers a syscall.
+// The answer for one syscall.
 struct SyscallResult {
-    // Negative errno, 0 for success.
+    // Negative errno. 0 means success.
     int error = 0;
-    // Return value, used only when `error` is 0.
+    // Return value. Only used when error is 0.
     std::int64_t value = 0;
 };
 
-// Decides what happens to every syscall the sandboxed process makes.
+// Decides how each syscall is answered.
 class ISandboxSyscallHandler {
 public:
     virtual ~ISandboxSyscallHandler() = default;
@@ -41,8 +40,8 @@ public:
     virtual SyscallResult handle(const Syscall& syscall) = 0;
 };
 
-// The handler used until syscall emulation exists: every syscall is failed, so
-// nothing the sandboxed process asks for can reach the kernel.
+// Default handler. It fails every syscall, so no syscall reaches the kernel.
+// Replace it once syscall emulation exists.
 class DenyAllSyscallHandler : public ISandboxSyscallHandler {
 public:
     explicit DenyAllSyscallHandler(int error = EPERM) : error_(error) {}
@@ -55,17 +54,12 @@ private:
 
 class Config {
 public:
-    // Directory the tmpfs that becomes the sandboxed process' "/" is mounted
-    // on. Populate it between prepare() and run().
-    std::filesystem::path rootfs = "/run/xavcore/sandbox-rootfs";
-    std::string tmpfs_options = "size=64m,mode=0755";
-
     // How long the sandboxed process may run before it is killed.
     std::chrono::milliseconds timeout{5000};
 };
 
 struct SandboxRunResult {
-    // True when the run was stopped after `timeout` instead of finishing.
+    // True when the run was stopped by the timeout instead of finishing.
     bool timed_out = false;
     // Number of syscalls the sandbox intercepted.
     std::uint64_t intercepted_syscalls = 0;
@@ -73,13 +67,10 @@ struct SandboxRunResult {
     int wait_status = 0;
 };
 
-// Runs an untrusted executable inside a isolated environment:
+// Runs an untrusted executable under a seccomp filter.
 //
-//   * user, mount, pid, network, ipc, uts and cgroup namespaces, so the process
-//     has no view of, and no privileges over, the host;
-//   * a tmpfs mounted as its root filesystem, so nothing it writes survives;
-//   * a seccomp filter that reports every syscall to this process instead of
-//     letting it run, so nothing reaches the kernel.
+// The filter reports every syscall to this process. The handler decides the
+// answer, and the syscall never reaches the kernel.
 class Sandbox {
 public:
     explicit Sandbox(Config config = {});
@@ -90,15 +81,11 @@ public:
     Sandbox& operator=(Sandbox&&) = delete;
 
 public:
-    // Mount the tmpfs root and create the cgroup. Idempotent.
-    outcome::result<void> prepare();
-
-    // Run `executable`, a path inside the sandbox root, with the default
-    // "deny every syscall" handler.
+    // Run `executable` with the default "deny every syscall" handler.
     outcome::result<SandboxRunResult> run(
         const std::filesystem::path& executable);
 
-    // Same, with a caller supplied syscall handler.
+    // Same, with a caller supplied handler.
     outcome::result<SandboxRunResult> run(
         const std::filesystem::path& executable,
         ISandboxSyscallHandler& handler);
@@ -109,5 +96,4 @@ private:
 };
 }  // namespace sandbox
 }  // namespace scan
-
 }  // namespace xavcore
