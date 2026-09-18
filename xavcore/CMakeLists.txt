@@ -51,6 +51,7 @@ find_package(boost_asio CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(boost_container_hash CONFIG REQUIRED)
+find_package(elfio CONFIG REQUIRED)
 pkg_check_modules(UNICORN REQUIRED IMPORTED_TARGET unicorn)
 pkg_check_modules(YARA REQUIRED IMPORTED_TARGET yara)
 pkg_check_modules(SECCOMP REQUIRED IMPORTED_TARGET libseccomp)
@@ -89,7 +90,7 @@ install(
         anomalous_syscall_detection_listener
         rule_based_detection_listener
         proactive_protection_rules
-        sandbox
+        xavcore_scan_sandbox
     LIBRARY DESTINATION lib        # ${prefix}/lib/lib*.so
 )
 
