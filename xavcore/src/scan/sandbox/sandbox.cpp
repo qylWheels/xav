@@ -93,6 +93,49 @@ public:
     void reset() { return; }
 
 private:
+    static void syscall_dispatcher(uc_engine* engine, void* user_data) {
+        Sandbox* self = reinterpret_cast<Sandbox*>(user_data);
+        std::uint64_t syscall_number;
+        std::uint64_t args[6];
+        std::uint64_t* argptrs[6] = {&args[0], &args[1], &args[2],
+                                     &args[3], &args[4], &args[5]};
+        int argregs[] = {UC_X86_REG_RDI, UC_X86_REG_RSI, UC_X86_REG_RDX,
+                         UC_X86_REG_R10, UC_X86_REG_R8,  UC_X86_REG_R9};
+        std::uint64_t ret;
+        uc_err err;
+
+        // Read syscall number.
+        err = uc_reg_read(engine, UC_X86_REG_RAX, &syscall_number);
+        if (err != UC_ERR_OK) {
+            throw std::runtime_error(
+                std::format("uc_reg_read failed: {}", uc_strerror(err)));
+        }
+        std::cout << std::format("syscall: {}", syscall_number) << std::endl;
+
+        // Read syscall arguments.
+        err = uc_reg_read_batch(engine, argregs,
+                                reinterpret_cast<void**>(argptrs), 6);
+        if (err != UC_ERR_OK) {
+            throw std::runtime_error(
+                std::format("uc_reg_read_batch failed: {}", uc_strerror(err)));
+        }
+        std::cout << std::format("args: {}, {}, {}, {}, {}, {}", *argptrs[0],
+                                 *argptrs[1], *argptrs[2], *argptrs[3],
+                                 *argptrs[4], *argptrs[5])
+                  << std::endl;
+
+        // Dispatch.
+        switch (syscall_number) {
+            default: {
+                std::cout << std::format("syscall {} not implemented",
+                                         syscall_number)
+                          << std::endl;
+                break;
+            }
+        }
+    }
+
+private:
     uc_engine* engine_;
     uc_hook syscall_hook_;
     std::uint64_t entrypoint_;

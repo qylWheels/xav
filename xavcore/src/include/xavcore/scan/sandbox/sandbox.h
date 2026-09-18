@@ -46,6 +46,9 @@ public:
     void reset();
 
 private:
+    static void syscall_dispatcher(uc_engine* engine, void* user_data);
+
+private:
     class Impl;
     std::unique_ptr<Impl> impl_;
 };
