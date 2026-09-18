@@ -15,6 +15,7 @@
     "spdlog",
     "yara",
     "zlib",
-    "boost-container-hash"
+    "boost-container-hash",
+    "unicorn"
   ]
 }
