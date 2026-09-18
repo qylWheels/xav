@@ -72,10 +72,6 @@ public:
     Sandbox& operator=(Sandbox&&) = delete;
 
 public:
-    // Run `executable` and fail every syscall it makes.
-    outcome::result<SandboxRunResult> run(
-        const std::filesystem::path& executable);
-
     // Same, with a caller supplied handler.
     outcome::result<SandboxRunResult> run(
         const std::filesystem::path& executable,
