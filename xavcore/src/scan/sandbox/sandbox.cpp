@@ -160,12 +160,6 @@ Sandbox::Sandbox(Config config)
 Sandbox::~Sandbox() = default;
 
 outcome::result<SandboxRunResult> Sandbox::run(
-    const std::filesystem::path& executable) {
-    DenyAllSyscallHandler handler;
-    return this->impl_->run(executable, handler);
-}
-
-outcome::result<SandboxRunResult> Sandbox::run(
     const std::filesystem::path& executable, ISandboxSyscallHandler& handler) {
     return this->impl_->run(executable, handler);
 }

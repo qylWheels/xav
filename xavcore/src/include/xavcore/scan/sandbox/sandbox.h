@@ -81,10 +81,6 @@ public:
     Sandbox& operator=(Sandbox&&) = delete;
 
 public:
-    // Run `executable` with the default "deny every syscall" handler.
-    outcome::result<SandboxRunResult> run(
-        const std::filesystem::path& executable);
-
     // Same, with a caller supplied handler.
     outcome::result<SandboxRunResult> run(
         const std::filesystem::path& executable,
