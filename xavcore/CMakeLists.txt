@@ -52,7 +52,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(boost_container_hash CONFIG REQUIRED)
 pkg_check_modules(YARA REQUIRED IMPORTED_TARGET yara)
-pkg_check_modules(SECCOMP IMPORTED_TARGET libseccomp)
+pkg_check_modules(SECCOMP REQUIRED IMPORTED_TARGET libseccomp)
 
 # Packages from cmake.
 include(FetchContent)
