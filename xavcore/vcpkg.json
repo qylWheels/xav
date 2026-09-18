@@ -2,6 +2,7 @@
   "dependencies": [
     "bext-sml",
     "boost-asio",
+    "boost-container-hash",
     "concurrentqueue",
     "cpp-httplib",
     "cpptrace",
@@ -13,9 +14,9 @@
     "protobuf",
     "rapidfuzz",
     "spdlog",
+    "unicorn",
     "yara",
     "zlib",
-    "boost-container-hash",
-    "unicorn"
+    "elfio"
   ]
 }
