@@ -51,6 +51,7 @@ find_package(boost_asio CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(boost_container_hash CONFIG REQUIRED)
+pkg_check_modules(unicorn REQUIRED IMPORTED_TARGET unicorn)
 pkg_check_modules(YARA REQUIRED IMPORTED_TARGET yara)
 pkg_check_modules(SECCOMP REQUIRED IMPORTED_TARGET libseccomp)
 
