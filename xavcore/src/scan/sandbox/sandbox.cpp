@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <elfio/elfio.hpp>
+#include <format>
 #include <outcome/success_failure.hpp>
 
 namespace xav {
@@ -87,6 +88,25 @@ public:
     }
 
     outcome::result<xavcore::types::MalwareInfo> run(std::int64_t timeout_ms) {
+        uc_err err;
+
+        // Add syscall hook.
+        err = uc_hook_add(this->engine_, &this->syscall_hook_, UC_HOOK_INSN,
+                          reinterpret_cast<void*>(Sandbox::syscall_dispatcher),
+                          this, 0, std::numeric_limits<std::uint64_t>::max(),
+                          UC_X86_INS_SYSCALL);
+        if (err != UC_ERR_OK) {
+            return make_error_code(err);
+        }
+
+        // Run!
+        err = uc_emu_start(this->engine_, this->entrypoint_, 0, 0, 0);
+        if (err != UC_ERR_OK) {
+            std::uint64_t rip;
+            uc_reg_read(this->engine_, UC_X86_REG_RIP, &rip);
+            return make_error_code(err);
+        }
+
         return outcome::success();
     }
 
