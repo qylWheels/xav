@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cerrno>
-#include <chrono>
 #include <cstdint>
 #include <filesystem>
 #include <memory>
@@ -52,15 +51,7 @@ private:
     int error_;
 };
 
-class Config {
-public:
-    // How long the sandboxed process may run before it is killed.
-    std::chrono::milliseconds timeout{5000};
-};
-
 struct SandboxRunResult {
-    // True when the run was stopped by the timeout instead of finishing.
-    bool timed_out = false;
     // Number of syscalls the sandbox intercepted.
     std::uint64_t intercepted_syscalls = 0;
     // Raw wait status of the sandboxed process.
@@ -73,7 +64,7 @@ struct SandboxRunResult {
 // answer, and the syscall never reaches the kernel.
 class Sandbox {
 public:
-    explicit Sandbox(Config config = {});
+    Sandbox();
     ~Sandbox();
     Sandbox(const Sandbox&) = delete;
     Sandbox& operator=(const Sandbox&) = delete;
@@ -81,6 +72,10 @@ public:
     Sandbox& operator=(Sandbox&&) = delete;
 
 public:
+    // Run `executable` and fail every syscall it makes.
+    outcome::result<SandboxRunResult> run(
+        const std::filesystem::path& executable);
+
     // Same, with a caller supplied handler.
     outcome::result<SandboxRunResult> run(
         const std::filesystem::path& executable,

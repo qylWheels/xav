@@ -1,7 +1,7 @@
 #include "seccomp_notifier.h"
 
-#include <poll.h>
 #include <seccomp.h>
+#include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/syscall.h>
 #include <unistd.h>
@@ -45,7 +45,6 @@ outcome::result<void> Supervisor::install_and_hand_over(int handover_fd) {
     if (notify_fd < 0) {
         // The filter is already loaded. Releasing the context here closes fds,
         // and that close would be reported and block. Leave it behind instead.
-        // The supervisor kills this process on timeout.
         return std::error_code(-notify_fd, std::system_category());
     }
 
@@ -80,23 +79,7 @@ outcome::result<void> Supervisor::send_fd(int sock, int fd) {
     return outcome::success();
 }
 
-outcome::result<int> Supervisor::receive_fd(int sock,
-                                            std::chrono::milliseconds timeout) {
-    struct pollfd pfd = {};
-    pfd.fd = sock;
-    pfd.events = POLLIN;
-
-    int rc = ::poll(&pfd, 1, static_cast<int>(timeout.count()));
-    while (rc < 0 && errno == EINTR) {
-        rc = ::poll(&pfd, 1, static_cast<int>(timeout.count()));
-    }
-    if (rc == 0) {
-        return std::make_error_code(std::errc::timed_out);
-    }
-    if (rc < 0) {
-        return last_error();
-    }
-
+outcome::result<int> Supervisor::receive_fd(int sock) {
     char byte = 0;
     struct iovec io{.iov_base = &byte, .iov_len = sizeof(byte)};
     char control[CMSG_SPACE(sizeof(int))] = {};
@@ -106,7 +89,12 @@ outcome::result<int> Supervisor::receive_fd(int sock,
     message.msg_control = control;
     message.msg_controllen = sizeof(control);
 
+    // Blocks until the sandboxed process sends the fd or dies. A dead process
+    // closes its end of the socket, so this does not wait forever.
     ssize_t received = ::recvmsg(sock, &message, 0);
+    while (received < 0 && errno == EINTR) {
+        received = ::recvmsg(sock, &message, 0);
+    }
     if (received < 0) {
         return last_error();
     }
@@ -123,8 +111,7 @@ outcome::result<int> Supervisor::receive_fd(int sock,
 }
 
 outcome::result<NotifyResult> Supervisor::serve(
-    int notify_fd, ISandboxSyscallHandler& handler,
-    std::chrono::milliseconds timeout) {
+    int notify_fd, ISandboxSyscallHandler& handler) {
     struct seccomp_notif* request = nullptr;
     struct seccomp_notif_resp* response = nullptr;
     int rc = seccomp_notify_alloc(&request, &response);
@@ -142,42 +129,25 @@ outcome::result<NotifyResult> Supervisor::serve(
     }
 
     NotifyResult result;
-    const auto deadline = std::chrono::steady_clock::now() + timeout;
 
     while (true) {
-        const auto remaining =
-            std::chrono::duration_cast<std::chrono::milliseconds>(
-                deadline - std::chrono::steady_clock::now());
-        if (remaining.count() <= 0) {
-            result.timed_out = true;
-            break;
-        }
-
-        struct pollfd pfd = {};
-        pfd.fd = notify_fd;
-        pfd.events = POLLIN;
-        rc = ::poll(&pfd, 1, static_cast<int>(remaining.count()));
-        while (rc < 0 && errno == EINTR) {
-            rc = ::poll(&pfd, 1, static_cast<int>(remaining.count()));
-        }
-        if (rc == 0) {
-            result.timed_out = true;
-            break;
-        }
-        if (rc < 0) {
-            seccomp_notify_free(request, response);
-            return last_error();
-        }
-
         std::memset(request, 0, request_size);
-        rc = seccomp_notify_receive(notify_fd, request);
-        if (rc == -ENOENT) {
-            // No task uses the filter any more.
-            break;
-        }
-        if (rc < 0) {
+
+        // The raw ioctl is used here instead of seccomp_notify_receive(). That
+        // libseccomp call turns ENOENT and EINTR into ECANCELED, and the two
+        // must be told apart: ENOENT means the target is gone, EINTR means a
+        // signal arrived and the wait must be retried.
+        if (::ioctl(notify_fd, SECCOMP_IOCTL_NOTIF_RECV, request) < 0) {
+            if (errno == ENOENT) {
+                // No task uses the filter any more, so the target is gone.
+                break;
+            }
+            if (errno == EINTR) {
+                continue;
+            }
+            const int error = errno;
             seccomp_notify_free(request, response);
-            return std::error_code(-rc, std::system_category());
+            return std::error_code(error, std::system_category());
         }
 
         Syscall syscall;
@@ -197,15 +167,14 @@ outcome::result<NotifyResult> Supervisor::serve(
         response->error = answer.error;
         response->val = answer.value;
 
-        rc = seccomp_notify_respond(notify_fd, response);
-        if (rc < 0) {
-            // The task died between the receive and the answer. Answer the
-            // remaining notifications.
-            if (rc == -ENOENT) {
+        if (::ioctl(notify_fd, SECCOMP_IOCTL_NOTIF_SEND, response) < 0) {
+            if (errno == ENOENT) {
+                // The task died between the receive and the answer.
                 continue;
             }
+            const int error = errno;
             seccomp_notify_free(request, response);
-            return std::error_code(-rc, std::system_category());
+            return std::error_code(error, std::system_category());
         }
         ++result.answered;
     }

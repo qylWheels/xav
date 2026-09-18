@@ -1,6 +1,5 @@
 #pragma once
 
-#include <chrono>
 #include <cstdint>
 #include <outcome.hpp>
 #include <outcome/config.hpp>
@@ -16,8 +15,6 @@ namespace sandbox {
 struct NotifyResult {
     // Number of syscalls answered.
     std::uint64_t answered = 0;
-    // True when serve() stopped because of the timeout.
-    bool timed_out = false;
 };
 
 // The supervisor side of seccomp user notification.
@@ -33,14 +30,11 @@ public:
     static outcome::result<void> install_and_hand_over(int handover_fd);
 
     // Receive the notification fd from the sandboxed process.
-    static outcome::result<int> receive_fd(int sock,
-                                           std::chrono::milliseconds timeout);
+    static outcome::result<int> receive_fd(int sock);
 
-    // Answer notifications with `handler` until the sandboxed process is gone
-    // or `timeout` expires.
-    static outcome::result<NotifyResult> serve(
-        int notify_fd, ISandboxSyscallHandler& handler,
-        std::chrono::milliseconds timeout);
+    // Answer notifications with `handler` until the sandboxed process is gone.
+    static outcome::result<NotifyResult> serve(int notify_fd,
+                                               ISandboxSyscallHandler& handler);
 
 private:
     // Send `fd` to the other end of `sock`.
