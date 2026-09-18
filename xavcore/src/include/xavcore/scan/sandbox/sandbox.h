@@ -1,5 +1,7 @@
 #pragma once
 
+#include <unicorn/unicorn.h>
+
 #include <cstdint>
 #include <filesystem>
 #include <outcome/outcome.hpp>
@@ -11,6 +13,24 @@ namespace outcome = OUTCOME_V2_NAMESPACE;
 namespace xav {
 namespace scan {
 namespace sandbox {
+class UcErrorCategory : public std::error_category {
+public:
+    const char* name() const noexcept override { return "unicorn"; }
+
+    std::string message(int ev) const override {
+        return uc_strerror(static_cast<uc_err>(ev));
+    }
+};
+
+inline const std::error_category& uc_error_category() {
+    static UcErrorCategory instance;
+    return instance;
+}
+
+inline std::error_code make_error_code(uc_err e) {
+    return {static_cast<int>(e), uc_error_category()};
+}
+
 class Sandbox {
 public:
     Sandbox();
